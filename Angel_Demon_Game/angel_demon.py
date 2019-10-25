@@ -328,27 +328,30 @@ class angel_demon_game():
 					elif (quantum == 1):
 						print("Angel disobeys neutrally and moves up!")
 						move_status = self.move_board_bot_up()
-						self.move_hexapod("UP")
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("UP")
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Angel and moves right!")
 
 						move_status = self.move_board_bot_right()
-						self.move_hexapod("R")
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("R")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
 
-
+						else:
+							self.move_hexapod("R")
 
 				#Desired move is to go up
 				elif (move == 2):
@@ -365,13 +368,15 @@ class angel_demon_game():
 					if (quantum == 0):
 						print("Angel successfully tells bot to move up!")
 						move_status = self.move_board_bot_up()
-						self.move_hexapod("UP")
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("UP")
 					elif (quantum == 1):
 						print("Angel disobeys neutrally and stays still!")
 
@@ -379,15 +384,16 @@ class angel_demon_game():
 						print("Bot disoboeys the Angel and moves up right!")
 
 						move_status = self.move_board_bot_up_right()
-						self.move_hexapod("UR")
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UR")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
-
+						else:
+							self.move_hexapod("UR")
 				self.angel_turn = 0
 				self.turn_num +=1
 
@@ -423,37 +429,44 @@ class angel_demon_game():
 					if (quantum == 0):
 						print("Devil successfully tells bot to move right!")
 						move_status = self.move_board_bot_right()
-						self.move_hexapod("R")
+						
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("R")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("R")
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves up-right!")
 						move_status = self.move_board_bot_up_right()
-						self.move_hexapod("UR")
+						
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UR")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("UR")
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Devil and moves up!")
 
 						move_status = self.move_board_bot_up()
-						self.move_hexapod("UP")
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
 
-
+						else:
+							self.move_hexapod("UP")
 				#Desired move to move up-right
 				elif (move == 2):
 					#Get the current light state
@@ -471,23 +484,29 @@ class angel_demon_game():
 					if (quantum == 0):
 						print("Devil successfully tells bot to move up-right!")
 						move_status = self.move_board_bot_up_right()
-						self.move_hexapod("UR")
+						
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("UR")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("UR")
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves right!")
 						move_status = self.move_board_bot_right()
-						self.move_hexapod("R")
+						
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							self.move_hexapod("R")
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
 							print("Out of bounds move! Bot staying still")
+						else:
+							self.move_hexapod("R")
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Devil and stays still!")
 

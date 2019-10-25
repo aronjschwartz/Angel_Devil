@@ -3,6 +3,7 @@ import numpy as np
 from cirq.ops import CZ, H, CNOT, X, CCX
 import re
 import random
+import matplotlib
 
 def counter_to_dict(counts_in):
     counts_dict = {}
@@ -119,7 +120,7 @@ def run_circuit(player, light1, light0):
     # gets counts for each possible output
     counts = results.multi_measurement_histogram(keys = ['y','x'])
 
-    #print(counts)
+    print(counts)
 
     results_dict = counter_to_dict(counts)
 
@@ -131,4 +132,5 @@ def run_circuit(player, light1, light0):
 
     print("Robot Mood = " + str(choice))
     return choice
-#run_circuit(0,0,0)
+
+run_circuit(0,0,1)

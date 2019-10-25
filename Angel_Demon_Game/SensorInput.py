@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 from PIL import Image
 from PIL import ImageStat
+import time
 
-cap = cv2.VideoCapture(0)
 threshold_value = []
 font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -233,16 +233,16 @@ def run_input():
 
    global A_x_start, A_x_end, A_y_start, A_y_end
    motors = []
-   #startup()
-   while(True):
+   cap = cv2.VideoCapture(0)
+   #startup()while(True):
        # Capture frame-by-frame
-       ret, frame = cap.read()
+   ret, frame = cap.read()
 
        # Our operations on the frame come here
-       gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+   #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
        # info to display on screen
-       cv2.imwrite("update.jpg",gray)
+       # cv2.imwrite("update.jpg",gray)
        
        # Display rectangles and text on screen
        
@@ -254,39 +254,47 @@ def run_input():
        #cv2.putText(gray,sensorB_value,(410,350), font, 0.7, (255,0, 0), 2, cv2.LINE_AA)
 
        # row 1
-       cv2.rectangle(gray,(A_x_start,A_y_start),(A_x_end,A_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(B_x_start,B_y_start),(B_x_end,B_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(C_x_start,C_y_start),(C_x_end,C_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(D_x_start,D_y_start),(D_x_end,D_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(E_x_start,E_y_start),(E_x_end,E_y_end),(0,0,0),3)
-
-       #row 2
-       cv2.rectangle(gray,(F_x_start,F_y_start),(F_x_end,F_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(G_x_start,G_y_start),(G_x_end,G_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(H_x_start,H_y_start),(H_x_end,H_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(I_x_start,I_y_start),(I_x_end,I_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(J_x_start,J_y_start),(J_x_end,J_y_end),(0,0,0),3)
-
-       #row 3
-       cv2.rectangle(gray,(K_x_start,K_y_start),(K_x_end,K_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(L_x_start,L_y_start),(L_x_end,L_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(M_x_start,M_y_start),(M_x_end,M_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(N_x_start,N_y_start),(N_x_end,N_y_end),(0,0,0),3)
-       cv2.rectangle(gray,(O_x_start,O_y_start),(O_x_end,O_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(A_x_start,A_y_start),(A_x_end,A_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(B_x_start,B_y_start),(B_x_end,B_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(C_x_start,C_y_start),(C_x_end,C_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(D_x_start,D_y_start),(D_x_end,D_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(E_x_start,E_y_start),(E_x_end,E_y_end),(0,0,0),3)
+##
+##       #row 2
+##       cv2.rectangle(gray,(F_x_start,F_y_start),(F_x_end,F_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(G_x_start,G_y_start),(G_x_end,G_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(H_x_start,H_y_start),(H_x_end,H_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(I_x_start,I_y_start),(I_x_end,I_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(J_x_start,J_y_start),(J_x_end,J_y_end),(0,0,0),3)
+##
+##       #row 3
+##       cv2.rectangle(gray,(K_x_start,K_y_start),(K_x_end,K_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(L_x_start,L_y_start),(L_x_end,L_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(M_x_start,M_y_start),(M_x_end,M_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(N_x_start,N_y_start),(N_x_end,N_y_end),(0,0,0),3)
+##       cv2.rectangle(gray,(O_x_start,O_y_start),(O_x_end,O_y_end),(0,0,0),3)
 
        # Display the resulting frame
-       cv2.imshow('frame',gray)
-       k = cv2.waitKey(1)
-       
-       # escape key exits
-       if k%256 == 27:
-           break
-       #space key takes photo
-       elif k%256 == 32:
-           cv2.imwrite("NewPicture.jpg",frame)
-           light_zone = get_value("NewPicture.jpg")
-           return light_zone
-           break
+       # cv2.imshow('frame',gray)
+##       k = cv2.waitKey(1)
+##       print("Press space for measurement")
+##       # escape key exits
+##       if k%256 == 27:
+##           break
+##       #space key takes photo
+##       elif k%256 == 32:
+##           cv2.imwrite("NewPicture.jpg",frame)
+##           light_zone = get_value("NewPicture.jpg")
+##           return light_zone
+##           break
+
+   cv2.imwrite("NewPicture.jpg",frame)
+   #cap.release()
+   #image_ = cv2.imread('NewPicture.jpg', cv2.IMREAD_ANYCOLOR)
+   print('imageupdated')
+   light_zone = get_value("NewPicture.jpg")
+   cap.release()
+   return light_zone
            
 
           

@@ -5,6 +5,8 @@ import re
 import random
 import matplotlib
 
+counts_dict = {}
+
 def counter_to_dict(counts_in):
     counts_dict = {}
     counts_string = str(counts_in)
@@ -70,7 +72,7 @@ def get_stats(dict_in):
                 percent_dict['(0, 0)'] = float(percent_dict['(0, 0)']) + percent
             else:
                 percent_dict['(0, 0)'] = percent
-                key = ('(0, 0)')
+                #key = ('(0, 0)')
             del percent_dict['(1, 1)']
     for key in percent_dict:
         if key == '(0, 0)':
@@ -112,7 +114,7 @@ def run_circuit(player, light1, light0):
     circuit.append(cirq.measure(q1,key='y'))
 
     # print out circuit
-   # print(circuit)
+    # print(circuit)
 
     # get results from 1000 runs of circuit
     results = simulator.run(circuit, repetitions = 1000)
@@ -120,7 +122,7 @@ def run_circuit(player, light1, light0):
     # gets counts for each possible output
     counts = results.multi_measurement_histogram(keys = ['y','x'])
 
-    print(counts)
+    #print(counts)
 
     results_dict = counter_to_dict(counts)
 
@@ -130,7 +132,7 @@ def run_circuit(player, light1, light0):
 
     choice = determine_state(letter_choice)
 
-    print("Robot Mood = " + str(choice))
+    #print("Robot Mood = " + str(choice))
     return choice
 
-run_circuit(0,0,1)
+run_circuit(0,1,0)

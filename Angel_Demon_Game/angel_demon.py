@@ -52,13 +52,16 @@ class angel_demon_game():
 
 
 		#Game board initialization
-		self.game_width = 10
-		self.game_height = 10
+		self.game_width = 5
+		self.game_height = 5
 		self.game_grid = [["   " for x in range(self.game_width)] for y in range(self.game_height)]
 
 
 		#Initialize the bomb position
-		self.game_grid[0][7] = "BOMB"
+		self.bomb_x_pos = 4
+		self.bomb_y_pos = 1
+		self.game_grid[self.bomb_x_pos][self.bomb_y_pos] = "BOMB"
+
 
 		#Initialize the bot starting position
 		self.game_grid[self.game_height - 1][0] = "BOT"
@@ -235,6 +238,18 @@ class angel_demon_game():
 		vector = SensorInput.run_input()
 		return vector
 
+	#This function checks if it is still possible for the devil to win
+	def check_game_possibility(self):
+		status = 0
+		for y in range(0, self.game_height):
+			for x in range(0, self.game_width):
+				if (self.game_grid[y][x] == "BOT"):
+					if ((self.bomb_x_pos > y) or (self.bomb_y_pos < x)):
+						status = 1
+						return status
+					else:
+						return status
+
 	def move_hexapod(self, move_code):
 		if (move_code == "N"):
 			print("No movement")
@@ -299,11 +314,14 @@ class angel_demon_game():
 
 			#Check whos turn it is
 			if (self.angel_turn == 1):
+
+				win_status = self.check_game_possibility()
+
+				if (win_status == 1):
+					self.angel_victory = True
+					break
 				print("***** Angels Turn *****")
-
-
 				self.show_game_board()
-
 
 				#Prompt user to select desired move
 				move = self.select_move_angel()
@@ -406,9 +424,15 @@ class angel_demon_game():
 
 			#Devils Turn
 			elif(self.angel_turn == 0):
-				print("****** Devils Turn *****")
 
+				win_status = self.check_game_possibility()
+
+				if (win_status == 1):
+					self.angel_victory = True
+					break
+				print("****** Devils Turn *****")
 				self.show_game_board()
+
 				#Prompt user to select desired move
 				move = self.select_move_devil()
 
@@ -429,7 +453,7 @@ class angel_demon_game():
 					if (quantum == 0):
 						print("Devil successfully tells bot to move right!")
 						move_status = self.move_board_bot_right()
-						
+
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
 							self.move_hexapod("R")
@@ -442,7 +466,7 @@ class angel_demon_game():
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves up-right!")
 						move_status = self.move_board_bot_up_right()
-						
+
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
 							self.move_hexapod("UR")
@@ -484,7 +508,7 @@ class angel_demon_game():
 					if (quantum == 0):
 						print("Devil successfully tells bot to move up-right!")
 						move_status = self.move_board_bot_up_right()
-						
+
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
 							self.move_hexapod("UR")
@@ -497,7 +521,7 @@ class angel_demon_game():
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves right!")
 						move_status = self.move_board_bot_right()
-						
+
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
 							self.move_hexapod("R")

@@ -5,7 +5,7 @@ import re
 import random
 import matplotlib
 
-counts_dict = {}
+#matplotlib.use('Agg')
 
 def counter_to_dict(counts_in):
     counts_dict = {}
@@ -114,7 +114,7 @@ def run_circuit(player, light1, light0):
     circuit.append(cirq.measure(q1,key='y'))
 
     # print out circuit
-    # print(circuit)
+   # print(circuit)
 
     # get results from 1000 runs of circuit
     results = simulator.run(circuit, repetitions = 1000)
@@ -122,7 +122,7 @@ def run_circuit(player, light1, light0):
     # gets counts for each possible output
     counts = results.multi_measurement_histogram(keys = ['y','x'])
 
-    #print(counts)
+    print(counts)
 
     results_dict = counter_to_dict(counts)
 
@@ -132,7 +132,6 @@ def run_circuit(player, light1, light0):
 
     choice = determine_state(letter_choice)
 
-    #print("Robot Mood = " + str(choice))
+    print("Robot Mood = " + str(choice))
     return choice
-
-run_circuit(0,1,0)
+#run_circuit(0,0,0)

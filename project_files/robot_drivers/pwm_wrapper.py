@@ -19,7 +19,7 @@ if PWM_WRAPPER_USE_HARDWARE:
 
 
 # example: pwm_L = pwm_wrapper(PWM_ADDR_L, PWM_FREQ)
-class pwm_wrapper(object):
+class Pwm_Wrapper(object):
 	def __init__(self, addr, freq):
 		self.address = addr
 		self.freq = freq

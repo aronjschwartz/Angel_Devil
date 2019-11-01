@@ -51,9 +51,8 @@ class Leg_Position(object):
 # leg. It should be able to set each join according to a degree, max, min,
 # or a value from 0-100 in terms of percent of maximum
 class Leg(object):
-	def __init__(self, uid, pwm, tip_channel, mid_channel, rot_channel, leg_num):
+	def __init__(self, uid, pwm, channels, leg_num):
 
-		# TODO: turn channels into a list
 		# TODO: turn limit parameters into a list
 		# TODO: turn "current position" vars into lists
 		# these changes offer little practical benefit, just code cleanliness, but are potentially a real pain to transition to, so they are low-priority
@@ -85,11 +84,10 @@ class Leg(object):
 		
 		
 		
-		# TODO: pass the channels in as a list, LEG_PWM_CHANNEL[LEG_RF], instead of 3 separate values... then i don't even need to assemble the list
-		# TODO: self.pwm_channels = [tip_channel, mid_channel, rot_channel]
-		self.tip_channel = tip_channel
-		self.mid_channel = mid_channel
-		self.rot_channel = rot_channel
+		self.pwm_channels = channels
+		# self.tip_channel = tip_channel
+		# self.mid_channel = mid_channel
+		# self.rot_channel = rot_channel
 		
 		
 		# now, assign the correct constants
@@ -201,7 +199,8 @@ class Leg(object):
 
 	def print_self(self):
 		print("leg uid : " + str(self.uid) + " ===========================")
-		print("on channels : " + str(self.tip_channel) + " " + str(self.mid_channel) + " " + str(self.rot_channel))
+		# print("on channels : " + str(self.tip_channel) + " " + str(self.mid_channel) + " " + str(self.rot_channel))
+		print("on channels : " + str(self.pwm_channels))
 		print("tip_motor pwm : " + str(self.tip_motor) + " angle : " + str(self.pwm_to_angle(self.tip_motor, TIP_MOTOR)))
 		print("mid_motor pwm : " + str(self.mid_motor) + " angle : " + str(self.pwm_to_angle(self.mid_motor, MID_MOTOR)))
 		print("rot_motor pwm : " + str(self.rot_motor) + " angle : " + str(self.pwm_to_angle(self.rot_motor, ROT_MOTOR)))
@@ -347,13 +346,13 @@ class Leg(object):
 		with self._curr_pos_lock:
 			if motor == TIP_MOTOR:
 				(self.tip_motor_angle, self.tip_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.tip_channel, 0, pwm_val)
+				self.pwm.set_pwm(self.pwm_channels[0], 0, pwm_val)
 			elif motor == MID_MOTOR:
 				(self.mid_motor_angle, self.mid_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.mid_channel, 0, pwm_val)
+				self.pwm.set_pwm(self.pwm_channels[1], 0, pwm_val)
 			elif motor == ROT_MOTOR:
 				(self.rot_motor_angle, self.rot_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.rot_channel, 0, pwm_val)
+				self.pwm.set_pwm(self.pwm_channels[2], 0, pwm_val)
 				
 		# TODO: after things are turned into lists, the code above can be replaced with:
 		# # do the write out, with lock just to be safe

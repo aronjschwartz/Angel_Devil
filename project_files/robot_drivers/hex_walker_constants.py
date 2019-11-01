@@ -91,8 +91,11 @@ c_R_ARM_ROT_MOTOR_UP = 628
 c_R_ARM_ROT_MOTOR_DOWN = 110
 
 # rotator motor constants
-ROTATOR_MOTOR_LEFT = 424
-ROTATOR_MOTOR_RIGHT = 217
+# TODO: test this! potentially unsafe rotator range!
+# ROTATOR_MOTOR_LEFT = 424
+# ROTATOR_MOTOR_RIGHT = 217
+ROTATOR_MOTOR_LEFT = 534
+ROTATOR_MOTOR_RIGHT = 107
 
 
 # angle limits in degrees: same regardless of side so no need to l/r differentiate
@@ -111,8 +114,11 @@ ARM_MID_MOTOR_IN_ANGLE = 0
 ARM_ROT_MOTOR_UP_ANGLE = 180
 ARM_ROT_MOTOR_DOWN_ANGLE = 0
 # rotator limits in degrees
-ROTATOR_LEFT_ANGLE = 45
-ROTATOR_RIGHT_ANGLE = 135
+# TODO: test this! potentially unsafe rotator range!
+# ROTATOR_LEFT_ANGLE = 45
+# ROTATOR_RIGHT_ANGLE = 135
+ROTATOR_LEFT_ANGLE = 0
+ROTATOR_RIGHT_ANGLE = 180
 
 # ==========================================================
 
@@ -137,17 +143,15 @@ CHANNEL_LEG5_TIP = 3	#lf
 CHANNEL_LEG5_MID = 7
 CHANNEL_LEG5_ROT = 8
 
-# TODO: determine channels for arms + waist
-
 CHANNEL_LEG6_TIP = 12	#arm_L
 CHANNEL_LEG6_MID = 11
 CHANNEL_LEG6_ROT = 10
 
-CHANNEL_LEG7_TIP = 12	#arm_R
+CHANNEL_LEG7_TIP = 14	#arm_R
 CHANNEL_LEG7_MID = 11
-CHANNEL_LEG7_ROT = 10
+CHANNEL_LEG7_ROT = 15
 
-CHANNEL_WAIST_ROT = 9	#waist, connected to pwmR
+CHANNEL_WAIST_ROT = 9	#waist, connected to bottom
 
 # usage: LEG_PWM_CHANNEL[leg# 0-7][servo# 0-2: tip=0, mid=1, rot=2]
 # example: LEG_PWM_CHANNEL[LEG_0][MID_MOTOR]
@@ -167,8 +171,8 @@ LEG_PWM_CHANNEL = [
 
 
 # set Adafruit pwm address and frequency
-PWM_ADDR_R = 0x40
-PWM_ADDR_L = 0x41
+PWM_ADDR_BOTTOM = 0x40 # bottom: 	R legs + L arm + waist
+PWM_ADDR_TOP = 0x41 # top: 		L legs + R arm
 PWM_FREQ = 60
 # TODO: which hat do the torso servos connect to? might change names of constants to reflect this
 

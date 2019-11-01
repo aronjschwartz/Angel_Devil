@@ -11,7 +11,7 @@ import threading
 import leg_thread
 
 #Extraneous
-HW_MOVE_DEBUG = 1 #toggle 0/1 to turn debug prints on/off
+HW_MOVE_DEBUG = 0 #toggle 0/1 to turn debug prints on/off
 
 LEG_THREAD_DEBUG = True
 
@@ -303,7 +303,7 @@ class Leg(object):
 	# adds commands to the command queue (with lock)
 	# sets the "running" flag unconditionally (note: no harm in setting an already set flag)
 	# * thread will jump in with "do_set_servo_angle" when it is the correct time
-	def set_leg_position_thread(self, leg_position, time, motor):
+	def set_leg_position_thread(self, leg_position, time):
 		# safety checking for each motor
 		leg_position.tip_motor = bidirectional_clamp(leg_position.tip_motor, self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_OUT_ANGLE)
 		leg_position.mid_motor = bidirectional_clamp(leg_position.mid_motor, self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN_ANGLE)
@@ -367,36 +367,41 @@ class Leg(object):
 
 
 class Hex_Walker(object):
-	def __init__(self, rf_leg, rm_leg, rr_leg, lr_leg, lm_leg, lf_leg):
+	def __init__(self, rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg):
 	
 		# TODO: make the leg objects live in an actual list so we can iterate over it
 		
 		# this is an initial array that serves as a permanent holder
+		# these need to stay
 		self.leg0 = rf_leg
 		self.leg1 = rm_leg
-		self.leg2 = rr_leg
-		self.leg3 = lr_leg
+		self.leg2 = rb_leg
+		self.leg3 = lb_leg
 		self.leg4 = lm_leg
 		self.leg5 = lf_leg
+		
+		# leglist indexed by LEG_RM, etc
+		self.leglist = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
 
 		# now, we assign meaningful values in order to define the "front"
+		# TODO: replace this with a list, indexed by "LEG_LF" "LEG_RB" etc
 		self.front = "5-0"
 		self.lf_leg = lf_leg
 		self.lm_leg = lm_leg
-		self.lr_leg = lr_leg
+		self.lb_leg = lb_leg
 		self.rf_leg = rf_leg
 		self.rm_leg = rm_leg
-		self.rr_leg = rr_leg
+		self.rb_leg = rb_leg
 
 		# create the lists of leg combinations that would be useful
-		self.all_legs = [rf_leg, rm_leg, rr_leg, lr_leg, lm_leg, lf_leg]
-		self.left_legs = [lf_leg, lm_leg, lr_leg]
-		self.right_legs = [rf_leg, rm_leg, rr_leg]
-		self.left_triangle = [lf_leg, rm_leg, lr_leg]
-		self.right_triangle = [rf_leg, lm_leg, rr_leg]
+		self.all_legs = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
+		self.left_legs = [lf_leg, lm_leg, lb_leg]
+		self.right_legs = [rf_leg, rm_leg, rb_leg]
+		self.left_triangle = [lf_leg, rm_leg, lb_leg]
+		self.right_triangle = [rf_leg, lm_leg, rb_leg]
 		self.front_legs = [lf_leg, rf_leg]
 		self.mid_legs = [lm_leg, rm_leg]
-		self.rear_legs = [lr_leg, rr_leg]
+		self.rear_legs = [lb_leg, rb_leg]
 
 		# set operating mode
 		self.current_pos = NORMAL_NEUTRAL
@@ -426,8 +431,8 @@ class Hex_Walker(object):
 		if( new_front == "0-1" ):
 			self.rf_leg = self.leg1
 			self.rm_leg = self.leg2
-			self.rr_leg = self.leg3
-			self.lr_leg = self.leg4
+			self.rb_leg = self.leg3
+			self.lb_leg = self.leg4
 			self.lm_leg = self.leg5
 			self.lf_leg = self.leg0
 			self.front = new_front
@@ -436,8 +441,8 @@ class Hex_Walker(object):
 		elif( new_front == "1-2" ):
 			self.rf_leg = self.leg2
 			self.rm_leg = self.leg3
-			self.rr_leg = self.leg4
-			self.lr_leg = self.leg5
+			self.rb_leg = self.leg4
+			self.lb_leg = self.leg5
 			self.lm_leg = self.leg0
 			self.lf_leg = self.leg1
 			self.front = new_front
@@ -446,8 +451,8 @@ class Hex_Walker(object):
 		elif( new_front == "2-3" ):
 			self.rf_leg = self.leg3
 			self.rm_leg = self.leg4
-			self.rr_leg = self.leg5
-			self.lr_leg = self.leg0
+			self.rb_leg = self.leg5
+			self.lb_leg = self.leg0
 			self.lm_leg = self.leg1
 			self.lf_leg = self.leg2
 			self.front = new_front
@@ -456,8 +461,8 @@ class Hex_Walker(object):
 		elif( new_front == "3-4" ):
 			self.rf_leg = self.leg4
 			self.rm_leg = self.leg5
-			self.rr_leg = self.leg0
-			self.lr_leg = self.leg1
+			self.rb_leg = self.leg0
+			self.lb_leg = self.leg1
 			self.lm_leg = self.leg2
 			self.lf_leg = self.leg3
 			self.front = new_front
@@ -466,8 +471,8 @@ class Hex_Walker(object):
 		elif( new_front == "4-5" ):
 			self.rf_leg = self.leg5
 			self.rm_leg = self.leg0
-			self.rr_leg = self.leg1
-			self.lr_leg = self.leg2
+			self.rb_leg = self.leg1
+			self.lb_leg = self.leg2
 			self.lm_leg = self.leg3
 			self.lf_leg = self.leg4
 			self.front = new_front
@@ -476,8 +481,8 @@ class Hex_Walker(object):
 		elif( new_front == "5-0" ):
 			self.rf_leg = self.leg0
 			self.rm_leg = self.leg1
-			self.rr_leg = self.leg2
-			self.lr_leg = self.leg3
+			self.rb_leg = self.leg2
+			self.lb_leg = self.leg3
 			self.lm_leg = self.leg4
 			self.lf_leg = self.leg5
 			self.front = new_front
@@ -487,17 +492,6 @@ class Hex_Walker(object):
 			print("invalid front specified") 
 			return INV_PARAM
 
-	def do_move_set(self, hex_walker_position_list):
-		for next_pos in hex_walker_position_list:
-			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
-				print("Sending command")
-				self.set_hex_walker_position(next_pos)
-				time.sleep(self.speed)
-			else:
-				print("invalid move set")
-				return ILLEGAL_MOVE
-		return SUCCESS
-	
 	# torso movement functions
 	def walk(self, num_steps, direction):
 		
@@ -627,6 +621,7 @@ class Hex_Walker(object):
 		self.set_hex_walker_position(TALL_NEUTRAL)
 
 	def leg_wave(self, direction, speed, repetitions):
+		# TODO: figure out what the hell this is doing
 		for i in range(0, repetitions):
 			if(direction == RIGHT):
 				for leg in self.all_legs:
@@ -649,6 +644,20 @@ class Hex_Walker(object):
 	def do_nothing(self):
 		self.set_hex_walker_position(TALL_NEUTRAL)
 
+
+	# old version: direct-set then wait
+	def do_move_set(self, hex_walker_position_list):
+		for next_pos in hex_walker_position_list:
+			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
+				if HW_MOVE_DEBUG:
+					print("Sending command")
+				self.set_hex_walker_position(next_pos)
+				time.sleep(self.speed)
+			else:
+				print("invalid move set")
+				return ILLEGAL_MOVE
+		return SUCCESS
+	
 # NOTE: the functinos set_hex_walker_position and do_set_hex_walker_position are similar but one takes in a raw position and the other uses the defined table AND updates the current position. Using the do
 # version skips this state-updating and so it can be useful for testing
 
@@ -663,12 +672,58 @@ class Hex_Walker(object):
 	def do_set_hex_walker_position(self, hex_walker_position):
 		self.rf_leg.set_leg_position(hex_walker_position.rf_pos)
 		self.rm_leg.set_leg_position(hex_walker_position.rm_pos)
-		self.rr_leg.set_leg_position(hex_walker_position.rr_pos)
-		self.lr_leg.set_leg_position(hex_walker_position.lr_pos)
+		self.rb_leg.set_leg_position(hex_walker_position.rr_pos)
+		self.lb_leg.set_leg_position(hex_walker_position.lr_pos)
 		self.lm_leg.set_leg_position(hex_walker_position.lm_pos)
 		self.lf_leg.set_leg_position(hex_walker_position.lf_pos)
 
 
+	# new version: gradual motion
+	#TODO: make this better
+	def do_move_set_thread(self, hex_walker_position_list):
+		for next_pos in hex_walker_position_list:
+			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
+				if HW_MOVE_DEBUG:
+					print("Sending command")
+				self.set_hex_walker_position_thread(next_pos)
+				# time.sleep(self.speed)
+				self.synchronize([LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF])
+			else:
+				print("invalid move set")
+				return ILLEGAL_MOVE
+		return SUCCESS
+		
+
+	#TODO: make this better
+	def set_hex_walker_position_thread(self, hex_walker_position_number):
+		if(HW_MOVE_DEBUG):
+			print("current position is : " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to position: " + HEX_WALKER_POSITIONS[hex_walker_position_number].description)
+		self.current_pos = hex_walker_position_number
+		self.do_set_hex_walker_position_thread(HEX_WALKER_POSITIONS[hex_walker_position_number])
+
+
+	#TODO: make this better
+	def do_set_hex_walker_position_thread(self, hex_walker_position):
+		self.rf_leg.set_leg_position_thread(hex_walker_position.rf_pos, self.speed)
+		self.rm_leg.set_leg_position_thread(hex_walker_position.rm_pos, self.speed)
+		self.rb_leg.set_leg_position_thread(hex_walker_position.rr_pos, self.speed)
+		self.lb_leg.set_leg_position_thread(hex_walker_position.lr_pos, self.speed)
+		self.lm_leg.set_leg_position_thread(hex_walker_position.lm_pos, self.speed)
+		self.lf_leg.set_leg_position_thread(hex_walker_position.lf_pos, self.speed)
+	
+
+
+	# synchronize the legs by not returning until all of the specified legs are done moving
+	# works with the new threadwise execution
+	# uses "absolute" positions of each leg: ignores the "change direction" stuff
+	def synchronize(self, masklist):
+		# first cast the leglist as a set to remove potential duplicates
+		mask = set(masklist)
+		for leg in mask:
+			# wait until the leg is done, if it is already done this returns immediately
+			self.leglist[leg].sleeping_flag.wait()
+		
+		
 
 
 # TODO: make the "rotator" class a subclass of "leg"

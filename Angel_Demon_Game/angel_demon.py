@@ -12,35 +12,14 @@ import sensor_input
 import random
 import quantum_circuit
 
-
-# import pwm_wrapper
-# import hex_walker_driver_v2
-# import hex_walker_constants
-# pwm_r = Pwm_Wrapper(PWM_ADDR_R, PWM_FREQ)
-# pwm_l = Pwm_Wrapper(PWM_ADDR_L, PWM_FREQ)
-# rf = Leg(0, pwm_r, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
-# rm = Leg(0, pwm_r, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
-# rb = Leg(0, pwm_r, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
-# lb = Leg(0, pwm_l, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
-# lm = Leg(0, pwm_l, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
-# lf = Leg(0, pwm_l, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
-# rarm = Leg(0, pwm_l, LEG_PWM_CHANNEL[ARM_R], ARM_R)
-# larm = Leg(0, pwm_r, LEG_PWM_CHANNEL[ARM_L], ARM_L)
-# rot = Rotator(0, pwm_r, 9)
-# #create the hex walker
-# hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
-# # create the torso
-# torso = Robot_Torso(rarm, larm, rot)
-
-
-
-
 #init the pwm stuffs and run selected tests
 pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)
 pwm_41= Adafruit_PCA9685.PCA9685(address=0x41)
 
 pwm_40.set_pwm_freq(60)
 pwm_41.set_pwm_freq(60)
+
+stab_angle = 180
 
 #create somee legs
 rf = Leg(0, pwm_40, 0, 1, 2, 0)
@@ -54,7 +33,7 @@ lf = Leg(0, pwm_41, 3, 7, 8, 5)
 hex_walker = Hex_Walker(rf, rm, rr, lr, lm, lf)
 
 # create the torso
-r = Leg(0, pwm_41, 12, 11, 10, ARM_R)
+r = Leg(0, pwm_41, 14, 11, 15, ARM_R)
 l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
 rot = Rotator(0, pwm_40, 9)
 
@@ -362,6 +341,7 @@ class angel_demon_game():
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle, 1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -376,6 +356,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("R")
 							self.devil_victory = True
 							break
@@ -402,6 +383,7 @@ class angel_demon_game():
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -420,6 +402,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -433,6 +416,7 @@ class angel_demon_game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
+								torso.stab(stab_angle ,1)
 								self.move_hexapod("R")
 								self.devil_victory = True
 								break
@@ -485,6 +469,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("R")
 							self.devil_victory = True
 							break
@@ -500,6 +485,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle,1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -513,6 +499,7 @@ class angel_demon_game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
+								torso.stab(stab_angle ,1)
 								self.move_hexapod("R")
 								self.devil_victory = True
 								break
@@ -528,6 +515,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -558,6 +546,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("UP")
 							self.devil_victory = True
 							break
@@ -571,6 +560,7 @@ class angel_demon_game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
+								torso.stab(stab_angle ,1)
 								self.move_hexapod("R")
 								self.devil_victory = True
 								break
@@ -584,6 +574,7 @@ class angel_demon_game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
+							torso.stab(stab_angle ,1)
 							self.move_hexapod("R")
 							self.devil_victory = True
 							break

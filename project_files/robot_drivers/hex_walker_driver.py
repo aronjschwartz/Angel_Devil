@@ -85,10 +85,15 @@ ARM_ROT_MOTOR_UP_ANGLE = 180
 ARM_ROT_MOTOR_DOWN_ANGLE = 0
 
 # rotation motor constants
-ROTATOR_MOTOR_LEFT = 424
-ROTATOR_MOTOR_RIGHT = 217
-ROTATOR_LEFT_ANGLE = 45
-ROTATOR_RIGHT_ANGLE = 135
+#ROTATOR_MOTOR_LEFT = 424
+#ROTATOR_MOTOR_RIGHT = 217
+#ROTATOR_LEFT_ANGLE = 45
+#ROTATOR_RIGHT_ANGLE = 135
+ROTATOR_MOTOR_LEFT = 534
+ROTATOR_MOTOR_RIGHT = 107
+ROTATOR_LEFT_ANGLE = 0
+ROTATOR_RIGHT_ANGLE = 180
+
 
 TIP_MOTOR = 1
 MID_MOTOR = 2
@@ -430,7 +435,7 @@ class Hex_Walker(object):
 		if(cp != TALL_NEUTRAL and cp != NORMAL_NEUTRAL and cp != CROUCH_NEUTRAL):
 			print("Cannot change front while not in the neutral position")
 			return ILLEGAL_MOVE
-		
+
 		# check for which side should be the front and re-assign the legs
 		# accordingly
 		if( new_front == "0-1" ):
@@ -494,7 +499,7 @@ class Hex_Walker(object):
 			return SUCCESS
 
 		else:
-			print("invalid front specified") 
+			print("invalid front specified")
 			return INV_PARAM
 
 	def do_move_set(self, hex_walker_position_list):
@@ -507,13 +512,13 @@ class Hex_Walker(object):
 				print("invalid move set")
 				return ILLEGAL_MOVE
 		return SUCCESS
-	
+
 	# torso movement functions
 	def walk(self, num_steps, direction):
-		
+
 		self.set_new_front(get_front_from_direction(direction))
 		print("dir: " + get_front_from_direction(direction))
-		
+
 		# start walk by lifting legs
 		self.set_hex_walker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
 		# define positions to go through to get steps from a neutral legs up
@@ -522,13 +527,13 @@ class Hex_Walker(object):
 		TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
 		TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
 		TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL ]
-		
+
 		right_step = [
 		TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
 		TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
 		TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
 		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL ]
-		
+
 		last_step = "right"
 
 		for i in range (0, num_steps):
@@ -543,7 +548,7 @@ class Hex_Walker(object):
 		self.set_new_front("5-0")
 
 	def rotate(self, num_steps, direction):
-		
+
 		# start rotate by lifting legs
 		self.set_hex_walker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
@@ -590,7 +595,7 @@ class Hex_Walker(object):
 		self.set_hex_walker_position(TALL_NEUTRAL)
 
 	def fine_rotate(self, num_steps, direction):
-		
+
 		# start rotate by lifting legs
 		self.set_hex_walker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
@@ -757,7 +762,7 @@ class Robot_Torso(object):
 		sleeps =	[.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1]
 		self.do_moveset(moves, rotations, sleeps, repetitions)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
+
 	def look(self):
 		self.set_torso_position(TORSO_LOOKING, 90)
 
@@ -777,7 +782,16 @@ class Robot_Torso(object):
 		sleeps = [.4, .4]
 		self.do_moveset(moves, rotations, sleeps, repetitions)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
+
+	def stab(self, rotation, repetitions):
+		moves = []
+		moves.append(TORSO_POINTING_LEFT)
+		rotations = [rotation]
+		sleeps = [.4, .4]
+		self.do_moveset(moves, rotations, sleeps, repetitions)
+		self.set_torso_rotation(rotation)
+
+
 	def hand_shake(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_SHAKE_DOWN)
@@ -788,7 +802,7 @@ class Robot_Torso(object):
 		sleeps = [.1, .1, .1, .1]
 		self.do_moveset(moves, rotations, sleeps, repetitions)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
+
 	def wave(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_WAVE_DOWN)

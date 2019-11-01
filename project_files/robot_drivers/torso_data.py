@@ -2,7 +2,7 @@ from leg_data import *
 from hex_walker_data import *
 
 TORSO_ARM_TABLE = {
-        "NEUTRAL"           : Leg_Position(0, 45, 45),
+        "NEUTRAL"           : Leg_Position(0, 45, 90),
         "ON_HIP"        : Leg_Position(0, 90, 0),
         "UP"             : Leg_Position(90, 0, 180),
         "STRAIGHT_OUT"   : Leg_Position(90,90,90),

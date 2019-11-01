@@ -138,16 +138,16 @@ CHANNEL_LEG5_MID = 7
 CHANNEL_LEG5_ROT = 8
 
 # TODO: determine channels for arms + waist
-#arm_L
-CHANNEL_LEG6_TIP = 99
+
+CHANNEL_LEG6_TIP = 99	#arm_L
 CHANNEL_LEG6_MID = 99
 CHANNEL_LEG6_ROT = 99
-#arm_R
-CHANNEL_LEG7_TIP = 99
+
+CHANNEL_LEG7_TIP = 99	#arm_R
 CHANNEL_LEG7_MID = 99
 CHANNEL_LEG7_ROT = 99
-#waist
-CHANNEL_WAIST_ROT = 99
+
+CHANNEL_WAIST_ROT = 99	#waist
 
 # usage: LEG_PWM_CHANNEL[leg# 0-7][servo# 0-2: tip=0, mid=1, rot=2]
 # example: LEG_PWM_CHANNEL[LEG_0][MID_MOTOR]

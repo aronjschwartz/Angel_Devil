@@ -13,6 +13,9 @@ import leg_thread
 #Extraneous
 HW_MOVE_DEBUG = 1 #toggle 0/1 to turn debug prints on/off
 
+LEG_THREAD_DEBUG = True
+
+
 
 # arbitrary values
 LEFT = 1
@@ -51,8 +54,10 @@ class Leg(object):
 	def __init__(self, uid, pwm, tip_channel, mid_channel, rot_channel, leg_num):
 
 		# TODO: turn channels into a list
-		# TODO: turn limits into a list
-		# TODO: turn current positions into a list
+		# TODO: turn limit parameters into a list
+		# TODO: turn "current position" vars into lists
+		# these changes offer little practical benefit, just code cleanliness, but are potentially a real pain to transition to, so they are low-priority
+		
 		
 		# unique ID, not actually used for anything
 		self.uid = uid
@@ -62,25 +67,33 @@ class Leg(object):
 		self.running_flag = threading.Event()
 		self.sleeping_flag = threading.Event()
 		self.sleeping_flag.set()
-		# an Event used as an event should be used: only briefly set. signals to "stop everything"
-		self.abort_event = threading.Event()
 		# the list of frames that the leg thread is consuming as the leg object is adding onto
 		self.frame_queue = []
 		# locking object to ensure no collisions happen around the frame queue
 		self._frame_queue_lock = threading.Lock()
+		# locking object to ensure no collisions happen around self.tip_motor/self.tip_motor_angle, etc
+		# might not be necessary but couldn't hurt, technically both the leg thread and leg object write into them
+		self._curr_pos_lock = threading.Lock()
 
 		# create and launch the thread for this leg
+		# note: this MUST be daemon type because the thread is designed to run forever... the only way to stop it is by stopping its parent, which means it must be a daemon!
 		# it should be able to access all of this leg's other member variables and functions
 		# threadname = "legthread" + str(leg_num)
-		self.legthread = threading.Thread(name="legthread_" + str(leg_num), target=leg_interpolate_thread, args=(self))
+		self.legthread = threading.Thread(name="legthread_" + str(leg_num), target=leg_interpolate_thread, args=(self, LEG_THREAD_DEBUG), daemon=True)
+		
 		self.legthread.start()
 		
 		
 		
+		# TODO: pass the channels in as a list, LEG_PWM_CHANNEL[LEG_RF], instead of 3 separate values... then i don't even need to assemble the list
+		# TODO: self.pwm_channels = [tip_channel, mid_channel, rot_channel]
 		self.tip_channel = tip_channel
 		self.mid_channel = mid_channel
 		self.rot_channel = rot_channel
+		
+		
 		# now, assign the correct constants
+		# TODO: self.SERVO_PWM_LIMITS = [[0,1],[0,1],[0,1]]
 		if leg_num == LEG_0:
 			self.TIP_MOTOR_OUT	  = c_0_TIP_MOTOR_OUT
 			self.TIP_MOTOR_IN	   = c_0_TIP_MOTOR_IN
@@ -88,6 +101,10 @@ class Leg(object):
 			self.MID_MOTOR_DOWN	 = c_0_MID_MOTOR_DOWN
 			self.ROT_MOTOR_RIGHT	= c_0_ROT_MOTOR_RIGHT
 			self.ROT_MOTOR_LEFT	 = c_0_ROT_MOTOR_LEFT
+			# TODO:
+			# self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_0_TIP_MOTOR_OUT, 	c_0_TIP_MOTOR_IN]
+			# self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_0_MID_MOTOR_UP, 	c_0_MID_MOTOR_DOWN]
+			# self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_0_ROT_MOTOR_RIGHT, 	c_0_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_1:
 			self.TIP_MOTOR_OUT	  = c_1_TIP_MOTOR_OUT
 			self.TIP_MOTOR_IN	   = c_1_TIP_MOTOR_IN
@@ -137,7 +154,9 @@ class Leg(object):
 			self.MID_MOTOR_DOWN	 = c_L_ARM_MID_MOTOR_IN
 			self.ROT_MOTOR_RIGHT	= c_L_ARM_ROT_MOTOR_UP
 			self.ROT_MOTOR_LEFT	 = c_L_ARM_ROT_MOTOR_DOWN
-
+		
+		
+		# TODO: self.SERVO_ANGLE_LIMITS = [[0,1],[0,1],[0,1]]
 		if(leg_num == ARM_L or leg_num == ARM_R):
 			self.TIP_MOTOR_OUT_ANGLE = ARM_TIP_MOTOR_OUT_ANGLE
 			self.TIP_MOTOR_IN_ANGLE = ARM_TIP_MOTOR_IN_ANGLE
@@ -145,6 +164,10 @@ class Leg(object):
 			self.MID_MOTOR_DOWN_ANGLE = ARM_MID_MOTOR_IN_ANGLE
 			self.ROT_MOTOR_RIGHT_ANGLE = ARM_ROT_MOTOR_UP_ANGLE
 			self.ROT_MOTOR_LEFT_ANGLE = ARM_ROT_MOTOR_DOWN_ANGLE
+			# TODO
+			# self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [ARM_TIP_MOTOR_OUT_ANGLE, 	ARM_TIP_MOTOR_IN_ANGLE]
+			# self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [ARM_MID_MOTOR_OUT_ANGLE, 	ARM_MID_MOTOR_IN_ANGLE]
+			# self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ARM_ROT_MOTOR_UP_ANGLE, 	ARM_ROT_MOTOR_DOWN_ANGLE]
 		else:
 			self.TIP_MOTOR_OUT_ANGLE = TIP_MOTOR_OUT_ANGLE
 			self.TIP_MOTOR_IN_ANGLE = TIP_MOTOR_IN_ANGLE
@@ -153,19 +176,21 @@ class Leg(object):
 			self.ROT_MOTOR_RIGHT_ANGLE = ROT_MOTOR_RIGHT_ANGLE
 			self.ROT_MOTOR_LEFT_ANGLE = ROT_MOTOR_LEFT_ANGLE
 			
-		# TODO: set these constants (both angle and pwm) for if the "leg_num" is of rotator type
+		# TODO: set these constants (both angle and pwm) to handle condition where if the "leg_num" is of rotator type
 
 
-		# set initial values that are not given
-		
-		# TODO: this is unacceptable, initialize leg positions to known values!!!
-		
+		# TODO: self.curr_servo_angle = [-1, -1, -1]
+		# TODO: self.curr_servo_pwm = [-1, -1, -1]
+		# declare these member variables, immediately have value overwritten...
 		self.tip_motor = -1
 		self.mid_motor = -1
 		self.rot_motor = -1
 		self.tip_motor_angle = -1
 		self.mid_motor_angle = -1
 		self.rot_motor_angle = -1
+		
+		# ...this code should overwrite the "-1"s with sensible values on bootup
+		# NEEDS to use the non-thread versions
 		if(leg_num == ARM_L or leg_num == ARM_R):
 			self.set_leg_position(TORSO_ARM_TABLE["NEUTRAL"])
 		else:
@@ -195,6 +220,9 @@ class Leg(object):
 			return linear_map(self.ROT_MOTOR_RIGHT_ANGLE, self.ROT_MOTOR_RIGHT, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_LEFT, angle)
 		else:
 			return INV_PARAM
+		# TODO: after things are turned into lists, the code above can be replaced with:
+		# return linear_map(self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1], self.SERVO_PWM_LIMITS[motor][1], angle)
+		
 	def pwm_to_angle(self, pwm, motor):
 		if motor == TIP_MOTOR:
 			return linear_map(self.TIP_MOTOR_OUT, self.TIP_MOTOR_OUT_ANGLE, self.TIP_MOTOR_IN, self.TIP_MOTOR_IN_ANGLE, pwm)
@@ -204,6 +232,9 @@ class Leg(object):
 			return linear_map(self.ROT_MOTOR_RIGHT, self.ROT_MOTOR_RIGHT_ANGLE, self.ROT_MOTOR_LEFT, self.ROT_MOTOR_LEFT_ANGLE, pwm)
 		else:
 			return INV_PARAM
+		# TODO: after things are turned into lists, the code above can be replaced with:
+		# return linear_map(self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][1], self.SERVO_ANGLE_LIMITS[motor][1], angle)
+
 	def percent_to_angle(self, percent, motor):
 		# maps 0-100 to each motor's min and max angle values
 		if motor == TIP_MOTOR:
@@ -214,6 +245,8 @@ class Leg(object):
 			return linear_map(100, self.ROT_MOTOR_RIGHT_ANGLE, 0, self.ROT_MOTOR_LEFT_ANGLE, percent)
 		else:
 			return INV_PARAM
+		# TODO: after things are turned into lists, the code above can be replaced with:
+		# return linear_map(100, self.SERVO_ANGLE_LIMITS[motor][0], 0, self.SERVO_ANGLE_LIMITS[motor][1], angle)
 
 	# convert-then-set functions:
 	def set_servo_percent(self, percent, motor):
@@ -252,15 +285,17 @@ class Leg(object):
 		else:
 			return INV_PARAM
 		safe_angle = bidirectional_clamp(angle, a, b)
+		# TODO: after things are turned into lists, the code above can be replaced with:
+		# safety checking for each motor
+		# (safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1])
 		
 		return self.do_set_servo_angle(safe_angle, motor)
 		
 		
 	# clear the frame queue to stop any currently-pending movements
-	def emergency_abort():
+	def abort():
 		with self._frame_queue_lock: 
 			self.frame_queue = []
-		self.abort_event.set()
 		
 		
 		
@@ -276,7 +311,7 @@ class Leg(object):
 		leg_position.rot_motor = bidirectional_clamp(leg_position.rot_motor, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_RIGHT_ANGLE)
 		
 		# assemble command from the leg position
-		# TODO: add a time component to the leg position object? or make a new object type? or just leave it like this?
+		# TODO: add a time component to the leg position object? or make a new object type? or just leave it like this? not sure how to best integrate/use this system
 		command = [leg_position.tip_motor, leg_position.mid_motor, leg_position.rot_motor, time]
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue
@@ -287,6 +322,7 @@ class Leg(object):
 				lastframe = self.frame_queue[-1]
 			else:
 				lastframe = [self.tip_motor_angle, self.mid_motor_angle, self.rot_motor_angle, 0]
+				# TODO: lastframe = self.curr_servo_angle
 		
 		# run interpolation
 		interpolate_list = interpolate(command, lastframe)
@@ -305,24 +341,37 @@ class Leg(object):
 	# set the actual PWM and the internally-tracked position
 	def do_set_servo_angle(self, angle, motor):
 		# get pwm val
-		pwm_val = int(self.angle_to_pwm(safe_angle, motor))
+		pwm_val = int(self.angle_to_pwm(angle, motor))
 
-		# do the write out
-		if motor == TIP_MOTOR:
-			(self.tip_motor_angle, self.tip_motor) = (angle, pwm_val)
-			self.pwm.set_pwm(self.tip_channel, 0, pwm_val)
-		elif motor == MID_MOTOR:
-			(self.mid_motor_angle, self.mid_motor) = (angle, pwm_val)
-			self.pwm.set_pwm(self.mid_channel, 0, pwm_val)
-		elif motor == ROT_MOTOR:
-			(self.rot_motor_angle, self.rot_motor) = (angle, pwm_val)
-			self.pwm.set_pwm(self.rot_channel, 0, pwm_val)
+		# do the write out, with lock just to be safe
+		with self._curr_pos_lock:
+			if motor == TIP_MOTOR:
+				(self.tip_motor_angle, self.tip_motor) = (angle, pwm_val)
+				self.pwm.set_pwm(self.tip_channel, 0, pwm_val)
+			elif motor == MID_MOTOR:
+				(self.mid_motor_angle, self.mid_motor) = (angle, pwm_val)
+				self.pwm.set_pwm(self.mid_channel, 0, pwm_val)
+			elif motor == ROT_MOTOR:
+				(self.rot_motor_angle, self.rot_motor) = (angle, pwm_val)
+				self.pwm.set_pwm(self.rot_channel, 0, pwm_val)
+				
+		# TODO: after things are turned into lists, the code above can be replaced with:
+		# # do the write out, with lock just to be safe
+		# with self._curr_pos_lock:
+			# self.curr_servo_angle[motor] = angle
+			# self.curr_servo_pwm[motor] = pwm_val
+			# self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
+			
+			
 		return SUCCESS
 
 
 
 class Hex_Walker(object):
 	def __init__(self, rf_leg, rm_leg, rr_leg, lr_leg, lm_leg, lf_leg):
+	
+		# TODO: make the leg objects live in an actual list so we can iterate over it
+		
 		# this is an initial array that serves as a permanent holder
 		self.leg0 = rf_leg
 		self.leg1 = rm_leg
@@ -365,8 +414,8 @@ class Hex_Walker(object):
 	def set_speed(self, new_speed):
 		self.speed = new_speed
 
-# this function will change the front from being between the "5-0" legs to being
-# between any two legs. The key is "(leg on left)-(leg on right)"
+	# this function will change the front from being between the "5-0" legs to being
+	# between any two legs. The key is "(leg on frontleft)-(leg on frontright)"
 	def set_new_front(self, new_front):
 		cp = self.current_pos
 		if(cp != TALL_NEUTRAL and cp != NORMAL_NEUTRAL and cp != CROUCH_NEUTRAL):

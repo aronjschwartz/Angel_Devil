@@ -55,7 +55,6 @@ def interpolate(cmd, curr):
 	# total time is rounded up to next multiple of command time... i.e. # of frames is rounded up
 	num_frames = math.ceil(cmd[3] / INTERPOLATE_TIME)
 	# initialize the list with the proper number of entries so I dont have to keep appending
-	# frame_list = [[0,0,0,0]] * num_frames
 	frame_list = []
 	for i in range(num_frames):
 		frame_list.append([0,0,0,0])

@@ -1,13 +1,13 @@
 from __future__ import division
 import time
-from hex_walker_constants import *
-from pwm_wrapper import *
-from hex_util import *
+import threading
 from hex_walker_data import *
 from leg_data import *
 from torso_data import *
 
-import threading
+from hex_walker_constants import *
+# from pwm_wrapper import *
+from hex_util import *
 from leg_thread import *
 
 #Extraneous
@@ -53,21 +53,23 @@ class Leg_Position(object):
 # leg. It should be able to set each join according to a degree, max, min,
 # or a value from 0-100 in terms of percent of maximum
 class Leg(object):
-	def __init__(self, uid, pwm, channels, leg_num):
+	def __init__(self, pwm, channels, leg_num):
 
 		# TODO: turn limit parameters into a list
 		# TODO: turn "current position" vars into lists
 		# these changes offer little practical benefit, just code cleanliness, but are potentially a real pain to transition to, so they are low-priority
 		
 		
-		# unique ID, not actually used for anything
-		self.uid = uid
+		# unique ID, not actually used for much, just stores the leg_num
+		self.uid = leg_num
 		# this can be either the new-style PWM wrapper or the old-style actual pwm object, works just the same
 		self.pwm = pwm
 		# running/sleeping flags: normal Events can only wait for a rising edge, if I want to wait for a falling edge, i need to set up a complementary system like this. also they're really being used as flags, not as "events", but whatever
 		self.running_flag = threading.Event()
 		self.sleeping_flag = threading.Event()
 		self.sleeping_flag.set()
+		# i want setting one/clearing other to be an atomic operation so it should have a lock object just in case
+		self._state_flag_lock = threading.Lock()
 		# the list of frames that the leg thread is consuming as the leg object is adding onto
 		self.frame_queue = []
 		# locking object to ensure no collisions happen around the frame queue
@@ -79,18 +81,13 @@ class Leg(object):
 		# create and launch the thread for this leg
 		# note: this MUST be daemon type because the thread is designed to run forever... the only way to stop it is by stopping its parent, which means it must be a daemon!
 		# it should be able to access all of this leg's other member variables and functions
-		# threadname = "legthread" + str(leg_num)
-		self.legthread = threading.Thread(name="legthread_" + str(leg_num), target=leg_interpolate_thread, args=(self, LEG_THREAD_DEBUG), daemon=True)
-		
-		self.legthread.start()
-		
+		# threadname = "framethread" + str(leg_num)
+		self.framethread = threading.Thread(name="framethread_" + str(leg_num), target=Frame_Thread_Func, args=(self, LEG_THREAD_DEBUG), daemon=True)
+		# just to be safe, don't start the thread until the end of __init__
 		
 		
-		self.pwm_channels = channels
-		# self.tip_channel = tip_channel
-		# self.mid_channel = mid_channel
-		# self.rot_channel = rot_channel
 		
+		self.pwm_channels = channels		
 		
 		# now, assign the correct constants
 		# TODO: self.SERVO_PWM_LIMITS = [[0,1],[0,1],[0,1]]
@@ -198,6 +195,9 @@ class Leg(object):
 			self.set_servo_angle(180, MID_MOTOR)
 			self.set_servo_angle(90, ROT_MOTOR)
 
+		# start the thread
+		self.framethread.start()
+
 
 	def print_self(self):
 		print("leg uid : " + str(self.uid) + " ===========================")
@@ -293,7 +293,8 @@ class Leg(object):
 		return self.do_set_servo_angle(safe_angle, motor)
 		
 		
-	# clear the frame queue to stop any currently-pending movements
+	# clear the frame queue to stop any currently-pending movements.
+	# note that when the hexwalker calls this it should first abort() all legs, THEN call "synchronize" on all legs. this way it doesn't wait for one leg to stop before clearing the queue of the next.
 	def abort():
 		with self._frame_queue_lock: 
 			self.frame_queue = []
@@ -306,37 +307,43 @@ class Leg(object):
 	# sets the "running" flag unconditionally (note: no harm in setting an already set flag)
 	# * thread will jump in with "do_set_servo_angle" when it is the correct time
 	def set_leg_position_thread(self, leg_position, time):
-		# safety checking for each motor
-		leg_position.tip_motor = bidirectional_clamp(leg_position.tip_motor, self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_OUT_ANGLE)
-		leg_position.mid_motor = bidirectional_clamp(leg_position.mid_motor, self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN_ANGLE)
-		leg_position.rot_motor = bidirectional_clamp(leg_position.rot_motor, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_RIGHT_ANGLE)
-		
 		# assemble command from the leg position
-		# TODO: add a time component to the leg position object? or make a new object type? or just leave it like this? not sure how to best integrate/use this system
-		command = [leg_position.tip_motor, leg_position.mid_motor, leg_position.rot_motor, time]
+		# TODO: add a time component to the leg position object? or make a new object type? or just build the command like this? not sure how to best integrate/use this system
+		command = [0, 0, 0, time]
 		
-		# if there is a queued interpolation frame, interpolate from the final frame in the queue
-		# otherwise, interpolate from current position
+		# safety checking for each motor
+		command[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_OUT_ANGLE)
+		command[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN_ANGLE)
+		command[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_RIGHT_ANGLE)
+		
+		
+		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.
+		# otherwise, interpolate from current position.
 		lastframe = []
 		with self._frame_queue_lock:
 			if len(self.frame_queue) > 0:
-				lastframe = self.frame_queue[-1]
-			else:
-				lastframe = [self.tip_motor_angle, self.mid_motor_angle, self.rot_motor_angle, 0]
+				# be sure it is a copy and not a reference, just to be safe
+				lastframe = list(self.frame_queue[-1])
+		if lastframe == []:   # "else" but outside of the lock block
+			lastframe = [self.tip_motor_angle, self.mid_motor_angle, self.rot_motor_angle]
 				# TODO: lastframe = self.curr_servo_angle
 		
 		# run interpolation
+		# NOTE: "command" must have 4 elements, "lastframe" only needs 3, the 4th is just unused
 		interpolate_list = interpolate(command, lastframe)
 		
-		# add new frames onto the END of the frame queue
+		# add new frames onto the END of the frame queue (with lock)
 		with self._frame_queue_lock:
 			self.frame_queue = self.frame_queue + interpolate_list
+			if LEG_THREAD_DEBUG and self.uid == 0:
+				print("leg_" + str(self.uid) + ": add " + str(len(interpolate_list)) + " frames to frame_queue, new length is " + str(len(frame_queue)))
 		
-		# clear "sleeping" event, does not trigger anything
-		self.sleeping_flag.clear()
-		# set the "running" event, this may trigger other waiting tasks
-		self.running_flag.set()
-
+		with self._state_flag_lock:
+			# clear "sleeping" event, does not trigger anything (note: clear before set)
+			self.sleeping_flag.clear()
+			# set the "running" event, this may trigger other waiting tasks
+			self.running_flag.set()
+		
 		
 	# unprotected internal-use-only function
 	# set the actual PWM and the internally-tracked position

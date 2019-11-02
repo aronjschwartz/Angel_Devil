@@ -13,20 +13,21 @@ import random
 import quantum_circuit
 
 
-from pwm_wrapper import *
+import pwm_wrapper
 from hex_walker_driver_v2 import *
 from hex_walker_constants import *
-pwm_bot = Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-rf = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
-rm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
-rb = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
-larm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
-rot = Rotator(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L][ROT_MOTOR])
-pwm_top = Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-lb = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
-lm = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
-lf = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
-rarm = Leg(0, pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
+pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
+rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
+rb = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
+larm = Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
+rot = Rotator(0, pwm_bot, LEG_PWM_CHANNEL[WAIST][WAIST_MOTOR])
+
+pwm_top = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+lb = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
+lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
+lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
+rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
 #create the hex walker
 hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
 # create the torso

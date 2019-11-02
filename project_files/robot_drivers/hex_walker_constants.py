@@ -27,6 +27,7 @@ WAIST = 8
 TIP_MOTOR = 0
 MID_MOTOR = 1
 ROT_MOTOR = 2
+WAIST_MOTOR = ROT_MOTOR
 
 # ==========================================================
 
@@ -155,8 +156,8 @@ CHANNEL_WAIST_ROT = 9	#waist, connected to bottom
 
 # usage: LEG_PWM_CHANNEL[leg# 0-7][servo# 0-2: tip=0, mid=1, rot=2]
 # example: LEG_PWM_CHANNEL[LEG_0][MID_MOTOR]
-# example: LEG_PWM_CHANNEL[LEG_RF][MID_MOTOR]
-# example: LEG_PWM_CHANNEL[WAIST][ROT_MOTOR]
+# example: LEG_PWM_CHANNEL[LEG_RF] returns a list
+# example: LEG_PWM_CHANNEL[WAIST][WAIST_MOTOR]
 LEG_PWM_CHANNEL = [
 [	CHANNEL_LEG0_TIP,	CHANNEL_LEG0_MID,	CHANNEL_LEG0_ROT	],
 [	CHANNEL_LEG1_TIP,	CHANNEL_LEG1_MID,	CHANNEL_LEG1_ROT	],

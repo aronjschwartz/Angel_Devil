@@ -8,9 +8,9 @@
 
 import time
 import threading
-import hex_walker_constants
-import hex_walker_driver_v2
-import hex_util
+from hex_walker_constants import *
+from hex_walker_driver_v2 import *
+from hex_util import *
 
 # "frame format" = [ TIP, MID, ROT, time ]
 
@@ -31,7 +31,7 @@ def leg_interpolate_thread(leg, DEBUG):
 			if frame == []:
 				break
 				
-			if DEBUG:
+			if DEBUG and leg.legthread.name == "legthread_0":
 				print(str(leg.legthread.name) + ": execute frame " + str(frame))
 			
 			# set the leg to the pose indicated by the frame

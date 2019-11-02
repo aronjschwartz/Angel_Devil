@@ -6,9 +6,9 @@
 
 
 # debug mode switch that enables/disables actual hardware
-PWM_WRAPPER_USE_HARDWARE = False
+PWM_WRAPPER_USE_HARDWARE = True
 # debug mode switch that enables/disables print statements (will absolutely flood the logs tho)
-PWM_WRAPPER_DEBUG_PRINTS = True
+PWM_WRAPPER_DEBUG_PRINTS = False
 
 
 
@@ -31,7 +31,7 @@ class Pwm_Wrapper(object):
 		# the lock object: only one thread can "have" the lock at a time, others will wait till its free
 		self._lock = threading.Lock()
 
-	def set_pwm(channel, on, off):
+	def set_pwm(self, channel, on, off):
 		# following info comes from the docs:
 		# channel: The channel that should be updated with the new values (0..15)
 		# on: The tick (between 0..4095) when the signal should transition from low to high

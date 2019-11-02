@@ -1,7 +1,7 @@
 
 # "mathy" utility functions that aren't really intrinsic to any one place
 
-import hex_walker_constants
+from hex_walker_constants import *
 import math
 
 
@@ -50,13 +50,15 @@ def get_front_from_direction(direction):
 	# might change this in the future tho so i will return the time between poses anyway
 def interpolate(cmd, curr):
 	# find the delta(s)
-	delta = [curr[0] - cmd[0], curr[1] - cmd[1], curr[2] - cmd[2]]
+	delta = [cmd[0] - curr[0], cmd[1] - curr[1], cmd[2] - curr[2]]
 	# determine how many sections this time must be broken into
 	# total time is rounded up to next multiple of command time... i.e. # of frames is rounded up
 	num_frames = math.ceil(cmd[3] / INTERPOLATE_TIME)
 	# initialize the list with the proper number of entries so I dont have to keep appending
-	frame_list = [[0,0,0,0]] * num_frames
+	# frame_list = [[0,0,0,0]] * num_frames
+	frame_list = []
 	for i in range(num_frames):
+		frame_list.append([0,0,0,0])
 		# set frame_list[i]
 		# math is ((i+1)/num_frames * delta) + curr
 		# the +1 is because the first frame should NOT be curr, and the final frame SHOULD be dest (curr+delta)

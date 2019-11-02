@@ -4,8 +4,8 @@
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
-from hex_walker_driver import *
-import Adafruit_PCA9685
+# from hex_walker_driver import *
+# import Adafruit_PCA9685
 import time
 import numpy as np
 import sensor_input
@@ -13,54 +13,56 @@ import random
 import quantum_circuit
 
 
-# import pwm_wrapper
-# import hex_walker_driver_v2
-# import hex_walker_constants
-# pwm_bot = Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-# rf = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
-# rm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
-# rb = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
-# larm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
-# rot = Rotator(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L][WAIST])
-# pwm_top = Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-# lb = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
-# lm = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
-# lf = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
-# rarm = Leg(0, pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
-# #create the hex walker
-# hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
-# # create the torso
-# torso = Robot_Torso(rarm, larm, rot)
+from pwm_wrapper import *
+from hex_walker_driver_v2 import *
+from hex_walker_constants import *
+pwm_bot = Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+rf = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
+rm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
+rb = Leg(0, pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
+larm = Leg(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
+rot = Rotator(0, pwm_bot, LEG_PWM_CHANNEL[ARM_L][ROT_MOTOR])
+pwm_top = Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+lb = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
+lm = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
+lf = Leg(0, pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
+rarm = Leg(0, pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
+#create the hex walker
+hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
+# create the torso
+torso = Robot_Torso(rarm, larm, rot)
 
-
-
-
-#init the pwm stuffs and run selected tests
-pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)
-pwm_41= Adafruit_PCA9685.PCA9685(address=0x41)
-
-pwm_40.set_pwm_freq(60)
-pwm_41.set_pwm_freq(60)
+# let the robot move nice and slow to show off the new smoothness
+hex_walker.set_speed(0.5)
 
 stab_angle = 180
 
-#create somee legs
-rf = Leg(0, pwm_40, 0, 1, 2, 0)
-rm = Leg(0, pwm_40, 3, 4, 5, 1)
-rr = Leg(0, pwm_40, 6, 7, 8, 2)
-lr = Leg(0, pwm_41, 0, 1, 2, 3)
-lm = Leg(0, pwm_41, 6, 4, 5, 4)
-lf = Leg(0, pwm_41, 3, 7, 8, 5)
 
-#create the hex walker
-hex_walker = Hex_Walker(rf, rm, rr, lr, lm, lf)
+# #init the pwm stuffs and run selected tests
+# pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)
+# pwm_41= Adafruit_PCA9685.PCA9685(address=0x41)
 
-# create the torso
-r = Leg(0, pwm_41, 14, 11, 15, ARM_R)
-l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
-rot = Rotator(0, pwm_40, 9)
+# pwm_40.set_pwm_freq(60)
+# pwm_41.set_pwm_freq(60)
 
-torso = Robot_Torso(r, l, rot)
+
+# #create somee legs
+# rf = Leg(0, pwm_40, 0, 1, 2, 0)
+# rm = Leg(0, pwm_40, 3, 4, 5, 1)
+# rr = Leg(0, pwm_40, 6, 7, 8, 2)
+# lr = Leg(0, pwm_41, 0, 1, 2, 3)
+# lm = Leg(0, pwm_41, 6, 4, 5, 4)
+# lf = Leg(0, pwm_41, 3, 7, 8, 5)
+
+# #create the hex walker
+# hex_walker = Hex_Walker(rf, rm, rr, lr, lm, lf)
+
+# # create the torso
+# r = Leg(0, pwm_41, 14, 11, 15, ARM_R)
+# l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
+# rot = Rotator(0, pwm_40, 9)
+
+# torso = Robot_Torso(r, l, rot)
 
 class angel_demon_game():
 

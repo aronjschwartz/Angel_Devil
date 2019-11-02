@@ -1,19 +1,21 @@
 from __future__ import division
 import time
-import hex_walker_constants
-import pwm_wrapper
-import hex_util
+from hex_walker_constants import *
+from pwm_wrapper import *
+from hex_util import *
 from hex_walker_data import *
 from leg_data import *
 from torso_data import *
 
 import threading
-import leg_thread
+from leg_thread import *
 
 #Extraneous
 HW_MOVE_DEBUG = 0 #toggle 0/1 to turn debug prints on/off
 
 LEG_THREAD_DEBUG = True
+
+USE_THREADING = True
 
 
 
@@ -317,7 +319,7 @@ class Leg(object):
 		# otherwise, interpolate from current position
 		lastframe = []
 		with self._frame_queue_lock:
-			if len(leg.frame_queue) > 0:
+			if len(self.frame_queue) > 0:
 				lastframe = self.frame_queue[-1]
 			else:
 				lastframe = [self.tip_motor_angle, self.mid_motor_angle, self.rot_motor_angle, 0]
@@ -331,9 +333,9 @@ class Leg(object):
 			self.frame_queue = self.frame_queue + interpolate_list
 		
 		# clear "sleeping" event, does not trigger anything
-		leg.sleeping_flag.clear()
+		self.sleeping_flag.clear()
 		# set the "running" event, this may trigger other waiting tasks
-		leg.running_flag.set()
+		self.running_flag.set()
 
 		
 	# unprotected internal-use-only function
@@ -651,8 +653,12 @@ class Hex_Walker(object):
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
 					print("Sending command")
-				self.set_hex_walker_position(next_pos)
-				time.sleep(self.speed)
+				if USE_THREADING:
+					self.set_hex_walker_position_thread(next_pos)
+					self.synchronize([LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF])
+				else:
+					self.set_hex_walker_position(next_pos)
+					time.sleep(self.speed)
 			else:
 				print("invalid move set")
 				return ILLEGAL_MOVE
@@ -686,7 +692,6 @@ class Hex_Walker(object):
 				if HW_MOVE_DEBUG:
 					print("Sending command")
 				self.set_hex_walker_position_thread(next_pos)
-				# time.sleep(self.speed)
 				self.synchronize([LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF])
 			else:
 				print("invalid move set")
@@ -827,6 +832,14 @@ class Robot_Torso(object):
 		self.do_moveset(moves, rotations, sleeps, repetitions)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
 	
+	def stab(self, rotation, repetitions):
+		moves = []
+		moves.append(TORSO_POINTING_LEFT)
+		rotations = [rotation]
+		sleeps = [.4, .4]
+		self.do_moveset(moves, rotations, sleeps, repetitions)
+		self.set_torso_rotation(rotation)
+
 	def hand_shake(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_SHAKE_DOWN)

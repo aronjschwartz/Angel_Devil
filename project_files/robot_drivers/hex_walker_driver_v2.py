@@ -669,6 +669,16 @@ class Hex_Walker(object):
 			self.leglist[leg].sleeping_flag.wait()
 		
 		
+	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
+	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
+	def abort(self):
+		# first clear all the queues
+		for leg in self.leglist:
+			leg.abort()
+		# then wait until all legs returned to "sleeping" state
+		self.synchronize(self.leglist)
+		# then wait for 3x the interpolate time, just to be safe
+		time.sleep(INTERPOLATE_TIME * 3)
 
 
 # TODO: make the "rotator" class a subclass of "leg"

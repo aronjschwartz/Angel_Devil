@@ -86,105 +86,66 @@ class Leg(object):
 		# just to be safe, don't start the thread until the end of __init__
 		
 		
-		
+		# set the channels to use for the PWM object, comes in as a list
 		self.pwm_channels = channels		
 		
-		# now, assign the correct constants
-		# TODO: self.SERVO_PWM_LIMITS = [[0,1],[0,1],[0,1]]
+		
+		# now, assign the correct constants to limit PWM values
+		self.SERVO_PWM_LIMITS = [[0,1],[0,1],[0,1]]
 		if leg_num == LEG_0:
-			self.TIP_MOTOR_OUT	  = c_0_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_0_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_0_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_0_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_0_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_0_ROT_MOTOR_LEFT
-			# TODO:
-			# self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_0_TIP_MOTOR_OUT, 	c_0_TIP_MOTOR_IN]
-			# self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_0_MID_MOTOR_UP, 	c_0_MID_MOTOR_DOWN]
-			# self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_0_ROT_MOTOR_RIGHT, 	c_0_ROT_MOTOR_LEFT]
+			# leg: out in, up down, right left
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_0_TIP_MOTOR_OUT, 	c_0_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_0_MID_MOTOR_UP, 	c_0_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_0_ROT_MOTOR_RIGHT,c_0_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_1:
-			self.TIP_MOTOR_OUT	  = c_1_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_1_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_1_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_1_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_1_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_1_ROT_MOTOR_LEFT
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_1_TIP_MOTOR_OUT, 	c_1_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_1_MID_MOTOR_UP, 	c_1_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_1_ROT_MOTOR_RIGHT,c_1_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_2:
-			self.TIP_MOTOR_OUT	  = c_2_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_2_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_2_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_2_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_2_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_2_ROT_MOTOR_LEFT
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_2_TIP_MOTOR_OUT, 	c_2_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_2_MID_MOTOR_UP, 	c_2_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_2_ROT_MOTOR_RIGHT,c_2_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_3:
-			self.TIP_MOTOR_OUT	  = c_3_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_3_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_3_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_3_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_3_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_3_ROT_MOTOR_LEFT
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_3_TIP_MOTOR_OUT, 	c_3_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_3_MID_MOTOR_UP, 	c_3_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_3_ROT_MOTOR_RIGHT,c_3_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_4:
-			self.TIP_MOTOR_OUT	  = c_4_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_4_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_4_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_4_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_4_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_4_ROT_MOTOR_LEFT
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_4_TIP_MOTOR_OUT, 	c_4_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_4_MID_MOTOR_UP, 	c_4_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_4_ROT_MOTOR_RIGHT,c_4_ROT_MOTOR_LEFT]
 		elif leg_num == LEG_5:
-			self.TIP_MOTOR_OUT	  = c_5_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_5_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_5_MID_MOTOR_UP
-			self.MID_MOTOR_DOWN	 = c_5_MID_MOTOR_DOWN
-			self.ROT_MOTOR_RIGHT	= c_5_ROT_MOTOR_RIGHT
-			self.ROT_MOTOR_LEFT	 = c_5_ROT_MOTOR_LEFT
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_5_TIP_MOTOR_OUT, 	c_5_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_5_MID_MOTOR_UP, 	c_5_MID_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_5_ROT_MOTOR_RIGHT,c_5_ROT_MOTOR_LEFT]
 		elif leg_num == ARM_R:
-			self.TIP_MOTOR_OUT	  = c_R_ARM_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_R_ARM_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_R_ARM_MID_MOTOR_OUT
-			self.MID_MOTOR_DOWN	 = c_R_ARM_MID_MOTOR_IN
-			self.ROT_MOTOR_RIGHT	= c_R_ARM_ROT_MOTOR_UP
-			self.ROT_MOTOR_LEFT	 = c_R_ARM_ROT_MOTOR_DOWN
+			# arm: out in, out in, up down
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_R_ARM_TIP_MOTOR_OUT, 	c_R_ARM_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_R_ARM_MID_MOTOR_OUT, 	c_R_ARM_MID_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_R_ARM_ROT_MOTOR_UP,	c_R_ARM_ROT_MOTOR_DOWN]
 		elif leg_num == ARM_L:
-			self.TIP_MOTOR_OUT	  = c_L_ARM_TIP_MOTOR_OUT
-			self.TIP_MOTOR_IN	   = c_L_ARM_TIP_MOTOR_IN
-			self.MID_MOTOR_UP	   = c_L_ARM_MID_MOTOR_OUT
-			self.MID_MOTOR_DOWN	 = c_L_ARM_MID_MOTOR_IN
-			self.ROT_MOTOR_RIGHT	= c_L_ARM_ROT_MOTOR_UP
-			self.ROT_MOTOR_LEFT	 = c_L_ARM_ROT_MOTOR_DOWN
+			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_L_ARM_TIP_MOTOR_OUT, 	c_L_ARM_TIP_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_L_ARM_MID_MOTOR_OUT, 	c_L_ARM_MID_MOTOR_IN]
+			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_L_ARM_ROT_MOTOR_UP,	c_L_ARM_ROT_MOTOR_DOWN]
 		
 		
-		# TODO: self.SERVO_ANGLE_LIMITS = [[0,1],[0,1],[0,1]]
+		self.SERVO_ANGLE_LIMITS = [[0,1],[0,1],[0,1]]
 		if(leg_num == ARM_L or leg_num == ARM_R):
-			self.TIP_MOTOR_OUT_ANGLE = ARM_TIP_MOTOR_OUT_ANGLE
-			self.TIP_MOTOR_IN_ANGLE = ARM_TIP_MOTOR_IN_ANGLE
-			self.MID_MOTOR_UP_ANGLE = ARM_MID_MOTOR_OUT_ANGLE
-			self.MID_MOTOR_DOWN_ANGLE = ARM_MID_MOTOR_IN_ANGLE
-			self.ROT_MOTOR_RIGHT_ANGLE = ARM_ROT_MOTOR_UP_ANGLE
-			self.ROT_MOTOR_LEFT_ANGLE = ARM_ROT_MOTOR_DOWN_ANGLE
-			# TODO
-			# self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [ARM_TIP_MOTOR_OUT_ANGLE, 	ARM_TIP_MOTOR_IN_ANGLE]
-			# self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [ARM_MID_MOTOR_OUT_ANGLE, 	ARM_MID_MOTOR_IN_ANGLE]
-			# self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ARM_ROT_MOTOR_UP_ANGLE, 	ARM_ROT_MOTOR_DOWN_ANGLE]
+			# arm: out in, out in, up down
+			self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [ARM_TIP_MOTOR_OUT_ANGLE, 	ARM_TIP_MOTOR_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [ARM_MID_MOTOR_OUT_ANGLE, 	ARM_MID_MOTOR_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ARM_ROT_MOTOR_UP_ANGLE, 	ARM_ROT_MOTOR_DOWN_ANGLE]
 		else:
-			self.TIP_MOTOR_OUT_ANGLE = TIP_MOTOR_OUT_ANGLE
-			self.TIP_MOTOR_IN_ANGLE = TIP_MOTOR_IN_ANGLE
-			self.MID_MOTOR_UP_ANGLE = MID_MOTOR_UP_ANGLE
-			self.MID_MOTOR_DOWN_ANGLE = MID_MOTOR_DOWN_ANGLE
-			self.ROT_MOTOR_RIGHT_ANGLE = ROT_MOTOR_RIGHT_ANGLE
-			self.ROT_MOTOR_LEFT_ANGLE = ROT_MOTOR_LEFT_ANGLE
+			# leg: out in, up down, right left
+			self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [TIP_MOTOR_OUT_ANGLE, 	TIP_MOTOR_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [MID_MOTOR_UP_ANGLE, 	MID_MOTOR_DOWN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ROT_MOTOR_RIGHT_ANGLE,ROT_MOTOR_LEFT_ANGLE]
 			
-		# TODO: set these constants (both angle and pwm) to handle condition where if the "leg_num" is of rotator type
+		# TODO: set these constants (both angle and pwm) to handle condition where if the "leg_num" is of rotator type?
 
 
-		# TODO: self.curr_servo_angle = [-1, -1, -1]
-		# TODO: self.curr_servo_pwm = [-1, -1, -1]
 		# declare these member variables, immediately have value overwritten...
-		self.tip_motor = -1
-		self.mid_motor = -1
-		self.rot_motor = -1
-		self.tip_motor_angle = -1
-		self.mid_motor_angle = -1
-		self.rot_motor_angle = -1
+		self.curr_servo_angle = [-1, -1, -1]
+		self.curr_servo_pwm = [-1, -1, -1]
 		
 		# ...this code should overwrite the "-1"s with sensible values on bootup
 		# NEEDS to use the non-thread versions
@@ -201,53 +162,37 @@ class Leg(object):
 
 	def print_self(self):
 		print("leg uid : " + str(self.uid) + " ===========================")
-		# print("on channels : " + str(self.tip_channel) + " " + str(self.mid_channel) + " " + str(self.rot_channel))
-		print("on channels : " + str(self.pwm_channels))
-		print("tip_motor pwm : " + str(self.tip_motor) + " angle : " + str(self.pwm_to_angle(self.tip_motor, TIP_MOTOR)))
-		print("mid_motor pwm : " + str(self.mid_motor) + " angle : " + str(self.pwm_to_angle(self.mid_motor, MID_MOTOR)))
-		print("rot_motor pwm : " + str(self.rot_motor) + " angle : " + str(self.pwm_to_angle(self.rot_motor, ROT_MOTOR)))
-		# mock function useful for testing when not in the lab. change all instances
-		# of pwm.set_pwm to pwm.set_pwm to use the real function
-		# Use the pwm.pwn for real, robot usage
+		print("on channels : tip/mid/rot = " + str(self.pwm_channels))
+		print("servo PWMs: tip/mid/rot = " + str(self.curr_servo_pwm))
+		print("servo angles: tip/mid/rot = " + str(self.curr_servo_angle))
+		print("frame queue size: " + str(len(self.frame_queue)))
 
 
-	# conversion functions:
+	# conversion functions: use linear mapping from input to output
 	def angle_to_pwm(self, angle, motor):
-		if motor == TIP_MOTOR:
-			return linear_map(self.TIP_MOTOR_OUT_ANGLE, self.TIP_MOTOR_OUT, self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_IN, angle)
-		elif motor == MID_MOTOR:
-			return linear_map(self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_UP, self.MID_MOTOR_DOWN_ANGLE, self.MID_MOTOR_DOWN, angle)
-		elif motor == ROT_MOTOR:
-			return linear_map(self.ROT_MOTOR_RIGHT_ANGLE, self.ROT_MOTOR_RIGHT, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_LEFT, angle)
-		else:
+		if motor < 0 or motor > 2:
+			print("ERR#1: INVALID PARAM")
 			return INV_PARAM
-		# TODO: after things are turned into lists, the code above can be replaced with:
-		# return linear_map(self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1], self.SERVO_PWM_LIMITS[motor][1], angle)
+		return linear_map(self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][0], 
+						self.SERVO_ANGLE_LIMITS[motor][1], self.SERVO_PWM_LIMITS[motor][1], 
+						angle)
 		
 	def pwm_to_angle(self, pwm, motor):
-		if motor == TIP_MOTOR:
-			return linear_map(self.TIP_MOTOR_OUT, self.TIP_MOTOR_OUT_ANGLE, self.TIP_MOTOR_IN, self.TIP_MOTOR_IN_ANGLE, pwm)
-		elif motor == MID_MOTOR:
-			return linear_map(self.MID_MOTOR_UP, self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN, self.MID_MOTOR_DOWN_ANGLE, pwm)
-		elif motor == ROT_MOTOR:
-			return linear_map(self.ROT_MOTOR_RIGHT, self.ROT_MOTOR_RIGHT_ANGLE, self.ROT_MOTOR_LEFT, self.ROT_MOTOR_LEFT_ANGLE, pwm)
-		else:
+		if motor < 0 or motor > 2:
+			print("ERR#2: INVALID PARAM")
 			return INV_PARAM
-		# TODO: after things are turned into lists, the code above can be replaced with:
-		# return linear_map(self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][1], self.SERVO_ANGLE_LIMITS[motor][1], angle)
+		return linear_map(self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][0], 
+						self.SERVO_PWM_LIMITS[motor][1], self.SERVO_ANGLE_LIMITS[motor][1], 
+						angle)
 
 	def percent_to_angle(self, percent, motor):
 		# maps 0-100 to each motor's min and max angle values
-		if motor == TIP_MOTOR:
-			return linear_map(100, self.TIP_MOTOR_OUT_ANGLE, 0, self.TIP_MOTOR_IN_ANGLE, percent)
-		elif motor == MID_MOTOR:
-			return linear_map(100, self.MID_MOTOR_UP_ANGLE, 0, self.MID_MOTOR_DOWN_ANGLE, percent)
-		elif motor == ROT_MOTOR:
-			return linear_map(100, self.ROT_MOTOR_RIGHT_ANGLE, 0, self.ROT_MOTOR_LEFT_ANGLE, percent)
-		else:
+		if motor < 0 or motor > 2:
+			print("ERR#3: INVALID PARAM")
 			return INV_PARAM
-		# TODO: after things are turned into lists, the code above can be replaced with:
-		# return linear_map(100, self.SERVO_ANGLE_LIMITS[motor][0], 0, self.SERVO_ANGLE_LIMITS[motor][1], angle)
+		return linear_map(100, self.SERVO_ANGLE_LIMITS[motor][0], 
+						0, self.SERVO_ANGLE_LIMITS[motor][1], 
+						angle)
 
 	# convert-then-set functions:
 	def set_servo_percent(self, percent, motor):
@@ -270,25 +215,20 @@ class Leg(object):
 	
 	# the old-fashioned "do the thing" command: clamps value to safety limits, ensures it won't collide with any thread operations, and calls do_set_servo_angle
 	def set_servo_angle(self, angle, motor):
+		if angle < 0 or angle > 360:
+			print("ERR#4: INVALID PARAM")
+			return INV_PARAM
+		if motor < 0 or motor > 2:
+			print("ERR#5: INVALID PARAM")
+			return INV_PARAM
+
 		# wait until running_flag is clear (sleeping_flag is set)
 		# this ensures that it won't conflict with the thread if it is running
 		# you SHOULDN'T be using both the thread and the direct-set method, but better to be safe than sorry
 		self.sleeping_flag.wait()
 		
 		# safety checking for each motor
-		(a, b) = (0, 0)
-		if motor == TIP_MOTOR:
-			(a, b) = (self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_OUT_ANGLE)
-		elif motor == MID_MOTOR:
-			(a, b) = (self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN_ANGLE)
-		elif motor == ROT_MOTOR:
-			(a, b) = (self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_RIGHT_ANGLE)
-		else:
-			return INV_PARAM
-		safe_angle = bidirectional_clamp(angle, a, b)
-		# TODO: after things are turned into lists, the code above can be replaced with:
-		# safety checking for each motor
-		# (safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1])
+		safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1])
 		
 		return self.do_set_servo_angle(safe_angle, motor)
 		
@@ -299,8 +239,7 @@ class Leg(object):
 		with self._frame_queue_lock: 
 			self.frame_queue = []
 		
-		
-		
+	
 	# safety clamp (in angle space) 
 	# interpolate (in angle space)
 	# adds commands to the command queue (with lock)
@@ -312,9 +251,12 @@ class Leg(object):
 		command = [0, 0, 0, time]
 		
 		# safety checking for each motor
-		command[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, self.TIP_MOTOR_IN_ANGLE, self.TIP_MOTOR_OUT_ANGLE)
-		command[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, self.MID_MOTOR_UP_ANGLE, self.MID_MOTOR_DOWN_ANGLE)
-		command[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, self.ROT_MOTOR_LEFT_ANGLE, self.ROT_MOTOR_RIGHT_ANGLE)
+		command[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, 
+					self.SERVO_ANGLE_LIMITS[TIP_MOTOR][0], self.SERVO_ANGLE_LIMITS[TIP_MOTOR][1])
+		command[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, 
+					self.SERVO_ANGLE_LIMITS[MID_MOTOR][0], self.SERVO_ANGLE_LIMITS[MID_MOTOR][1])
+		command[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, 
+					self.SERVO_ANGLE_LIMITS[ROT_MOTOR][0], self.SERVO_ANGLE_LIMITS[ROT_MOTOR][1])
 		
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.
@@ -325,8 +267,7 @@ class Leg(object):
 				# be sure it is a copy and not a reference, just to be safe
 				lastframe = list(self.frame_queue[-1])
 		if lastframe == []:   # "else" but outside of the lock block
-			lastframe = [self.tip_motor_angle, self.mid_motor_angle, self.rot_motor_angle]
-				# TODO: lastframe = self.curr_servo_angle
+			lastframe = self.curr_servo_angle
 		
 		# run interpolation
 		# NOTE: "command" must have 4 elements, "lastframe" only needs 3, the 4th is just unused
@@ -348,28 +289,20 @@ class Leg(object):
 	# unprotected internal-use-only function
 	# set the actual PWM and the internally-tracked position
 	def do_set_servo_angle(self, angle, motor):
+		if motor < 0 or motor > 2:
+			print("ERR#6: INVALID PARAM")
+			return INV_PARAM
+		if angle < 0 or angle > 360:
+			print("ERR#7: INVALID PARAM")
+			return INV_PARAM
 		# get pwm val
 		pwm_val = int(self.angle_to_pwm(angle, motor))
 
-		# do the write out, with lock just to be safe
-		with self._curr_pos_lock:
-			if motor == TIP_MOTOR:
-				(self.tip_motor_angle, self.tip_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.pwm_channels[0], 0, pwm_val)
-			elif motor == MID_MOTOR:
-				(self.mid_motor_angle, self.mid_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.pwm_channels[1], 0, pwm_val)
-			elif motor == ROT_MOTOR:
-				(self.rot_motor_angle, self.rot_motor) = (angle, pwm_val)
-				self.pwm.set_pwm(self.pwm_channels[2], 0, pwm_val)
-				
-		# TODO: after things are turned into lists, the code above can be replaced with:
 		# # do the write out, with lock just to be safe
-		# with self._curr_pos_lock:
-			# self.curr_servo_angle[motor] = angle
-			# self.curr_servo_pwm[motor] = pwm_val
-			# self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
-			
+		with self._curr_pos_lock:
+			self.curr_servo_angle[motor] = angle
+			self.curr_servo_pwm[motor] = pwm_val
+			self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
 			
 		return SUCCESS
 

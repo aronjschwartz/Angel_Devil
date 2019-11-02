@@ -235,7 +235,7 @@ class Leg(object):
 		
 	# clear the frame queue to stop any currently-pending movements.
 	# note that when the hexwalker calls this it should first abort() all legs, THEN call "synchronize" on all legs. this way it doesn't wait for one leg to stop before clearing the queue of the next.
-	def abort():
+	def abort(self):
 		with self._frame_queue_lock: 
 			self.frame_queue = []
 		

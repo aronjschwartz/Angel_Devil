@@ -632,7 +632,7 @@ class Hex_Walker(object):
 				if HW_MOVE_DEBUG:
 					print("Sending command")
 				self.set_hex_walker_position_thread(next_pos)
-				self.synchronize([LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF])
+				self.synchronize()
 			else:
 				print("invalid move set")
 				return ILLEGAL_MOVE
@@ -658,10 +658,11 @@ class Hex_Walker(object):
 	
 
 
-	# synchronize the legs by not returning until all of the specified legs are done moving
-	# works with the new threadwise execution
-	# uses "absolute" positions of each leg: ignores the "change direction" stuff
-	def synchronize(self, masklist):
+	# synchronize the legs with the main thread by not returning until all of the specified legs are done moving
+	# must give it a list, even if it is a 1-element list
+	# uses "absolute" indices of each leg: ignores the "change direction" stuff
+	# if called with no arg, default is to wait for all legs
+	def synchronize(self, masklist=[LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF]):
 		# first cast the leglist as a set to remove potential duplicates
 		mask = set(masklist)
 		for leg in mask:

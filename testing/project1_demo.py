@@ -105,3 +105,9 @@ while(cmd != 0):
     elif(cmd == 17):
         print("bounce down")
         hex_walker.bounce(.3, 4)
+    elif(cmd == 18):
+        print("fine rotate left l step")
+        hex_walker.fine_rotate(1, LEFT)
+    elif(cmd == 19):
+        print("fine rotate right 1 step")
+        hex_walker.fine_rotate(1, RIGHT)

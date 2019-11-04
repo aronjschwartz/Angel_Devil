@@ -1,9 +1,11 @@
 import sys
-sys.path.append("../project_files/robot_drivers/")
+sys.path.append("../robot_drivers/")
 
 import Adafruit_PCA9685
 import time
 from hex_walker_driver import *
+
+sleep_time = 3
 
 print("working")
 def helper_test():
@@ -34,8 +36,14 @@ def tip_motor_test(leg):
   print("tip motor to 180")
   leg.set_angle(180, TIP_MOTOR)
   time.sleep(sleep_time)
+  print("tip motor to 225")
+  leg.set_angle(225, TIP_MOTOR)
+  time.sleep(sleep_time)
   print("tip motor to 270")
   leg.set_angle(270, TIP_MOTOR)
+  time.sleep(sleep_time)
+  print("tip motor to 300")
+  leg.set_angle(300, TIP_MOTOR)
   time.sleep(sleep_time)
 
 def mid_motor_test(leg):
@@ -213,9 +221,12 @@ lf = Leg(0, pwm_41, 3, 7, 8, 5)
 right_legs = [rf, rm, rr]
 left_legs = [lf, lm, lr]
 all_legs = right_legs + left_legs
-
+for leg in all_legs:
+    tip_motor_test(leg)
+'''
 hex_walker = Hex_Walker(rf, rm, rr, lr, lm, lf)
 hex_walker.do_move_set([TALL_NEUTRAL])
+'''
 '''
 for leg in all_legs:
     print("-----------------------------next leg-----------------------------")
@@ -227,6 +238,6 @@ for leg in all_legs:
 # create a test walker
 #crouch_rotate_test(hex_walker)
 #crouch_walk_test(hex_walker)
-for i in range(0,100):
-    tall_walk_test(hex_walker)
+for i in range(0,10):
+    tall_side_walk_test(hex_walker)
 hex_walker.do_move_set([TALL_NEUTRAL])

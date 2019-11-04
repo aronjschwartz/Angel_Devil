@@ -438,7 +438,8 @@ class Hex_Walker(object):
 	def walk(self, num_steps, direction):
 		
 		self.set_new_front(get_front_from_direction(direction))
-		print("dir: " + get_front_from_direction(direction))
+		if HW_MOVE_DEBUG:
+			print("walk dir: " + get_front_from_direction(direction))
 		
 		# start walk by lifting legs
 		self.set_hex_walker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)

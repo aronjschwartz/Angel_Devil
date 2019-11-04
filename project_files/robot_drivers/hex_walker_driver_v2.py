@@ -277,7 +277,7 @@ class Leg(object):
 		with self._frame_queue_lock:
 			self.frame_queue = self.frame_queue + interpolate_list
 			if LEG_THREAD_DEBUG and self.uid == 0:
-				print("leg_" + str(self.uid) + ": add " + str(len(interpolate_list)) + " frames to frame_queue, new length is " + str(len(frame_queue)))
+				print("leg_" + str(self.uid) + ": add " + str(len(interpolate_list)) + " frames to frame_queue, new length is " + str(len(self.frame_queue)))
 		
 		with self._state_flag_lock:
 			# clear "sleeping" event, does not trigger anything (note: clear before set)

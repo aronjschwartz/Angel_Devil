@@ -27,7 +27,7 @@ WAIST = 8
 TIP_MOTOR = 0
 MID_MOTOR = 1
 ROT_MOTOR = 2
-WAIST_MOTOR = ROT_MOTOR
+WAIST_MOTOR = 0
 
 # ==========================================================
 
@@ -95,8 +95,8 @@ c_R_ARM_ROT_MOTOR_DOWN = 110
 # TODO: test this! potentially unsafe rotator range!
 # ROTATOR_MOTOR_LEFT = 424
 # ROTATOR_MOTOR_RIGHT = 217
-ROTATOR_MOTOR_LEFT = 534
-ROTATOR_MOTOR_RIGHT = 107
+c_ROTATOR_MOTOR_LEFT = 534
+c_ROTATOR_MOTOR_RIGHT = 107
 
 
 # angle limits in degrees: same regardless of side so no need to l/r differentiate
@@ -123,8 +123,12 @@ ROTATOR_RIGHT_ANGLE = 180
 
 # ==========================================================
 
+PWM_FREQ = 60
+
 # set up the channels used on the PWM hat for each motor
 # one variable for each servo + indexable array
+PWM_ADDR_BOTTOM = 0x40 # bottom: 	R legs + L arm + waist
+
 CHANNEL_LEG0_TIP = 0	#rf
 CHANNEL_LEG0_MID = 1
 CHANNEL_LEG0_ROT = 2
@@ -134,6 +138,15 @@ CHANNEL_LEG1_ROT = 5
 CHANNEL_LEG2_TIP = 6	#rb
 CHANNEL_LEG2_MID = 7
 CHANNEL_LEG2_ROT = 8
+
+CHANNEL_LEG6_TIP = 12	#arm_L
+CHANNEL_LEG6_MID = 11
+CHANNEL_LEG6_ROT = 10
+
+CHANNEL_WAIST_ROT = 9	#waist, connected to bottom
+
+PWM_ADDR_TOP = 0x41 # top: 		L legs + R arm
+
 CHANNEL_LEG3_TIP = 0	#lb
 CHANNEL_LEG3_MID = 1
 CHANNEL_LEG3_ROT = 2
@@ -144,15 +157,10 @@ CHANNEL_LEG5_TIP = 3	#lf
 CHANNEL_LEG5_MID = 7
 CHANNEL_LEG5_ROT = 8
 
-CHANNEL_LEG6_TIP = 12	#arm_L
-CHANNEL_LEG6_MID = 11
-CHANNEL_LEG6_ROT = 10
-
 CHANNEL_LEG7_TIP = 14	#arm_R
 CHANNEL_LEG7_MID = 11
 CHANNEL_LEG7_ROT = 15
 
-CHANNEL_WAIST_ROT = 9	#waist, connected to bottom
 
 # usage: LEG_PWM_CHANNEL[leg# 0-7][servo# 0-2: tip=0, mid=1, rot=2]
 # example: LEG_PWM_CHANNEL[LEG_0][MID_MOTOR]
@@ -171,14 +179,10 @@ LEG_PWM_CHANNEL = [
 ]
 
 
-# set Adafruit pwm address and frequency
-PWM_ADDR_BOTTOM = 0x40 # bottom: 	R legs + L arm + waist
-PWM_ADDR_TOP = 0x41 # top: 		L legs + R arm
-PWM_FREQ = 60
-# TODO: which hat do the torso servos connect to? might change names of constants to reflect this
 
 # ==========================================================
 
 # time between interpolated poses is known constant, number of interpolated poses is dynamic
-INTERPOLATE_TIME = 0.1
+# .05 is okay, try 0.03 or 0.02 next
+INTERPOLATE_TIME = 0.03
 

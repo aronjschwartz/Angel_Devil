@@ -1,3 +1,5 @@
+# set the angles of all the servos in a leg
+
 import sys
 sys.path.append("../project_files/robot_drivers/")
 

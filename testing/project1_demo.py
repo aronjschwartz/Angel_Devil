@@ -1,3 +1,6 @@
+# demonstrate the "macro-motion" functions
+
+
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
@@ -51,6 +54,8 @@ while(cmd != 0):
     print("15 - leg wave left")
     print("16 - leg wave right")
     print("17 - bounce down")
+    print("18 - fine rotate left")
+    print("19 - fine rotate right")
 
     cmd = input("Choose an option:")
 

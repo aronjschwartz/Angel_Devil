@@ -3,7 +3,7 @@ Simple way to control each leg through a ui
 Author: Patrick Gmerek
 """
 import sys
-sys.path.append("../robot_drivers/")
+sys.path.append("../project_files/robot_drivers/")
 
 import Adafruit_PCA9685
 import cv2 as cv

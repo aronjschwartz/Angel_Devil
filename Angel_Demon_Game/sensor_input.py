@@ -7,10 +7,17 @@ import time
 threshold_value = []
 font = cv2.FONT_HERSHEY_SIMPLEX
 
+# if True, brightness value will be printed
+print_brightness = False
+# if True, code will tell you when the image has been taken
+print_take_image = False
+
 x_start = 50
 y_start = 50
 x_width = 110
 y_height = 125
+
+# These values define the borders of each brightness zone
 
 # row 1
 
@@ -93,40 +100,15 @@ O_x_end = O_x_start + x_width
 O_y_start = N_y_start
 O_y_end = O_y_start + y_height
 
-def brightness( im_file ):
-   im = Image.open(im_file).convert('L')
-   stat = ImageStat.Stat(im)
-   return stat.mean[0]
-
-def threshold(sensor, input_value):
-   global threshold_value
-   if sensor == 0:
-      if  threshold_value[0] > input_value:
-         motor_dir = 0
-      else:
-         motor_dir = 1
-   elif sensor == 1:
-      if  threshold_value[1] > input_value:
-         motor_dir = 0
-      else:
-         motor_dir = 1
-   return motor_dir
-
-def motor_set(input_string):
-   if input_string == "Below threshold":
-      motor = 0
-   else:
-      motor = 1
-   return int(motor)
-   
-
+# get_brightness function -> gets the average brightness within a specified area
 def getBrightness( im_file, x_start, x_end, y_start, y_end):
    im = Image.open(im_file).convert('RGB')
    total = 0
    count = 0
    current_x = x_start
    current_y = y_start
-   
+
+   # get the brightness of every pixel in the area
    while current_y <= y_end:
       while current_x <= x_end:
          pixelRGB = im.getpixel((current_x,current_y))
@@ -137,23 +119,14 @@ def getBrightness( im_file, x_start, x_end, y_start, y_end):
          count = count + 1
       current_y = current_y + 1
       current_x = x_start
+   # calculate average brightness
    average_brightness = total/count
+   # return average brightness
    return average_brightness
 
-def movement(inA,inB):
-   motorA = int(inA)
-   motorB = int(inB)
-   if motorA == 1 and motorB == 1:
-      out_string = "Forward"
-   elif motorA == 1 and motorB == 0:
-      out_string = "Turn Right"
-   elif motorA == 0 and motorB == 1:
-      out_string = "Turn Left"
-   else:
-      out_string = "Not Moving"
-   return out_string
-
+# get_value function -> computes the brightness of each zone and then uses the middle 13 to calculate brightness
 def get_value(im_file):
+   global print_brightness
    global A_x_start, A_x_end, A_y_start, A_y_end
    global B_x_start, B_x_end, B_y_start, B_y_end
    global C_x_start, C_x_end, C_y_start, C_y_end
@@ -172,6 +145,7 @@ def get_value(im_file):
 
    brightness_values = []
 
+   # calculating brightness for each zone
    brightness_values.append(getBrightness(im_file, A_x_start, A_x_end, A_y_start, A_y_end))
    brightness_values.append(getBrightness(im_file, B_x_start, B_x_end, B_y_start, B_y_end))
    brightness_values.append(getBrightness(im_file, C_x_start, C_x_end, C_y_start, C_y_end))
@@ -187,15 +161,19 @@ def get_value(im_file):
    brightness_values.append(getBrightness(im_file, N_x_start, N_x_end, N_y_start, N_y_end))
    brightness_values.append(getBrightness(im_file, O_x_start, O_x_end, O_y_start, O_y_end))
 
+   # sorting brightness values from min to max
    brightness_values.sort()
    max_value = len(brightness_values)
+   # remove max and min values
    brightness_values.pop(max_value-1)
    brightness_values.pop(0)
    total = 0
+   # calculate average brightness of remaining zones
    for value in brightness_values:
       total = total + value
    average_brightness = (total/len(brightness_values))
 
+   # determining which zone the robot is in
    if ((0 <= average_brightness) and (average_brightness <= 99)):
       zone = [0,0]
    elif ((99 < average_brightness) and ( average_brightness<= 125)):
@@ -204,101 +182,30 @@ def get_value(im_file):
       zone = [1,0]
    else:
       zone = [1,1]
-   print("Avg brightness: ", average_brightness)
-   return zone
-   
-         
-        
-def startup():
-    global threshold_value
-    count = 0
-    totalA = 0
-    totalB = 0
-    threshold_offset = 20
-    while count != 10:
-        ret, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite("NewPicture.jpg",frame)
-        brightA = getSensorA("NewPicture.jpg")
-        brightB = getSensorB("NewPicture.jpg")
-        totalA = totalA + brightA
-        totalB = totalB + brightB
-        count = count + 1
-    thresholdA = totalA/count + threshold_offset
-    thresholdB = totalB/count + threshold_offset
-    threshold_value = [thresholdA,thresholdB]
-    return threshold_value
 
+   # print average brightness value
+   if print_brightness == True:
+      print("Avg brightness: ", average_brightness)
+
+   # return the light zone
+   return zone
+
+# run_input function -> captures the image and calculates the average brightness and determines the light zone        
 def run_input():
 
-   global A_x_start, A_x_end, A_y_start, A_y_end
-   motors = []
+   global print_take_image
+
    cap = cv2.VideoCapture(0)
-   #startup()while(True):
-       # Capture frame-by-frame
    ret, frame = cap.read()
-
-       # Our operations on the frame come here
-   #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-       # info to display on screen
-       # cv2.imwrite("update.jpg",gray)
-       
-       # Display rectangles and text on screen
-       
-       #cv2.putText(gray,'Sensor A',(80,215), font, 1, (0,0, 255), 2, cv2.LINE_AA)
-       #cv2.putText(gray,'Sensor B',(380,215), font, 1, (255,0, 0), 2, cv2.LINE_AA)
-       #cv2.putText(gray,sensorA_threshold,(10,30), font, 0.7, (0,0, 255), 2, cv2.LINE_AA)
-       #cv2.putText(gray,sensorB_threshold,(400,30), font, 0.7, (255,0, 0), 2, cv2.LINE_AA)
-       #cv2.putText(gray,sensorA_value,(110,350), font, 0.7, (0,0, 255), 2, cv2.LINE_AA)
-       #cv2.putText(gray,sensorB_value,(410,350), font, 0.7, (255,0, 0), 2, cv2.LINE_AA)
-
-       # row 1
-##       cv2.rectangle(gray,(A_x_start,A_y_start),(A_x_end,A_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(B_x_start,B_y_start),(B_x_end,B_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(C_x_start,C_y_start),(C_x_end,C_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(D_x_start,D_y_start),(D_x_end,D_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(E_x_start,E_y_start),(E_x_end,E_y_end),(0,0,0),3)
-##
-##       #row 2
-##       cv2.rectangle(gray,(F_x_start,F_y_start),(F_x_end,F_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(G_x_start,G_y_start),(G_x_end,G_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(H_x_start,H_y_start),(H_x_end,H_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(I_x_start,I_y_start),(I_x_end,I_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(J_x_start,J_y_start),(J_x_end,J_y_end),(0,0,0),3)
-##
-##       #row 3
-##       cv2.rectangle(gray,(K_x_start,K_y_start),(K_x_end,K_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(L_x_start,L_y_start),(L_x_end,L_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(M_x_start,M_y_start),(M_x_end,M_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(N_x_start,N_y_start),(N_x_end,N_y_end),(0,0,0),3)
-##       cv2.rectangle(gray,(O_x_start,O_y_start),(O_x_end,O_y_end),(0,0,0),3)
-
-       # Display the resulting frame
-       # cv2.imshow('frame',gray)
-##       k = cv2.waitKey(1)
-##       print("Press space for measurement")
-##       # escape key exits
-##       if k%256 == 27:
-##           break
-##       #space key takes photo
-##       elif k%256 == 32:
-##           cv2.imwrite("NewPicture.jpg",frame)
-##           light_zone = get_value("NewPicture.jpg")
-##           return light_zone
-##           break
-
    cv2.imwrite("NewPicture.jpg",frame)
-   #cap.release()
-   #image_ = cv2.imread('NewPicture.jpg', cv2.IMREAD_ANYCOLOR)
-   print('imageupdated')
+
+   if print_take_image == True:
+      print('imageupdated')
+      
    light_zone = get_value("NewPicture.jpg")
    cap.release()
    return light_zone
            
-
-          
-
    # When everything done, release the capture
    cap.release()
    cv2.destroyAllWindows()

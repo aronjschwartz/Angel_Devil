@@ -1,0 +1,26 @@
+
+useful testing files:
+	interactive_control_legs
+	interactive_control_torso
+		(note: merge and improve the "interactive" files)
+	manual_calibration
+	project1_demo
+		(note: rename)
+
+
+to delete:
+	manual_control (overshadowed by manual_calibration and interactive_control)
+	tip_tester (overshadowed by manual_calibration and interactive_control)
+	
+
+dunno:
+	testing
+	torso_testing
+		(note: these two run through a sequence of hardcoded tests, out-of-date)
+	home_test_app
+		(more hardcoded tests, out-of-date)
+	simple_controller
+		(old threading, object detection? out-of-date)
+	simpletest
+		(old pwm hat demo)
+

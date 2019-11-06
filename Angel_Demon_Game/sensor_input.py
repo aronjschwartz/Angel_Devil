@@ -1,3 +1,7 @@
+#Program: Uses a webcam and OpenCV to determine brightness of a specified area
+#Author: Tristan Cunderla
+#Last edit: 11/6/2019
+
 import numpy as np
 import cv2
 from PIL import Image

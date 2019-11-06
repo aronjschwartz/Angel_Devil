@@ -1,3 +1,7 @@
+#Program: Implements quantum circuit and determines robot "mood"
+#Author: Tristan Cunderla
+#Last edit: 11/6/2019
+
 import cirq
 import numpy as np
 from cirq.ops import CZ, H, CNOT, X, CCX

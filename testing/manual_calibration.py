@@ -47,7 +47,7 @@ def set_pwm_loop(legs, L, S):
 			except ValueError:
 				# if given non-numeric input, go up a level
 				break
-			if P < 0 or P > 4095:
+			if P < 0 or P > 1000:
 				# if invalid numeric input, prompt again
 				print("err: input out of range")
 				continue

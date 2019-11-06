@@ -39,10 +39,10 @@ WAIST_MOTOR = 0
 # each constant should correspond to the end of the range for that servo (match the angles listed below)
 c_0_TIP_MOTOR_OUT = 158
 c_0_TIP_MOTOR_IN = 642
-c_0_MID_MOTOR_UP = 612
-c_0_MID_MOTOR_DOWN = 264
-c_0_ROT_MOTOR_RIGHT = 149
-c_0_ROT_MOTOR_LEFT = 603
+c_0_MID_MOTOR_UP = 600
+c_0_MID_MOTOR_DOWN = 260
+c_0_ROT_MOTOR_RIGHT = 145
+c_0_ROT_MOTOR_LEFT = 595
 
 c_1_TIP_MOTOR_OUT = 129
 c_1_TIP_MOTOR_IN = 606

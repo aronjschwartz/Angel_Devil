@@ -1,13 +1,14 @@
 
+# Brian Henson
+
 # this file defines a wrapper object around the Adafruit PWM hat that is designed to be thread-safe.
 # i don't know exactly how long the "set pwm" operation takes, its probably instant, but there should
 # be zero downside and only upside to making it thread-safe, since it is shared hardware.
 
 
-
 # debug mode switch that enables/disables actual hardware
 PWM_WRAPPER_USE_HARDWARE = True
-# debug mode switch that enables/disables print statements (will absolutely flood the logs tho)
+# debug mode switch that enables/disables print statements (will absolutely flood the logs tho, so dont)
 PWM_WRAPPER_DEBUG_PRINTS = False
 
 

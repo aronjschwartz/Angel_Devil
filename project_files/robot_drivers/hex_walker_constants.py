@@ -1,8 +1,10 @@
 
-# this file defines constants and macros that don't cleanly fit into the other files.
-# or are important enough that they deserve their own file.
-# or whatever i feel like.
+# Brian Henson
 
+# this file defines constants that are used in many places throughout many files, so they
+# can be changed from just one place.
+
+# ==========================================================
 
 # set the "leg number" IDs, do not change!!!
 # used as array indices so they must be be contiguous starting from 0
@@ -92,9 +94,6 @@ c_R_ARM_ROT_MOTOR_UP = 640
 c_R_ARM_ROT_MOTOR_DOWN = 110
 
 # rotator motor constants
-# TODO: test this! potentially unsafe rotator range!
-# ROTATOR_MOTOR_LEFT = 424
-# ROTATOR_MOTOR_RIGHT = 217
 c_ROTATOR_MOTOR_LEFT = 480
 c_ROTATOR_MOTOR_RIGHT = 135
 
@@ -115,9 +114,6 @@ ARM_MID_MOTOR_IN_ANGLE = 0
 ARM_ROT_MOTOR_UP_ANGLE = 190
 ARM_ROT_MOTOR_DOWN_ANGLE = 0
 # rotator limits in degrees
-# TODO: test this! potentially unsafe rotator range!
-# ROTATOR_LEFT_ANGLE = 45
-# ROTATOR_RIGHT_ANGLE = 135
 ROTATOR_LEFT_ANGLE = 30
 ROTATOR_RIGHT_ANGLE = 150
 

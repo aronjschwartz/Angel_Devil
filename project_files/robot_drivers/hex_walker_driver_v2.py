@@ -1,3 +1,13 @@
+
+# Brian Henson
+
+# new version of hex_walker_driver, first created in fall2019 project1.
+# moved some contents from here to hex_util or hex_walker_constants files for cleanliness and organization.
+# adds interpolation & threading improvments to the Leg object driver, some of the Hex_Walker driver, more improvements pending.
+# also improved organization of Leg object by grouping variables into lists.
+# also improved code reuse by making Rotator object a subclass of Leb object.
+
+
 from __future__ import division
 import time
 import threading
@@ -6,7 +16,6 @@ from leg_data import *
 from torso_data import *
 
 from hex_walker_constants import *
-# from pwm_wrapper import *
 from hex_util import *
 from leg_thread import *
 

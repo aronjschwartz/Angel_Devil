@@ -12,6 +12,7 @@
 # if not a daemon then the python program would never return to the command line until all threads finish, and since this thread runs inside while(true)...
 # daemon means "kill this thread when the main thread is terminated" which solves the problem.
 
+# interpolate() actually happens in the main thread but because it is used only for this background thread it makes sense to define it here.
 
 import time
 import threading

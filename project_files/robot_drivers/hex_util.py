@@ -1,5 +1,6 @@
 
 # Brian Henson
+
 # "mathy" utility functions that aren't really intrinsic to any one place
 # i just didn't want them cluttering up the class definitions in hex_walker_driver_v2
 

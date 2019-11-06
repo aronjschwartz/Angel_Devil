@@ -1,0 +1,3 @@
+tip servos: HiTec HS-485HB
+rot/mid servos: HiTec HS-645MG
+torso servos (waist and arms): TWM SV4032

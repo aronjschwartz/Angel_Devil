@@ -4,8 +4,7 @@
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
-# from hex_walker_driver import *
-# import Adafruit_PCA9685
+#Import libraries
 import time
 import numpy as np
 import sensor_input
@@ -16,6 +15,8 @@ import quantum_circuit
 import pwm_wrapper
 from hex_walker_driver_v2 import *
 from hex_walker_constants import *
+
+#Create objects for bot control
 pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
 rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
 rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
@@ -217,19 +218,21 @@ class angel_demon_game():
 		print(np.matrix(self.game_grid))
 		print()
 
-
+	#Function to execute the angel wins dance
 	def angel_wins(self):
 		print()
 		print("THE ANGEL WINS!!!")
 		print()
 		hex_walker.bounce(.3, 4)
-
+	
+	#Function to execute the devil wins dance
 	def devil_wins(self):
 		print()
 		print("THE DEVIL WINS!!! BOOM!")
 		print()
 		torso.king_kong(90, 4)
-
+	
+	#Function to prompt and obtain the angel desired move
 	def select_move_angel(self):
 		choice = ""
 		print("1 - No movement ")
@@ -247,7 +250,7 @@ class angel_demon_game():
 				choice = input("Enter choice: ")
 		return choice
 
-
+	#Function to prompt and obtain the devil desired move
 	def select_move_devil(self):
 		choice = ""
 		print("1 - Right ")
@@ -266,11 +269,12 @@ class angel_demon_game():
 		return choice
 
 
-
+	#Function to pass the state vector into the quantum module and return a resulting move code
 	def quantum_translate(self, state):
 		move_code = quantum_circuit.run_circuit(state[0], state[1], state[2])
 		return move_code
-
+	
+	#Function to determine the light state
 	def determine_state(self):
 		vector = []
 		vector = sensor_input.run_input()
@@ -287,7 +291,8 @@ class angel_demon_game():
 						return status
 					else:
 						return status
-
+	
+	#Function to execute physical movement of the bot based on move code
 	def move_hexapod(self, move_code):
 		if (move_code == "N"):
 			print("No movement")
@@ -313,7 +318,8 @@ class angel_demon_game():
 			hex_walker.walk(20, 0)
 			time.sleep(0.1)
 			hex_walker.rotate(5,LEFT)
-
+	
+	#Primary function to run the angel demon game
 	def run_game(self):
 		#Welcome message
 		print("**************************************************************")

@@ -1,8 +1,8 @@
 
 #**********************************************************************************************
 #*														                                      *
-#*	   Program: Implements the Angel/Demon game with a quantum-based decision making          *										 *
-#*														                                      *			
+#*	   Program: Implements the Angel/Demon game with a quantum-based decision making          *
+#*														                                      *
 #**********************************************************************************************
 
 import sys
@@ -42,10 +42,10 @@ torso = Robot_Torso(rarm, larm, rot)
 # let the robot move nice and slow to show off the new smoothness
 hex_walker.set_speed(0.5)
 
-stab_angle = 180
+stab_angle = 150
 
 
-class angel_demon_game():
+class Angel_Demon_Game():
 
 	def __init__(self, turns_max, hex_walker):
 
@@ -647,7 +647,7 @@ class angel_demon_game():
 
 #Main function to execute the game
 def main():
-	game = angel_demon_game(30, "test")
+	game = Angel_Demon_Game(30, "test")
 	game.run_game()
 
 #Call the main function

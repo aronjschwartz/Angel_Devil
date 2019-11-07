@@ -16,12 +16,14 @@ print_brightness = False
 # if True, code will tell you when the image has been taken
 print_take_image = False
 
+# these values indicate where to start the first light zone
 x_start = 50
 y_start = 50
+# these values indicate the height and width of each light zone
 x_width = 110
 y_height = 125
 
-# These values define the borders of each brightness zone
+# These values define the borders of each brightness zone (currently this is a 5 by 3 grid)
 
 # row 1
 
@@ -112,7 +114,7 @@ def getBrightness( im_file, x_start, x_end, y_start, y_end):
    current_x = x_start
    current_y = y_start
 
-   # get the brightness of every pixel in the area
+   # get the brightness of every pixel in the light zone
    while current_y <= y_end:
       while current_x <= x_end:
          pixelRGB = im.getpixel((current_x,current_y))
@@ -199,15 +201,20 @@ def run_input():
 
    global print_take_image
 
+   # take photo to get brightness
    cap = cv2.VideoCapture(0)
    ret, frame = cap.read()
    cv2.imwrite("NewPicture.jpg",frame)
 
+   # indicate the photo was taken
    if print_take_image == True:
       print('imageupdated')
-      
+
+   # get the average brightness
    light_zone = get_value("NewPicture.jpg")
+   # release camera
    cap.release()
+   # return average brightness
    return light_zone
            
    # When everything done, release the capture

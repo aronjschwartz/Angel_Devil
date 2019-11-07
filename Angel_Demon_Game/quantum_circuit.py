@@ -9,6 +9,7 @@ import re
 import random
 import matplotlib
 
+# empty string to hold the outputs of the simulation that can be passed between different functions
 letter_string = ""
 
 # PRINT VARIABLES -> used to print out specfic cricuit values
@@ -27,6 +28,7 @@ print_mood = False
 def counter_to_dict(counts_in):
     counts_dict = {}
     counts_string = str(counts_in)
+    # remove any nonsense characters that are not relevent to the circuit
     counts_string = re.sub(r'[a-zA-Z]+', '', counts_string, re.I)
     counts_dict = eval(counts_string[1:-1])
     # sort counter values into dictionary
@@ -46,6 +48,7 @@ def parse_counts(counts_in):
     shuffled_list = []
     select_random = ""
     # creating string that holds all the possible output values
+    # letter values are used because it is easier to concatenate a string
     for key in counts_in:
         multiplier = 0
         add_digits = ""
@@ -96,7 +99,7 @@ def get_stats():
     neutral_number = 0
     disobey_number = 0
 
-    # determining how many times each output occurs
+    # determining how many times each output occurs, character by character
     for element in range(0,len(letter_string)):
         current_element = letter_string[element]
         if current_element == 'a':
@@ -143,6 +146,10 @@ def run_circuit(player, light1, light0):
         circuit.append(X(q0))  
 
     # main circuit construction
+    # H ->Hadamard gate
+    # CNOT -> Feynman gate
+    # X -> Pauli X gate (inverter)
+    # CCX -> CCNOT gate
     circuit.append(H(q0))
     circuit.append(CNOT(q2,q1))
     circuit.append(X(q1))

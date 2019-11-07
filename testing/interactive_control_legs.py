@@ -5,16 +5,19 @@ Author: Patrick Gmerek
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
-import Adafruit_PCA9685
 import cv2 as cv
 import time
-from hex_walker_driver import *
+
+import pwm_wrapper
+from hex_walker_driver_v2 import *
+from hex_walker_constants import *
 
 
 def main():
     all_legs = initialize_legs()
     slider_names = ["Leg", "Rotary Joint", "Mid Joint", "Tip Joint"]
-    slider_limits = [[1, 5], [0, 180], [45, 180], [60, 180]]
+	# TODO: look up these limits, don't hard-code them
+    slider_limits = [[1, 5], [0, 180], [45, 180], [90, 270]]
     window_name = "Hexapod Leg Control"
     cv.namedWindow(window_name)
 
@@ -60,25 +63,24 @@ def dummy(x):
 
 
 def initialize_legs():
-    # init the pwm stuffs and run selected tests
-    right_side= Adafruit_PCA9685.PCA9685(address=0x40)
-    left_side= Adafruit_PCA9685.PCA9685(address=0x41)
+	pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+	rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
+	rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
+	rb = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
+	larm = Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
+	rot = Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST)
 
-    # create some legs
-    right_side.set_pwm_freq(60)
-    left_side.set_pwm_freq(60)
-    sleep_time = 1
-    rf = Leg(0, right_side, 0, 1, 2, 0)
-    rm = Leg(1, right_side, 3, 4, 5, 1)
-    rr = Leg(2, right_side, 6, 7, 8, 2)
-    lr = Leg(3, left_side, 0, 1, 2, 3)
-    lm = Leg(4, left_side, 3, 4, 5, 4)
-    lf = Leg(5, left_side, 6, 7, 8, 5)
-    right_legs = [rf, rm, rr]
-    left_legs = [lr, lm, lf]
-    all_legs = right_legs + left_legs
+	pwm_top = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+	lb = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
+	lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
+	lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
+	rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
 
-    return all_legs
+	all = [rf, rm, rb, lb, lm, lf, larm, rarm, rot]
+	
+	# no need to create hex_walker or torso objects
+	
+    return [rf, rm, rb, lb, lm, lf]
 
 
 if __name__ == '__main__':

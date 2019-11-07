@@ -98,34 +98,38 @@ class Angel_Demon_Game():
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
-				#Bot found
-				if (self.game_grid[i][j] == "BOT"):
-					#i = 0 corresponds to the top row, therefore cant move up more
-					if (i == 0): 
-						#Set status to "out of bounds" and break
-						status = 2
-						done = True
-						break
-					else:
-						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-						try:
-							self.game_grid[i][j] = "    "
-							if (self.game_grid[i-1][j] == "BOMB"):
-								#Set status to bomb detonation 
-								status = 1
-								done = True
-								break
-							else:
-								#Otherwise just move the bot and status remains at "0"
-								self.game_grid[i-1][j] = "BOT"
-								done = True
-								break
-						#Capture index errors for code safety
-						except IndexError:
+				#This try block handles rectanglur grids by ignoring index errors
+				try:
+					#Bot found
+					if (self.game_grid[i][j] == "BOT"):
+						#i = 0 corresponds to the top row, therefore cant move up more
+						if (i == 0): 
+							#Set status to "out of bounds" and break
 							status = 2
 							done = True
 							break
-
+						else:
+							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+							try:
+								self.game_grid[i][j] = "    "
+								if (self.game_grid[i-1][j] == "BOMB"):
+									#Set status to bomb detonation 
+									status = 1
+									done = True
+									break
+								else:
+									#Otherwise just move the bot and status remains at "0"
+									self.game_grid[i-1][j] = "BOT"
+									done = True
+									break
+							#Capture index errors for code safety
+							except IndexError:
+								status = 2
+								done = True
+								break
+				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
+				except IndexError:
+					pass
 			if (done == True):
 				break
 		return status
@@ -139,34 +143,38 @@ class Angel_Demon_Game():
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
-				#Bot found
-				if (self.game_grid[i][j] == "BOT"):
-					#j = (width - 1) corresponds to the right column, therefore cant move more right
-					if (j == (self.game_width - 1)): 
-						#Set status to out-of-bounds and break
-						status = 2
-						done = True
-						break
-					else:
-						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-						try:
-							self.game_grid[i][j] = "    "
-							if (self.game_grid[i][j+1] == "BOMB"):
-								#Set status to bomb detonation
-								status = 1
-								done = True
-								break
-							else:
-								#Otherwise just move the bot and status remains at "0"
-								self.game_grid[i][j+1] = "BOT"
-								done = True
-								break
-						#Capture index errors for code safety
-						except IndexError:
+				#This try block handles rectanglur grids by ignoring index errors
+				try:
+					#Bot found
+					if (self.game_grid[i][j] == "BOT"):
+						#j = (width - 1) corresponds to the right column, therefore cant move more right
+						if (j == (self.game_width - 1)): 
+							#Set status to out-of-bounds and break
 							status = 2
 							done = True
 							break
-
+						else:
+							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+							try:
+								self.game_grid[i][j] = "    "
+								if (self.game_grid[i][j+1] == "BOMB"):
+									#Set status to bomb detonation
+									status = 1
+									done = True
+									break
+								else:
+									#Otherwise just move the bot and status remains at "0"
+									self.game_grid[i][j+1] = "BOT"
+									done = True
+									break
+							#Capture index errors for code safety
+							except IndexError:
+								status = 2
+								done = True
+								break
+				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
+				except IndexError:
+					pass
 			if (done == True):
 				break
 		return status
@@ -180,33 +188,38 @@ class Angel_Demon_Game():
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
-				if (self.game_grid[i][j] == "BOT"):
-					#Check if top row (i = 0) OR right column (j = width -1)
-					#Reject move as out of bounds if either occurs
-					if ((i == 0) or (j == (self.game_width - 1))): 
-						status = 2
-						done = True
-						break
-					else:
-						try:
-							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-							self.game_grid[i][j] = "    "
-							if (self.game_grid[i-1][j+1] == "BOMB"):
-								#Set status to bomb detonation
-								status = 1
-								done = True
-								break
-							else:
-								#Otherwise just move the bot and status remains at "0"
-								self.game_grid[i-1][j+1] = "BOT"
-								done = True
-								break
-
-						except IndexError:
+				#This try block handles rectanglur grids by ignoring index errors
+				try:
+					#Bot found
+					if (self.game_grid[i][j] == "BOT"):
+						#Check if top row (i = 0) OR right column (j = width -1)
+						#Reject move as out of bounds if either occurs
+						if ((i == 0) or (j == (self.game_width - 1))): 
 							status = 2
 							done = True
 							break
+						else:
+							try:
+								#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+								self.game_grid[i][j] = "    "
+								if (self.game_grid[i-1][j+1] == "BOMB"):
+									#Set status to bomb detonation
+									status = 1
+									done = True
+									break
+								else:
+									#Otherwise just move the bot and status remains at "0"
+									self.game_grid[i-1][j+1] = "BOT"
+									done = True
+									break
 
+							except IndexError:
+								status = 2
+								done = True
+								break
+				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
+				except IndexError:
+					pass
 			if (done == True):
 				break
 		return status

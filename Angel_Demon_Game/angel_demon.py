@@ -1,6 +1,10 @@
-#Program: Implements the Angel/Demon game with a quantum brain
-#Author: Aron Schwartz
-#Last edit: 10/18/2019
+
+#**********************************************************************************************
+#*														                                      *
+#*	   Program: Implements the Angel/Demon game with a quantum-based decision making          *										 *
+#*														                                      *			
+#**********************************************************************************************
+
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
@@ -41,60 +45,35 @@ hex_walker.set_speed(0.5)
 stab_angle = 180
 
 
-# #init the pwm stuffs and run selected tests
-# pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)
-# pwm_41= Adafruit_PCA9685.PCA9685(address=0x41)
-
-# pwm_40.set_pwm_freq(60)
-# pwm_41.set_pwm_freq(60)
-
-
-# #create somee legs
-# rf = Leg(0, pwm_40, 0, 1, 2, 0)
-# rm = Leg(0, pwm_40, 3, 4, 5, 1)
-# rr = Leg(0, pwm_40, 6, 7, 8, 2)
-# lr = Leg(0, pwm_41, 0, 1, 2, 3)
-# lm = Leg(0, pwm_41, 6, 4, 5, 4)
-# lf = Leg(0, pwm_41, 3, 7, 8, 5)
-
-# #create the hex walker
-# hex_walker = Hex_Walker(rf, rm, rr, lr, lm, lf)
-
-# # create the torso
-# r = Leg(0, pwm_41, 14, 11, 15, ARM_R)
-# l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
-# rot = Rotator(0, pwm_40, 9)
-
-# torso = Robot_Torso(r, l, rot)
-
 class angel_demon_game():
 
 	def __init__(self, turns_max, hex_walker):
 
-		#Angel variables
+		#Angel variables to track whos turn it is and if the angel has won
 		self.angel_turn = 0 #random.randint(0,1)
 		self.angel_victory = False
 
-		#Devil variables
+		#Devil variables to track if the devil has won
 		self.devil_victory = False
 
-		#Hexapod variables
+		#Hexapod variable to hold the move to be executed by the hexapod
 		self.hexapod_move = ""
+		#Variable to hold the state ------------->  [TURN_BIT, LIGHT_BIT_0, LIGHT_BIT_1]
 		self.state = [0,0,0]
-		#self.hex_walker = hex_walker
+	
 
-		#Game variables
+		#Game variables to track the current turn and maximum amount of turns
 		self.turn_num = 0
 		self.max_turns = turns_max
 
 
-		#Game board initialization
+		#Game board initialization with configurable heighth and width
 		self.game_width = 4
 		self.game_height = 4
 		self.game_grid = [["   " for x in range(self.game_width)] for y in range(self.game_height)]
 
 
-		#Initialize the bomb position
+		#Initialize the bomb starting position
 		self.bomb_y_pos = 2
 		self.bomb_x_pos = 0
 		self.game_grid[self.bomb_y_pos][self.bomb_x_pos] = "BOMB"
@@ -104,7 +83,7 @@ class angel_demon_game():
 		self.game_grid[self.game_height - 1][0] = "BOT"
 
 
-	#Function to clear the board
+	#Function to clear the board.  Writes all values in the grid to a 1-character empty string
 	def clear_board(self):
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
@@ -112,29 +91,36 @@ class angel_demon_game():
 
 	#Function to move the bot up one square
 	def move_board_bot_up(self):
+		#Status code to track results of the attempted move.  0 = valid, 1 = devil victory, 2 = out of bounds rejection
 		status = 0
+		#Tracker boolean for easier loop control
 		done = False
+		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
+				#Bot found
 				if (self.game_grid[i][j] == "BOT"):
-					if (i == 0): #Highest row, cant move up more
+					#i = 0 corresponds to the top row, therefore cant move up more
+					if (i == 0): 
+						#Set status to "out of bounds" and break
 						status = 2
 						done = True
 						break
 					else:
+						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
 						try:
 							self.game_grid[i][j] = "    "
 							if (self.game_grid[i-1][j] == "BOMB"):
-								#Set status to bomb detonation
+								#Set status to bomb detonation 
 								status = 1
 								done = True
 								break
 							else:
-								#Otherwise just move the bot
+								#Otherwise just move the bot and status remains at "0"
 								self.game_grid[i-1][j] = "BOT"
 								done = True
 								break
-
+						#Capture index errors for code safety
 						except IndexError:
 							status = 2
 							done = True
@@ -146,16 +132,23 @@ class angel_demon_game():
 
 	#Function to move the bot right one square
 	def move_board_bot_right(self):
+		#Status code to track results of the attempted move.  0 = valid, 1 = devil victory, 2 = out of bounds rejection
 		status = 0
+		#Tracker boolean for easier loop control
 		done = False
+		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
+				#Bot found
 				if (self.game_grid[i][j] == "BOT"):
-					if (j == (self.game_width - 1)): #Farthest right, cant go more right
+					#j = (width - 1) corresponds to the right column, therefore cant move more right
+					if (j == (self.game_width - 1)): 
+						#Set status to out-of-bounds and break
 						status = 2
 						done = True
 						break
 					else:
+						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
 						try:
 							self.game_grid[i][j] = "    "
 							if (self.game_grid[i][j+1] == "BOMB"):
@@ -164,11 +157,11 @@ class angel_demon_game():
 								done = True
 								break
 							else:
-								#Otherwise just move the bot
+								#Otherwise just move the bot and status remains at "0"
 								self.game_grid[i][j+1] = "BOT"
 								done = True
 								break
-
+						#Capture index errors for code safety
 						except IndexError:
 							status = 2
 							done = True
@@ -180,17 +173,23 @@ class angel_demon_game():
 
 	#Function to move the bot up-right one square
 	def move_board_bot_up_right(self):
+		#Status code to track results of the attempted move.  0 = valid, 1 = devil victory, 2 = out of bounds rejection
 		status = 0
+		#Tracker boolean for easier loop control
 		done = False
+		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_width):
 			for j in range(0, self.game_height):
 				if (self.game_grid[i][j] == "BOT"):
-					if ((i == 0) or (j == (self.game_width - 1))): #Either max height or far right, cant do up-right move
+					#Check if top row (i = 0) OR right column (j = width -1)
+					#Reject move as out of bounds if either occurs
+					if ((i == 0) or (j == (self.game_width - 1))): 
 						status = 2
 						done = True
 						break
 					else:
 						try:
+							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
 							self.game_grid[i][j] = "    "
 							if (self.game_grid[i-1][j+1] == "BOMB"):
 								#Set status to bomb detonation
@@ -198,7 +197,7 @@ class angel_demon_game():
 								done = True
 								break
 							else:
-								#Otherwise just move the bot
+								#Otherwise just move the bot and status remains at "0"
 								self.game_grid[i-1][j+1] = "BOT"
 								done = True
 								break
@@ -212,20 +211,20 @@ class angel_demon_game():
 				break
 		return status
 
-	#Function to display the game board
+	#Function to display the game board.  Uses np.matrix for easy 2d visualization
 	def show_game_board(self):
 		print()
 		print(np.matrix(self.game_grid))
 		print()
 
-	#Function to execute the angel wins dance
+	#Function to execute the angel wins dance and console output
 	def angel_wins(self):
 		print()
 		print("THE ANGEL WINS!!!")
 		print()
 		hex_walker.bounce(.3, 4)
 	
-	#Function to execute the devil wins dance
+	#Function to execute the devil wins dance and console output
 	def devil_wins(self):
 		print()
 		print("THE DEVIL WINS!!! BOOM!")
@@ -234,10 +233,12 @@ class angel_demon_game():
 	
 	#Function to prompt and obtain the angel desired move
 	def select_move_angel(self):
+		#Show possible moves
 		choice = ""
 		print("1 - No movement ")
 		print("2 - Up ")
 		choice = input("Enter choice: ")
+		#Loop until valid input entered
 		while(1):
 			if (choice == "1"):
 				choice = 1
@@ -245,6 +246,7 @@ class angel_demon_game():
 			elif (choice == "2"):
 				choice = 2
 				break
+			#Reject if not valid input and re-prompt
 			else:
 				print("Invalid choice")
 				choice = input("Enter choice: ")
@@ -252,10 +254,12 @@ class angel_demon_game():
 
 	#Function to prompt and obtain the devil desired move
 	def select_move_devil(self):
+		#Show possible moves
 		choice = ""
 		print("1 - Right ")
 		print("2 - Up-Right ")
 		choice = input("Enter choice: ")
+		#Loop until valid input entered
 		while(1):
 			if (choice == "1"):
 				choice = 1
@@ -263,6 +267,7 @@ class angel_demon_game():
 			elif (choice == "2"):
 				choice = 2
 				break
+			#Reject if not valid and re-prompt
 			else:
 				print("Invalid choice")
 				choice = input("Enter choice: ")
@@ -270,25 +275,29 @@ class angel_demon_game():
 
 
 	#Function to pass the state vector into the quantum module and return a resulting move code
+	#Takes the 3 bit state as input -------------> [TURN_BIT, LIGHT_BIT_0, LIGHT_BIT_1]
 	def quantum_translate(self, state):
 		move_code = quantum_circuit.run_circuit(state[0], state[1], state[2])
 		return move_code
 	
-	#Function to determine the light state
+	#Function to determine the light state and return a vector.  Vector is one of the four possible light zones (00, 01, 10, 11)
 	def determine_state(self):
 		vector = []
 		vector = sensor_input.run_input()
 		return vector
 
-	#This function checks if it is still possible for the devil to win
+	#This function checks if it is still possible for the devil to win, meaning the bomb is still up and/or right of the bot
 	def check_game_possibility(self):
 		status = 0
 		for y in range(0, self.game_height):
 			for x in range(0, self.game_width):
+				#Locate the bot
 				if (self.game_grid[y][x] == "BOT"):
+					#Ensure bot position allows possibility of devil still winning.  Return status = 1 if so
 					if ((self.bomb_y_pos > y) or (self.bomb_x_pos < x)):
 						status = 1
 						return status
+					#Otherwise return standard status indicating game is still on
 					else:
 						return status
 	
@@ -336,7 +345,6 @@ class angel_demon_game():
 			#Reset the move status (used to track if the move results in hitting the bomb)
 			move_status = 0
 
-			#Show the game board at the beginning of every turn
 
 			#Check whos turn it is
 			if (self.angel_turn == 1):
@@ -365,7 +373,7 @@ class angel_demon_game():
 					print("Sending total state to quantum: ", self.state)
 					quantum = self.quantum_translate(self.state)
 
-					#Depending on the quantum outcome, the bot listens or disobeys (CHANCE TO BE ULTIMATELY INFLUENCED BY LIGHT LEVEL)
+					#Depending on the quantum outcome, the bot listens or disobeys 
 					if (quantum == 0):
 						print("Angel successfully tells bot to stay still")
 
@@ -494,8 +502,7 @@ class angel_demon_game():
 					print("Sending total state to quantum: ", self.state)
 					quantum = self.quantum_translate(self.state)
 
-					#Depending on the quantum outcome, the bot listens or disobeys (CHANCE TO BE ULTIMATELY INFLUENCED BY LIGHT LEVEL)
-					#Depending on the quantum outcome, the bot listens or disobeys (CHANCE TO BE ULTIMATELY INFLUENCED BY LIGHT LEVEL)
+					#Depending on the quantum outcome, the bot listens or disobeys 
 					if (quantum == 0):
 						print("Devil successfully tells bot to move right!")
 						move_status = self.move_board_bot_right()
@@ -621,7 +628,8 @@ class angel_demon_game():
 
 				self.angel_turn = 1
 				self.turn_num +=1
-
+				
+				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")
 					self.angel_victory = True
@@ -629,7 +637,7 @@ class angel_demon_game():
 
 
 
-		#If we break the loop and get here, check who won and execute the appropriate "victory" dance.  Could do left hand raise/right hand raise, etc
+		#If we break the loop and get here, check who won and execute the appropriate "victory" function
 		if (self.angel_victory == True):
 			self.angel_wins()
 
@@ -637,22 +645,10 @@ class angel_demon_game():
 			self.devil_wins()
 
 
-
+#Main function to execute the game
 def main():
-
-
-
-	# create the #torso
-#	r = Leg(0, pwm_41, 12, 11, 10, ARM_R)
-#	l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
-#	rot = Rotator(0, pwm_40, 9)
-
-	# Create instance of the game
-
 	game = angel_demon_game(30, "test")
-
-
 	game.run_game()
 
-
+#Call the main function
 main()

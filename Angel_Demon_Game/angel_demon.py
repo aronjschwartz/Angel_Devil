@@ -35,12 +35,12 @@ lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
 lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
 rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
 #create the hex walker
-hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
+#hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
 # create the torso
-torso = Robot_Torso(rarm, larm, rot)
+#torso = Robot_Torso(rarm, larm, rot)
 
 # let the robot move nice and slow to show off the new smoothness
-hex_walker.set_speed(0.5)
+#hex_walker.set_speed(0.5)
 
 stab_angle = 150
 
@@ -69,7 +69,7 @@ class Angel_Demon_Game():
 
 		#Game board initialization with configurable heighth and width
 		self.game_width = 4
-		self.game_height = 4
+		self.game_height = 7
 		self.game_grid = [["   " for x in range(self.game_width)] for y in range(self.game_height)]
 
 
@@ -96,40 +96,36 @@ class Angel_Demon_Game():
 		#Tracker boolean for easier loop control
 		done = False
 		#Loop through the rows and columns to find the bot location
-		for i in range(0, self.game_width):
-			for j in range(0, self.game_height):
-				#This try block handles rectanglur grids by ignoring index errors
-				try:
-					#Bot found
-					if (self.game_grid[i][j] == "BOT"):
-						#i = 0 corresponds to the top row, therefore cant move up more
-						if (i == 0): 
-							#Set status to "out of bounds" and break
+		for i in range(0, self.game_height):
+			for j in range(0, self.game_width):			
+				#Bot found
+				if (self.game_grid[i][j] == "BOT"):
+					#i = 0 corresponds to the top row, therefore cant move up more
+					if (i == 0): 
+						#Set status to "out of bounds" and break
+						status = 2
+						done = True
+						break
+					else:
+						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+						try:
+							self.game_grid[i][j] = "    "
+							if (self.game_grid[i-1][j] == "BOMB"):
+								#Set status to bomb detonation 
+								status = 1
+								done = True
+								break
+							else:
+								#Otherwise just move the bot and status remains at "0"
+								self.game_grid[i-1][j] = "BOT"
+								done = True
+								break
+						#Capture index errors for code safety
+						except IndexError:
 							status = 2
 							done = True
 							break
-						else:
-							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-							try:
-								self.game_grid[i][j] = "    "
-								if (self.game_grid[i-1][j] == "BOMB"):
-									#Set status to bomb detonation 
-									status = 1
-									done = True
-									break
-								else:
-									#Otherwise just move the bot and status remains at "0"
-									self.game_grid[i-1][j] = "BOT"
-									done = True
-									break
-							#Capture index errors for code safety
-							except IndexError:
-								status = 2
-								done = True
-								break
-				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
-				except IndexError:
-					pass
+				
 			if (done == True):
 				break
 		return status
@@ -141,40 +137,37 @@ class Angel_Demon_Game():
 		#Tracker boolean for easier loop control
 		done = False
 		#Loop through the rows and columns to find the bot location
-		for i in range(0, self.game_width):
-			for j in range(0, self.game_height):
-				#This try block handles rectanglur grids by ignoring index errors
-				try:
-					#Bot found
-					if (self.game_grid[i][j] == "BOT"):
-						#j = (width - 1) corresponds to the right column, therefore cant move more right
-						if (j == (self.game_width - 1)): 
-							#Set status to out-of-bounds and break
+		for i in range(0, self.game_height):
+			for j in range(0, self.game_width):
+			
+				#Bot found
+				if (self.game_grid[i][j] == "BOT"):
+					#j = (width - 1) corresponds to the right column, therefore cant move more right
+					if (j == (self.game_width - 1)): 
+						#Set status to out-of-bounds and break
+						status = 2
+						done = True
+						break
+					else:
+						#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+						try:
+							self.game_grid[i][j] = "    "
+							if (self.game_grid[i][j+1] == "BOMB"):
+								#Set status to bomb detonation
+								status = 1
+								done = True
+								break
+							else:
+								#Otherwise just move the bot and status remains at "0"
+								self.game_grid[i][j+1] = "BOT"
+								done = True
+								break
+						#Capture index errors for code safety
+						except IndexError:
 							status = 2
 							done = True
 							break
-						else:
-							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-							try:
-								self.game_grid[i][j] = "    "
-								if (self.game_grid[i][j+1] == "BOMB"):
-									#Set status to bomb detonation
-									status = 1
-									done = True
-									break
-								else:
-									#Otherwise just move the bot and status remains at "0"
-									self.game_grid[i][j+1] = "BOT"
-									done = True
-									break
-							#Capture index errors for code safety
-							except IndexError:
-								status = 2
-								done = True
-								break
-				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
-				except IndexError:
-					pass
+				
 			if (done == True):
 				break
 		return status
@@ -186,40 +179,37 @@ class Angel_Demon_Game():
 		#Tracker boolean for easier loop control
 		done = False
 		#Loop through the rows and columns to find the bot location
-		for i in range(0, self.game_width):
-			for j in range(0, self.game_height):
-				#This try block handles rectanglur grids by ignoring index errors
-				try:
-					#Bot found
-					if (self.game_grid[i][j] == "BOT"):
-						#Check if top row (i = 0) OR right column (j = width -1)
-						#Reject move as out of bounds if either occurs
-						if ((i == 0) or (j == (self.game_width - 1))): 
+		for i in range(0, self.game_height):
+			for j in range(0, self.game_width):
+				
+				#Bot found
+				if (self.game_grid[i][j] == "BOT"):
+					#Check if top row (i = 0) OR right column (j = width -1)
+					#Reject move as out of bounds if either occurs
+					if ((i == 0) or (j == (self.game_width - 1))): 
+						status = 2
+						done = True
+						break
+					else:
+						try:
+							#If the move is not out of bounds, see if it will result in the bot hitting the bomb
+							self.game_grid[i][j] = "    "
+							if (self.game_grid[i-1][j+1] == "BOMB"):
+								#Set status to bomb detonation
+								status = 1
+								done = True
+								break
+							else:
+								#Otherwise just move the bot and status remains at "0"
+								self.game_grid[i-1][j+1] = "BOT"
+								done = True
+								break
+
+						except IndexError:
 							status = 2
 							done = True
 							break
-						else:
-							try:
-								#If the move is not out of bounds, see if it will result in the bot hitting the bomb
-								self.game_grid[i][j] = "    "
-								if (self.game_grid[i-1][j+1] == "BOMB"):
-									#Set status to bomb detonation
-									status = 1
-									done = True
-									break
-								else:
-									#Otherwise just move the bot and status remains at "0"
-									self.game_grid[i-1][j+1] = "BOT"
-									done = True
-									break
-
-							except IndexError:
-								status = 2
-								done = True
-								break
-				#This exception should only be hit when dealing with rectangluar grids.  Catches the index error and throws it out
-				except IndexError:
-					pass
+			
 			if (done == True):
 				break
 		return status

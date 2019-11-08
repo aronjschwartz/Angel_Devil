@@ -5,11 +5,12 @@ Author: Patrick Gmerek
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
-import Adafruit_PCA9685
-import numpy as np
 import cv2 as cv
 import time
-from hex_walker_driver import *
+
+import pwm_wrapper
+from hex_walker_driver_v2 import *
+from hex_walker_constants import *
 
 
 def main():
@@ -17,9 +18,10 @@ def main():
     slider_names = ["Waist",
                     "Right Tip Joint", "Right Mid Joint", "Right Rotary Joint",
                     "Left Tip Joint", "Left Mid Joint", "Left Rotary Joint"]
-    slider_limits = [[90, 135],
-                     [90, 180], [90, 180], [90, 180],
-                     [90, 180], [90, 180], [90, 180]]
+	# TODO: look up these limits, don't hard-code them
+    slider_limits = [[60, 150],
+                     [0, 180], [0, 180], [0, 180],
+                     [0, 180], [0, 180], [0, 180]]
     window_name = "Hexapod Torso Control"
     cv.namedWindow(window_name)
 
@@ -30,7 +32,7 @@ def main():
 
     torso[0].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
     torso[1].set_leg_position(Leg_Position(user_inputs[4], user_inputs[5], user_inputs[6]))
-    torso[2].set_angle(user_inputs[0])
+    torso[2].set_servo_angle(user_inputs[0])
     while True:
         previous_user_inputs = user_inputs
         user_inputs = fetch_trackbar_pos(window_name, slider_names)
@@ -41,7 +43,7 @@ def main():
             print("Values changed")
             torso[0].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
             torso[1].set_leg_position(Leg_Position(user_inputs[4], user_inputs[5], user_inputs[6]))
-            torso[2].set_angle(user_inputs[0])
+            torso[2].set_servo_angle(user_inputs[0])
     cv.destroyAllWindows()
 
 
@@ -72,19 +74,24 @@ def dummy(x):
 
 
 def initialize_torso():
-    pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)
-    pwm_41= Adafruit_PCA9685.PCA9685(address=0x41)
+	pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+	rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
+	rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
+	rb = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
+	larm = Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
+	rot = Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST)
 
-    pwm_40.set_pwm_freq(60)
-    pwm_41.set_pwm_freq(60)
+	pwm_top = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+	lb = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
+	lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
+	lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
+	rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
 
-    sleep_time = 2
-    # create the torso
-    r = Leg(0, pwm_41, 12, 11, 10, ARM_R)
-    l = Leg(0, pwm_40, 12, 11, 10, ARM_L)
-    rot = Rotator(0, pwm_40, 9)
-
-    return [r, l, rot]
+	all = [rf, rm, rb, lb, lm, lf, larm, rarm, rot]
+	
+	# no need to create hex_walker or torso objects
+	
+    return [rarm, larm, rot]
 
 
 if __name__ == '__main__':

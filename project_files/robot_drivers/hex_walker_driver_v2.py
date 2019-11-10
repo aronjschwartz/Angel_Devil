@@ -491,8 +491,10 @@ class Hex_Walker(object):
 			return INV_PARAM
 
 
-	# old version: direct-set then wait
-	def do_move_set(self, hex_walker_position_list):
+	## take a list of INDICES of poses to run through.
+	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
+	# previously do_move_set
+	def run_move_list(self, hex_walker_position_list):
 		for next_pos in hex_walker_position_list:
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
@@ -505,16 +507,29 @@ class Hex_Walker(object):
 		return SUCCESS
 	
 	
-	# TODO: for each leg, call hex.do_leg_pos
-	# require pose, accept index or object. if index, update current_pos. if object, don't.
+	## used to set the pose of the whole 6-leg system and update "current pose" if possible.
+	# hexwalker_pose_id can be index or object. 
+	# if index, update current_pos. if object, don't, because it was probably dynamically created.
 	# optional arg with speed
-	def set_hex_walker_position(self, hex_walker_position_number):
-		if(HW_MOVE_DEBUG):
-			print("current position is : " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to position: " + HEX_WALKER_POSITIONS[hex_walker_position_number].description)
-		self.current_pos = hex_walker_position_number
-		self.set_hexwalker_leg_position(HEX_WALKER_POSITIONS[hex_walker_position_number])
+	# previously set_hex_walker_position
+	def set_hexwalker_position(self, hexwalker_pose_id, time=self.speed):
+		if isinstance(hexwalker_pose_id, int):
+			# if it is an index, then update current_pos and do the rest of the thing
+			self.current_pos = hexwalker_pose_id
+			pose = HEX_WALKER_POSITIONS[hexwalker_pose_id]
+			if(HW_MOVE_DEBUG):
+				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + pose.description)
+		else:
+			# if it is the actual object, then it was probably dynamically created. don't update pose, dont print debug description
+			pose = hexwalker_pose_id
+		
+		# self.set_hexwalker_leg_position(pose, GROUP_ALL_LEGS, self.speed)
+		self.set_hexwalker_leg_position(pose)
 
 
+	## used to set the pose of some/all of the while keeping other legs untouched.
+	## if using threading, can set multiple simultaneous leg transitions with different durations by calling 
+	## this multiple times without synchronize() between.
 	# if given dest=Leg_Position, set all specified legs to that same pose
 	# if given dest=Hex_Walker_Position, set all specified legs to the pose corresponding to that leg within the Hex_Walker_Position object
 	# leglist can be int or list, or none (defaults to all legs)
@@ -610,14 +625,18 @@ class Hex_Walker(object):
 	# synchronize the legs with the main thread by not returning until all of the specified legs are done moving
 	# accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_LEGS
+	# depending on USE_THREADING, either simply sleep or do the actual synchro
 	def synchronize(self, masklist=GROUP_ALL_LEGS):
-		# if given a single index rather than an iteratable, make it into a set
-		# if given something else, cast the masklist as a set to remove potential duplicates
-		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
-		
-		for leg in [self.idx_to_leg(n) for n in mask]:
-			# wait until the leg is done, if it is already done this returns immediately
-			leg.idle_flag.wait()
+		if USE_THREADING:
+			# if given a single index rather than an iteratable, make it into a set
+			# if given something else, cast the masklist as a set to remove potential duplicates
+			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+			
+			for leg in [self.idx_to_leg(n) for n in mask]:
+				# wait until the leg is done, if it is already done this returns immediately
+				leg.idle_flag.wait()
+		else:
+			time.sleep(self.speed)
 		
 		
 	# convert given index to the actual leg object... trivial but whatever

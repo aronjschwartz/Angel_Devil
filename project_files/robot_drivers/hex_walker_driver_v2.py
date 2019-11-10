@@ -497,37 +497,82 @@ class Hex_Walker(object):
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
 					print("Sending command")
-				if USE_THREADING:
-					self.set_hex_walker_position_thread(next_pos)
-					self.synchronize([LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF])
-				else:
-					self.set_hex_walker_position(next_pos)
-					time.sleep(self.speed)
+				self.set_hex_walker_position(next_pos)
+				self.synchronize()
 			else:
 				print("invalid move set")
 				return ILLEGAL_MOVE
 		return SUCCESS
 	
-# NOTE: the functinos set_hex_walker_position and do_set_hex_walker_position are similar but one takes in a raw position and the other uses the defined table AND updates the current position. Using the do
-# version skips this state-updating and so it can be useful for testing
-
-# NOTE: this function should not be called from external code (except testing) because it might not be safe
+	
+	# TODO: for each leg, call hex.do_leg_pos
+	# require pose, accept index or object. if index, update current_pos. if object, don't.
+	# optional arg with speed
 	def set_hex_walker_position(self, hex_walker_position_number):
 		if(HW_MOVE_DEBUG):
 			print("current position is : " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to position: " + HEX_WALKER_POSITIONS[hex_walker_position_number].description)
 		self.current_pos = hex_walker_position_number
-		self.do_set_hex_walker_position(HEX_WALKER_POSITIONS[hex_walker_position_number])
-
-# NOTE: this function should not be called from external code (except testing) because it might not be safe
-	def do_set_hex_walker_position(self, hex_walker_position):
-		self.rf_leg.set_leg_position(hex_walker_position.rf_pos)
-		self.rm_leg.set_leg_position(hex_walker_position.rm_pos)
-		self.rb_leg.set_leg_position(hex_walker_position.rr_pos)
-		self.lb_leg.set_leg_position(hex_walker_position.lr_pos)
-		self.lm_leg.set_leg_position(hex_walker_position.lm_pos)
-		self.lf_leg.set_leg_position(hex_walker_position.lf_pos)
+		self.set_hexwalker_leg_position(HEX_WALKER_POSITIONS[hex_walker_position_number])
 
 
+	# if given dest=Leg_Position, set all specified legs to that same pose
+	# if given dest=Hex_Walker_Position, set all specified legs to the pose corresponding to that leg within the Hex_Walker_Position object
+	# leglist can be int or list, or none (defaults to all legs)
+	# optional arg with speed
+	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
+	def set_hexwalker_leg_position(self, dest, leglist=GROUP_ALL_LEGS, time=self.speed):
+		# leglist: if given a single index rather than an iteratable, make it into a set
+		# if given something else, cast the leglist as a set to remove potential duplicates
+		legs = set((leglist)) if isinstance(leglist, int) else set(leglist)
+		
+		if isinstance(dest, Hex_Walker_Position):
+			if USE_THREADING:
+				for n in legs:
+					# extract the appropriate pose from the object
+					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
+					if n == LEG_RF:
+						pose = dest.rf_pos
+					elif n == LEG_RM:
+						pose = dest.rm_pos
+					elif n == LEG_RB:
+						pose = dest.rr_pos
+					elif n == LEG_LB:
+						pose = dest.lr_pos
+					elif n == LEG_LM:
+						pose = dest.lm_pos
+					elif n == LEG_LF:
+						pose = dest.lf_pos
+					self.idx_to_leg(n).set_leg_position_thread(pose, time)
+			else:
+				for n in legs:
+					# extract the appropriate pose from the object
+					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
+					if n == LEG_RF:
+						pose = dest.rf_pos
+					elif n == LEG_RM:
+						pose = dest.rm_pos
+					elif n == LEG_RB:
+						pose = dest.rr_pos
+					elif n == LEG_LB:
+						pose = dest.lr_pos
+					elif n == LEG_LM:
+						pose = dest.lm_pos
+					elif n == LEG_LF:
+						pose = dest.lf_pos
+					self.idx_to_leg(n).set_leg_position(pose)
+		elif isinstance(dest, Leg_Position):
+			if USE_THREADING:
+				for leg in [self.idx_to_leg(n) for n in legs]:
+					# threading version
+					leg.set_leg_position_thread(dest, time)
+			else:
+				for leg in [self.idx_to_leg(n) for n in legs]:
+					# non-threading version
+					leg.set_leg_position(dest)
+		else:
+			print("ERROR: given invalid hexwalker leg position type")
+
+'''
 	# new version: gradual motion
 	#TODO: make this better
 	def do_move_set_thread(self, hex_walker_position_list):
@@ -559,16 +604,17 @@ class Hex_Walker(object):
 		self.lb_leg.set_leg_position_thread(hex_walker_position.lr_pos, self.speed)
 		self.lm_leg.set_leg_position_thread(hex_walker_position.lm_pos, self.speed)
 		self.lf_leg.set_leg_position_thread(hex_walker_position.lf_pos, self.speed)
-	
+'''
 
 
 	# synchronize the legs with the main thread by not returning until all of the specified legs are done moving
-	# must give it a list, even if it is a 1-element list
-	# uses "absolute" indices of each leg: ignores the "change direction" stuff
-	# if called with no arg, default is to wait for all legs
+	# accepts list, set, int (treated as single-element set)
+	# if not given any arg, default is GROUP_ALL_LEGS
 	def synchronize(self, masklist=GROUP_ALL_LEGS):
-		# first cast the leglist as a set to remove potential duplicates
-		mask = set(masklist)
+		# if given a single index rather than an iteratable, make it into a set
+		# if given something else, cast the masklist as a set to remove potential duplicates
+		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		
 		for leg in [self.idx_to_leg(n) for n in mask]:
 			# wait until the leg is done, if it is already done this returns immediately
 			leg.idle_flag.wait()
@@ -578,6 +624,7 @@ class Hex_Walker(object):
 	# TODO: apply custom "front" offset here
 	def idx_to_leg(self, n):
 		return self.leglist[n]
+	
 	
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
 	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
@@ -590,6 +637,9 @@ class Hex_Walker(object):
 		# then wait for 3x the interpolate time, just to be safe
 		time.sleep(INTERPOLATE_TIME * 3)
 
+
+	########################################################################################
+	########################################################################################
 	# movement functions
 	def walk(self, num_steps, direction):
 		
@@ -742,6 +792,9 @@ class Hex_Walker(object):
 
 	def do_nothing(self):
 		self.set_hex_walker_position(TALL_NEUTRAL)
+		
+	########################################################################################
+	########################################################################################
 
 
 

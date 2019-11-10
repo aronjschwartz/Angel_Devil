@@ -164,14 +164,14 @@ class Leg(object):
 		# ...this code should overwrite the "-1"s with sensible values on bootup
 		# NEEDS to use the non-thread versions
 		if(leg_num == ARM_L or leg_num == ARM_R):
+			# default position is with arms fully extended
 			self.set_leg_position(TORSO_ARM_TABLE["STRAIGHT_OUT"])
 		elif(leg_num == WAIST):
 			self.set_servo_angle(90, WAIST_MOTOR)
 		else:
-			# 180/90/90: pointing straight out is default
-			self.set_servo_angle(180, TIP_MOTOR)
-			self.set_servo_angle(90, MID_MOTOR)
-			self.set_servo_angle(90, ROT_MOTOR)
+			# default position is 90-degree crouch
+			# self.set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
+			self.set_leg_position(MISC_TABLE["INIT"])
 
 		# start the thread
 		self.framethread.start()
@@ -318,47 +318,32 @@ class Leg(object):
 			self.frame_queue = []
 		
 	
-	# unprotected internal-use-only function
+	# internal-use-only function
 	# set the actual PWM and the internally-tracked position
-	def do_set_servo_angle(self, angle, motor):
-		if motor < 0 or motor > 2:
-			print("ERR#6: INVALID PARAM")
+	# guarantees that the determined PWM value isn't too crazy
+	def do_set_servo_angle(self, angle, servo):
+		if servo < 0 or servo > 2:
+			# ensure servo index is valid
+			print("ERR#6: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
 			return INV_PARAM
-		if angle < 0 or angle > 360:
-			print("ERR#7: INVALID PARAM")
+		# convert to pwm
+		pwm_val = int(self.angle_to_pwm(angle, servo))
+		
+		if pwm_val < c_PWM_ABSOLUTE_MINIMUM or pwm_val > c_PWM_ABSOLUTE_MAXIMUM:
+			# guarantee somewhat-sensible PWM value
+			print("ERR#7: UNSAFE PWM! safe values are "+str(c_PWM_ABSOLUTE_MINIMUM)+" to "+str(c_PWM_ABSOLUTE_MAXIMUM))
+			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle)+", pwm="+str(pwm_val))
+			# TODO: raise an exception of some kind??
 			return INV_PARAM
-		# get pwm val
-		pwm_val = int(self.angle_to_pwm(angle, motor))
-
+		
 		# # do the write out, with lock just to be safe
 		with self._curr_pos_lock:
-			self.curr_servo_angle[motor] = angle
-			self.curr_servo_pwm[motor] = pwm_val
-			self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
+			self.curr_servo_angle[servo] = angle
+			self.curr_servo_pwm[servo] = pwm_val
+			self.pwm.set_pwm(self.pwm_channels[servo], 0, pwm_val)
 			
 		return SUCCESS
-
-
-	# unprotected internal-use-only function
-	# set the actual PWM and the internally-tracked position
-	def do_set_servo_pwm(self, pwm_val, motor):
-		if motor < 0 or motor > 2:
-			print("ERR#8: INVALID PARAM")
-			return INV_PARAM
-		if pwm_val < 0 or pwm_val > 4095:
-			print("ERR#9: INVALID PARAM")
-			return INV_PARAM
-		# get angle val
-		angle = int(self.pwm_to_angle(pwm_val, motor))
-
-		# # do the write out, with lock just to be safe
-		with self._curr_pos_lock:
-			self.curr_servo_angle[motor] = angle
-			self.curr_servo_pwm[motor] = pwm_val
-			self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
-			
-		return SUCCESS
-
 
 
 class Hex_Walker(object):
@@ -738,52 +723,18 @@ class Hex_Walker(object):
 
 # make the "rotator" class a subclass of "leg"
 # any functions that would work on a leg also work on the rotator, it inherits absolutely everything
-# redefines do_set_servo_angle and do_set_servo_pwm to only touch the one servo, ignore other two
+# redefines do_set_servo_angle to only touch the one servo, ignore other two
 # to use this with threading it will need to use set_servo_angle_thread(angle, motor, time)
-# technically you can try to set all 3 of the leg motors and it won't crash but nothing will happen unless you are setting the waist motor
+# technically you can try to set the other 2 leg motors and it won't crash but nothing will happen unless you are setting the waist motor
 class Rotator(Leg):
-	# unprotected internal-use-only function
-	# set the actual PWM and the internally-tracked position
-	# for Rotator, redefine this to do nothing unless given WAIST_MOTOR
-	def do_set_servo_angle(self, angle, motor):
-		if motor != WAIST_MOTOR:
+	# internal-use-only function
+	# if servo is not WAIST_MOTOR, then return & do nothing... otherwise call normal do_set_servo_angle()
+	def do_set_servo_angle(self, angle, servo):
+		if servo != WAIST_MOTOR:
 			# print("ERR#10: INVALID PARAM")
 			return INV_PARAM
-		if angle < 0 or angle > 360:
-			print("ERR#11: INVALID PARAM")
-			return INV_PARAM
-		# get pwm val
-		pwm_val = int(self.angle_to_pwm(angle, motor))
-
-		# # do the write out, with lock just to be safe
-		with self._curr_pos_lock:
-			self.curr_servo_angle[motor] = angle
-			self.curr_servo_pwm[motor] = pwm_val
-			self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
-			
-		return SUCCESS
-
-
-	# unprotected internal-use-only function
-	# set the actual PWM and the internally-tracked position
-	# for Rotator, redefine this to do nothing unless given WAIST_MOTOR
-	def do_set_servo_pwm(self, pwm_val, motor):
-		if motor != WAIST_MOTOR:
-			# print("ERR#12: INVALID PARAM")
-			return INV_PARAM
-		if pwm_val < 0 or pwm_val > 4095:
-			print("ERR#13: INVALID PARAM")
-			return INV_PARAM
-		# get angle val
-		angle = int(self.pwm_to_angle(pwm_val, motor))
-
-		# # do the write out, with lock just to be safe
-		with self._curr_pos_lock:
-			self.curr_servo_angle[motor] = angle
-			self.curr_servo_pwm[motor] = pwm_val
-			self.pwm.set_pwm(self.pwm_channels[motor], 0, pwm_val)
-			
-		return SUCCESS
+		# if it is valid, do the exact same code as the Leg would
+		return super().do_set_servo_angle(angle, servo)
 
 
 

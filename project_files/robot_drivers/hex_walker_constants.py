@@ -35,8 +35,9 @@ WAIST_MOTOR = 0
 
 
 # all constants related to the hex_walker leg servos
-# TODO: revisit and tune these constants!!!
-# each constant should correspond to the end of the range for that servo (match the angles listed below)
+# TODO: revisit and tune these constants!!! arms done, waist done, leg0 done
+# these are PWM values that correspond to the ends of the range for that servo (match the angles listed below)
+# used for linear mapping from angle-space to pwm-space
 c_0_TIP_MOTOR_OUT = 158
 c_0_TIP_MOTOR_IN = 642
 c_0_MID_MOTOR_UP = 600
@@ -97,8 +98,16 @@ c_R_ARM_ROT_MOTOR_DOWN = 110
 c_ROTATOR_MOTOR_LEFT = 480
 c_ROTATOR_MOTOR_RIGHT = 135
 
+# to prevent damage, Leg.do_set_servo_angle() will raise an error if trying to set a servo with PWM limits outside this range
+# this applies to all servos on the robot
+# damage could easily occur before these limits but whatever, its for catching extreme outliers
+c_PWM_ABSOLUTE_MINIMUM = 50
+c_PWM_ABSOLUTE_MAXIMUM = 700
 
-# angle limits in degrees: same regardless of side so no need to l/r differentiate
+
+# sevo angle limits in degrees
+# used for linear mapping from angle-space to pwm-space, corresponds to the pwm endpoints listed above
+# also used for safety clamping
 # leg limits in degrees
 TIP_MOTOR_OUT_ANGLE = 270
 TIP_MOTOR_IN_ANGLE = 90

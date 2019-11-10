@@ -25,13 +25,8 @@ rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R) #7
 all_legs = [rf, rm, rb, lb, lm, lf, larm, rarm, rot]
 
 
-print("This file is for directly setting the angle/PWM values of given servos to determine their active range.")
-print("Both modes ignore the angle/PWM limits listed in the drivers, this means it is easily possible to damage the servos so be extremely careful! This is intended for determining new limits of the servos.")
-print("USE EXTREME CAUTION")
-
-
 # display current pwm value and its tentative limits
-# prompt for new input & set, do_set_servo_pwm(), loop until non-numeric value given
+# prompt for new input & set, do_set_servo_angle(), loop until non-numeric value given
 def set_pwm_loop(legs, L, S):
 		curr = legs[L].curr_servo_pwm[S]
 		min = legs[L].SERVO_PWM_LIMITS[S][0]
@@ -47,13 +42,10 @@ def set_pwm_loop(legs, L, S):
 			except ValueError:
 				# if given non-numeric input, go up a level
 				break
-			if P < 0 or P > 1000:
-				# if invalid numeric input, prompt again
-				print("err: input out of range")
-				continue
 				
 			# actually set the PWM
-			legs[L].do_set_servo_pwm(P, S)
+			A = legs[L].pwm_to_angle(P, S)
+			legs[L].do_set_servo_angle(A, S)
 
 
 # display current angle value and its tentative limits
@@ -67,21 +59,29 @@ def set_angle_loop(legs, L, S):
 		while(True):
 			# prompt for actual value
 			r = input("  Angle:")
-			P = -1
+			A = -1
 			try:
-				P = float(r)
+				A = float(r)
 			except ValueError:
 				# if given non-numeric input, go up a level
 				break
-			if P < 0 or P > 360:
-				# if invalid numeric input, prompt again
-				print("err: input out of range")
-				continue
 				
 			# actually set the PWM
-			legs[L].do_set_servo_angle(P, S)
+			legs[L].do_set_servo_angle(A, S)
 
 
+###############################################################
+
+print("")
+print("This file is for directly setting the angle/PWM values of given servos to determine their active range.")
+print("Both modes ignore the angle/PWM limits listed in the drivers, this means it is easily possible to damage the servos so be extremely careful! This is intended for determining new limits of the servos.")
+print("USE EXTREME CAUTION")
+print("")
+
+# print("Moving to 'star position', press Enter when ready")
+# input()
+# for L in range(6):
+	# all_legs[L].set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
 
 
 # ask if using PWM or angle mode

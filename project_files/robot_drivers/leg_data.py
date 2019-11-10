@@ -161,7 +161,9 @@ TALL_TRI_SIDE_MOVEMENT_TABLE = {
 # misc table
 MISC_TABLE = {
         "BOUNCE"            : Leg_Position(90, 75, 90),
-        "PULL_UP"           : Leg_Position(60, 75, 90)
+        "PULL_UP"           : Leg_Position(60, 75, 90),
+        "INIT"           : Leg_Position(90, 90, 90),
+		"STRAIGHT_OUT"		: Leg_Position(180, 90, 90)
 
    }
 

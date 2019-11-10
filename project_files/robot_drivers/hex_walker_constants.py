@@ -24,6 +24,18 @@ ARM_L = 6
 ARM_R = 7
 WAIST = 8
 
+# set up useful "groups" of leg indices, might get some mild efficiency boost from using sets instead of lists
+# should only be used as "for L in [self.idx_to_leg(n) for n in GROUP]:"
+GROUP_ALL_LEGS =   set(LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_LF)
+GROUP_LEFT_LEGS =  set(LEG_LB, LEG_LM, LEG_LF)
+GROUP_RIGHT_LEGS = set(LEG_RF, LEG_RM, LEG_RB)
+GROUP_LEFT_TRI =   set(LEG_RM, LEG_LB, LEG_LF)
+GROUP_RIGHT_TRI =  set(LEG_RF, LEG_RB, LEG_LM)
+GROUP_FRONT_LEGS = set(LEG_RF, LEG_LF)
+GROUP_MID_LEGS =   set(LEG_RM, LEG_LM)
+GROUP_BACK_LEGS =  set(LEG_RB, LEG_LB)
+
+
 # set the servo IDs, do not change!!!
 # used as array indices so they must be be contiguous starting from 0
 TIP_MOTOR = 0

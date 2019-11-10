@@ -566,14 +566,19 @@ class Hex_Walker(object):
 	# must give it a list, even if it is a 1-element list
 	# uses "absolute" indices of each leg: ignores the "change direction" stuff
 	# if called with no arg, default is to wait for all legs
-	def synchronize(self, masklist=[LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_RF]):
+	def synchronize(self, masklist=GROUP_ALL_LEGS):
 		# first cast the leglist as a set to remove potential duplicates
 		mask = set(masklist)
-		for leg in mask:
+		for leg in [self.idx_to_leg(n) for n in mask]:
 			# wait until the leg is done, if it is already done this returns immediately
-			self.leglist[leg].idle_flag.wait()
+			leg.idle_flag.wait()
 		
 		
+	# convert given index to the actual leg object... trivial but whatever
+	# TODO: apply custom "front" offset here
+	def idx_to_leg(self, n):
+		return self.leglist[n]
+	
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
 	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
 	def abort(self):

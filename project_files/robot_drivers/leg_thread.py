@@ -23,7 +23,7 @@ from hex_walker_constants import *
 
 # uses the following members of "leg": 
 # running_flag
-# sleeping_flag
+# idle_flag
 # _state_flag_lock
 # frame_queue
 # _frame_queue_lock
@@ -71,7 +71,7 @@ def Frame_Thread_Func(leg, DEBUG):
 			# clear "running" event, does not trigger anything (note: clear before set)
 			leg.running_flag.clear()
 			# set the "sleeping" event, this may trigger other waiting tasks
-			leg.sleeping_flag.set()
+			leg.idle_flag.set()
 		# loop back to top, wait until running_flag is set again
 		pass
 	pass

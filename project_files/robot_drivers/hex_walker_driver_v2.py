@@ -67,17 +67,17 @@ class Leg(object):
 	# set_leg_position_thread
 	# abort
 	# do_set_servo_angle
-	# do_set_servo_pwm
 	def __init__(self, pwm, channels, leg_num):
 
 		# unique ID, not actually used for much, just stores the leg_num
 		self.uid = leg_num
 		# this can be either the new-style PWM wrapper or the old-style actual pwm object, works just the same
 		self.pwm = pwm
-		# running/sleeping flags: normal Events can only wait for a rising edge, if I want to wait for a falling edge, i need to set up a complementary system like this. also they're really being used as flags, not as "events", but whatever
+		# running/idle flags: normal Events can only wait for a rising edge, if I want to wait for a falling edge, i need to 
+		# set up a complementary system like this. also they're really being used as flags, not as "events", but whatever.
 		self.running_flag = threading.Event()
-		self.sleeping_flag = threading.Event()
-		self.sleeping_flag.set()
+		self.idle_flag = threading.Event()
+		self.idle_flag.set()
 		# i want setting one/clearing other to be an atomic operation so it should have a lock object just in case
 		self._state_flag_lock = threading.Lock()
 		# the list of frames that the leg thread is consuming as the leg object is adding onto
@@ -228,10 +228,10 @@ class Leg(object):
 			print("ERR#5: INVALID PARAM")
 			return INV_PARAM
 
-		# wait until running_flag is clear (sleeping_flag is set)
+		# wait until running_flag is clear (idle_flag is set)
 		# this ensures that it won't conflict with the thread if it is running
 		# you SHOULDN'T be using both the thread and the direct-set method, but better to be safe than sorry
-		self.sleeping_flag.wait()
+		self.idle_flag.wait()
 		
 		# safety checking for each motor
 		safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1])
@@ -305,14 +305,15 @@ class Leg(object):
 		
 		with self._state_flag_lock:
 			# clear "sleeping" event, does not trigger anything (note: clear before set)
-			self.sleeping_flag.clear()
+			self.idle_flag.clear()
 			# set the "running" event, this may trigger other waiting tasks
 			self.running_flag.set()
 		
 		
 
 	# clear the frame queue to stop any currently-pending movements.
-	# note that when the hexwalker calls this it should first abort() all legs, THEN call "synchronize" on all legs. this way it doesn't wait for one leg to stop before clearing the queue of the next.
+	# note that when the hexwalker calls this it should first abort() all legs, THEN call "synchronize" on all legs. 
+	# this way it doesn't wait for one leg to stop before clearing the queue of the next.
 	def abort(self):
 		with self._frame_queue_lock: 
 			self.frame_queue = []
@@ -344,6 +345,23 @@ class Leg(object):
 			self.pwm.set_pwm(self.pwm_channels[servo], 0, pwm_val)
 			
 		return SUCCESS
+
+
+# make the "rotator" class a subclass of "leg"
+# any functions that would work on a leg also work on the rotator, it inherits absolutely everything
+# redefines do_set_servo_angle to only touch the one servo, ignore other two
+# to use this with threading it will need to use set_servo_angle_thread(angle, motor, time)
+# technically you can try to set the other 2 leg motors and it won't crash but nothing will happen unless you are setting the waist motor
+class Rotator(Leg):
+	# internal-use-only function
+	# if servo is not WAIST_MOTOR, then return & do nothing... otherwise call normal do_set_servo_angle()
+	def do_set_servo_angle(self, angle, servo):
+		if servo != WAIST_MOTOR:
+			# print("ERR#10: INVALID PARAM")
+			return INV_PARAM
+		# if it is valid, do the exact same code as the Leg would
+		return super().do_set_servo_angle(angle, servo)
+
 
 
 class Hex_Walker(object):
@@ -706,7 +724,7 @@ class Hex_Walker(object):
 		mask = set(masklist)
 		for leg in mask:
 			# wait until the leg is done, if it is already done this returns immediately
-			self.leglist[leg].sleeping_flag.wait()
+			self.leglist[leg].idle_flag.wait()
 		
 		
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
@@ -721,54 +739,6 @@ class Hex_Walker(object):
 		time.sleep(INTERPOLATE_TIME * 3)
 
 
-# make the "rotator" class a subclass of "leg"
-# any functions that would work on a leg also work on the rotator, it inherits absolutely everything
-# redefines do_set_servo_angle to only touch the one servo, ignore other two
-# to use this with threading it will need to use set_servo_angle_thread(angle, motor, time)
-# technically you can try to set the other 2 leg motors and it won't crash but nothing will happen unless you are setting the waist motor
-class Rotator(Leg):
-	# internal-use-only function
-	# if servo is not WAIST_MOTOR, then return & do nothing... otherwise call normal do_set_servo_angle()
-	def do_set_servo_angle(self, angle, servo):
-		if servo != WAIST_MOTOR:
-			# print("ERR#10: INVALID PARAM")
-			return INV_PARAM
-		# if it is valid, do the exact same code as the Leg would
-		return super().do_set_servo_angle(angle, servo)
-
-
-
-'''
-class Rotator(object):
-	def __init__(self, uid, pwm, channel):
-		self.uid = uid
-		self.pwm = pwm
-		self.channel = channel
-		self.pwm_val = -1
-		self.ROTATOR_MOTOR_LEFT  = ROTATOR_MOTOR_LEFT
-		self.ROTATOR_MOTOR_RIGHT = ROTATOR_MOTOR_RIGHT
-		self.ROTATOR_LEFT_ANGLE = ROTATOR_LEFT_ANGLE
-		self.ROTATOR_RIGHT_ANGLE = ROTATOR_RIGHT_ANGLE
-		self.set_servo_angle(90)
-
-	def angle_to_pwm(self, angle):
-		return linear_map(self.ROTATOR_LEFT_ANGLE, self.ROTATOR_MOTOR_LEFT, self.ROTATOR_RIGHT_ANGLE, self.ROTATOR_MOTOR_RIGHT, angle)
-
-	def set_servo_angle(self, angle):
-		pwm_val = int(self.angle_to_pwm(angle))
-		# safety check
-		upper = max(self.ROTATOR_MOTOR_LEFT, self.ROTATOR_MOTOR_RIGHT)
-		lower = min(self.ROTATOR_MOTOR_LEFT, self.ROTATOR_MOTOR_RIGHT)
-
-		if pwm_val < lower:
-			pwm_val = lower
-
-		elif pwm_val > upper:
-			pwm_val = upper
-
-		self.pwm_val = pwm_val
-		self.pwm.set_pwm(self.channel, 0, pwm_val)
-'''
 
 class Robot_Torso(object):
 	def __init__(self, right_arm, left_arm, rotator):

@@ -17,7 +17,7 @@ from torso_data import *
 
 from hex_walker_constants import *
 from hex_util import *
-from leg_thread import *
+import frame_thread as ft
 
 #Extraneous
 HW_MOVE_DEBUG = 0 #toggle 0/1 to turn debug prints on/off
@@ -92,7 +92,7 @@ class Leg(object):
 		# note: this MUST be daemon type because the thread is designed to run forever... the only way to stop it is by stopping its parent, which means it must be a daemon!
 		# it should be able to access all of this leg's other member variables and functions
 		# threadname = "framethread" + str(leg_num)
-		self.framethread = threading.Thread(name="framethread_" + str(leg_num), target=Frame_Thread_Func, args=(self, LEG_THREAD_DEBUG), daemon=True)
+		self.framethread = threading.Thread(name="framethread_" + str(leg_num), target=ft.Frame_Thread_Func, args=(self, LEG_THREAD_DEBUG), daemon=True)
 		# just to be safe, don't start the thread until the end of __init__
 		
 		
@@ -294,7 +294,7 @@ class Leg(object):
 		
 		# run interpolation
 		# NOTE: "curr" only needs 3 elements, but when copied from frame_queue it has 4... the 4th is just unused
-		interpolate_list = interpolate(dest, curr, time)
+		interpolate_list = ft.interpolate(dest, curr, time)
 		
 		# add new frames onto the END of the frame queue (with lock)
 		with self._frame_queue_lock:

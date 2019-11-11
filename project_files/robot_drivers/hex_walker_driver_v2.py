@@ -241,61 +241,60 @@ class Leg(object):
 		
 	# creates a temporary "leg position" object to give to the leg_position_thread function
 	# changes the given motor to the given position over the given time
-	# OTHER MOTORS CANNOT CHANGE WHILE THIS IS CHANGING, to change multiple motors at a time use set_leg_position_thread
+	# OTHER MOTORS (on this leg) CANNOT CHANGE DURING THIS TIME, to change multiple motors at a time use set_leg_position_thread
 	def set_servo_angle_thread(self, angle, motor, time):
-		# # TODO: if the Leg_Position object is changed to list-style, i can use:
-		# v = self.curr_servo_angle.copy() # explicitly make a copy
-		# v[motor] = angle # modify the copy
-		# L = Leg_Position(v) # init the Leg_Position from the list
+		# explicitly make a copy of current angles
+		v = list(self.curr_servo_angle)
+		# modify one entry of the copy
+		v[motor] = angle
+		# init the Leg_Position from the list
+		L = Leg_Position(v[0], v[1], v[2])
 		
-		L = None
-		if motor == TIP_MOTOR or motor == WAIST_MOTOR:
-			L = Leg_Position(angle, self.curr_servo_angle[1], self.curr_servo_angle[2])			
-		if motor == MID_MOTOR:
-			L = Leg_Position(self.curr_servo_angle[0], angle, self.curr_servo_angle[2])			
-		if motor == ROT_MOTOR:
-			L = Leg_Position(self.curr_servo_angle[0], self.curr_servo_angle[1], angle)
 		self.set_leg_position_thread(L, time)
-		
-	
+
+
 	# uses the "leg_position" objects, immediate set (no threading)
 	def set_leg_position(self, leg_position):
 		self.set_servo_angle(leg_position.tip_motor, TIP_MOTOR)
 		self.set_servo_angle(leg_position.mid_motor, MID_MOTOR)
 		self.set_servo_angle(leg_position.rot_motor, ROT_MOTOR)
 
+
 	# safety clamp (in angle space) 
 	# interpolate (in angle space)
-	# adds commands to the command queue (with lock)
+	# adds frames to the frame queue (with lock)
 	# sets the "running" flag unconditionally (note: no harm in setting an already set flag)
 	# * thread will jump in with "do_set_servo_angle" when it is the correct time
 	def set_leg_position_thread(self, leg_position, time):
-		# assemble command from the leg position
-		# TODO: add a time component to the leg position object? or make a new object type? or just build the command like this? not sure how to best integrate/use this system
-		command = [0, 0, 0, time]
+		# assemble dest from the leg position
+		# TODO: add a time component to the leg position object? or make a new object type? or just build the dest like this? not sure how to best integrate/use this system
+		dest = [0, 0, 0]
 		
 		# safety checking for each motor
-		command[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, 
+		# TODO: once Leg_Position is listified, replace the following code with:
+		# for s in range(3):
+			# dest[s] = bidirectional_clamp(leg_position.list[s], self.SERVO_ANGLE_LIMITS[s][0], self.SERVO_ANGLE_LIMITS[s][1])
+		dest[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, 
 					self.SERVO_ANGLE_LIMITS[TIP_MOTOR][0], self.SERVO_ANGLE_LIMITS[TIP_MOTOR][1])
-		command[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, 
+		dest[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, 
 					self.SERVO_ANGLE_LIMITS[MID_MOTOR][0], self.SERVO_ANGLE_LIMITS[MID_MOTOR][1])
-		command[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, 
+		dest[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, 
 					self.SERVO_ANGLE_LIMITS[ROT_MOTOR][0], self.SERVO_ANGLE_LIMITS[ROT_MOTOR][1])
-		
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.
 		# otherwise, interpolate from current position.
-		lastframe = []
+		curr = []
 		with self._frame_queue_lock:
 			if len(self.frame_queue) > 0:
 				# be sure it is a copy and not a reference, just to be safe
-				lastframe = list(self.frame_queue[-1])
-		if lastframe == []:   # "else" but outside of the lock block
-			lastframe = self.curr_servo_angle
+				curr = list(self.frame_queue[-1])
+		if curr == []:   # "else" but outside of the lock block
+			# this is fine as a reference, because this only happens when the thread isn't running
+			curr = self.curr_servo_angle
 		
 		# run interpolation
-		# NOTE: "command" must have 4 elements, "lastframe" only needs 3, the 4th is just unused
-		interpolate_list = interpolate(command, lastframe)
+		# NOTE: "curr" only needs 3 elements, but when copied from frame_queue it has 4... the 4th is just unused
+		interpolate_list = interpolate(dest, curr, time)
 		
 		# add new frames onto the END of the frame queue (with lock)
 		with self._frame_queue_lock:
@@ -308,8 +307,7 @@ class Leg(object):
 			self.idle_flag.clear()
 			# set the "running" event, this may trigger other waiting tasks
 			self.running_flag.set()
-		
-		
+
 
 	# clear the frame queue to stop any currently-pending movements.
 	# note that when the hexwalker calls this it should first abort() all legs, THEN call "synchronize" on all legs. 
@@ -720,7 +718,7 @@ class Hex_Walker(object):
 					# tall neutral = (120, 45, 90)
 					self.set_hexwalker_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 			if(direction == LEFT):
-				reverselist = GROUP_ALL_LEGS.copy()
+				reverselist = list(GROUP_ALL_LEGS)
 				reverselist.reverse()
 				for n in reverselist:
 					self.set_hexwalker_leg_position(MISC_TABLE["PULL_UP"], n, speed)

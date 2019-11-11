@@ -4,6 +4,23 @@
 # this file defines constants that are used in many places throughout many files, so they
 # can be changed from just one place.
 
+
+# ==========================================================
+
+# arbitrary values
+LEFT = 1
+RIGHT = 2
+
+# return codes
+SUCCESS = 0
+INV_PARAM = -1
+ILLEGAL_MOVE = -2
+
+# speed options: this is just the time it waits betweeen moves (for hexwalker object)
+PLAID_SPEED = .1
+NORMAL = .2
+SLOW = .4
+
 # ==========================================================
 
 # set the "leg number" IDs, do not change!!!
@@ -24,7 +41,7 @@ ARM_L = 6
 ARM_R = 7
 WAIST = 8
 
-# set up useful "groups" of leg indices
+# set up useful "groups" of leg indices, do not change!!!
 # should only be used as "for L in [self.idx_to_leg(n) for n in GROUP]:"
 GROUP_ALL_LEGS =   [LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_LF]
 GROUP_LEFT_LEGS =  [LEG_LB, LEG_LM, LEG_LF]

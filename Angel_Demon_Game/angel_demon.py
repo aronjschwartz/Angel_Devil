@@ -16,28 +16,27 @@ import random
 import quantum_circuit
 
 
-import pwm_wrapper
-from hex_walker_driver_v2 import *
+import pwm_wrapper as pw
+import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
 
-#Create objects for bot control
-pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
-rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
-rb = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
-larm = Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
-# rot = Rotator(0, pwm_bot, LEG_PWM_CHANNEL[WAIST][WAIST_MOTOR])
-rot = Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST)
+pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+rf = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF) #0
+rm = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM) #1
+rb = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB) #2
+larm = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L) #6
+rot = hwd.Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST) #8
 
-pwm_top = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-lb = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
-lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
-lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
-rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
+pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+lb = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB) #3
+lm = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM) #4
+lf = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF) #5
+rarm = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R) #7
+
 #create the hex walker
-#hex_walker = Hex_Walker(rf, rm, rb, lb, lm, lf)
+hex_walker = hwd.Hex_Walker(rf, rm, rb, lb, lm, lf)
 # create the torso
-#torso = Robot_Torso(rarm, larm, rot)
+torso = hwd.Robot_Torso(rarm, larm, rot)
 
 # let the robot move nice and slow to show off the new smoothness
 #hex_walker.set_speed(0.5)

@@ -8,8 +8,8 @@ sys.path.append("../project_files/robot_drivers/")
 import cv2 as cv
 import time
 
-import pwm_wrapper
-from hex_walker_driver_v2 import *
+import pwm_wrapper as pw
+import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
 
 
@@ -63,18 +63,18 @@ def dummy(x):
 
 
 def initialize_legs():
-	pwm_bot = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-	rf = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF)
-	rm = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM)
-	rb = Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB)
-	larm = Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L)
-	rot = Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST)
+	pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+	rf = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RF], LEG_RF) #0
+	rm = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RM], LEG_RM) #1
+	rb = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[LEG_RB], LEG_RB) #2
+	larm = hwd.Leg(pwm_bot, LEG_PWM_CHANNEL[ARM_L], ARM_L) #6
+	rot = hwd.Rotator(pwm_bot, LEG_PWM_CHANNEL[WAIST], WAIST) #8
 
-	pwm_top = pwm_wrapper.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-	lb = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB)
-	lm = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM)
-	lf = Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF)
-	rarm = Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R)
+	pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+	lb = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LB], LEG_LB) #3
+	lm = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LM], LEG_LM) #4
+	lf = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[LEG_LF], LEG_LF) #5
+	rarm = hwd.Leg(pwm_top, LEG_PWM_CHANNEL[ARM_R], ARM_R) #7
 
 	all = [rf, rm, rb, lb, lm, lf, larm, rarm, rot]
 	

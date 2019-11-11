@@ -28,22 +28,6 @@ USE_THREADING = True
 
 
 
-# arbitrary values
-LEFT = 1
-RIGHT = 2
-
-# error codes and coding constants
-SUCCESS = 0
-INV_PARAM = -1
-ILLEGAL_MOVE = -2
-
-
-# speed options: this is just the time it waits betweeen moves (for hexwalker object)
-PLAID_SPEED = .1
-NORMAL = .2
-SLOW = .4
-
-
 # Leg_Position class defined in leg_data.py
 # Hex_Walker_Position class defined in hex_walker_data.py
 # Torso_Position class defined in torso_data.py

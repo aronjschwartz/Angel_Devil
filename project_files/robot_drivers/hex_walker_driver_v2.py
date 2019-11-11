@@ -246,7 +246,7 @@ class Leg(object):
 		# # TODO: if the Leg_Position object is changed to list-style, i can use:
 		# v = self.curr_servo_angle.copy() # explicitly make a copy
 		# v[motor] = angle # modify the copy
-		# L = Leg_Position(v)
+		# L = Leg_Position(v) # init the Leg_Position from the list
 		
 		L = None
 		if motor == TIP_MOTOR or motor == WAIST_MOTOR:
@@ -381,41 +381,29 @@ class Hex_Walker(object):
 		# leglist indexed by LEG_RM, etc
 		self.leglist = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
 
-		# now, we assign meaningful values in order to define the "front"
-		# TODO: replace this with a list, indexed by "LEG_LF" "LEG_RB" etc
-		self.front = "5-0"
-		self.lf_leg = lf_leg
-		self.lm_leg = lm_leg
-		self.lb_leg = lb_leg
-		self.rf_leg = rf_leg
-		self.rm_leg = rm_leg
-		self.rb_leg = rb_leg
-
-		# create the lists of leg combinations that would be useful
-		self.all_legs = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
-		self.left_legs = [lf_leg, lm_leg, lb_leg]
-		self.right_legs = [rf_leg, rm_leg, rb_leg]
-		self.left_triangle = [lf_leg, rm_leg, lb_leg]
-		self.right_triangle = [rf_leg, lm_leg, rb_leg]
-		self.front_legs = [lf_leg, rf_leg]
-		self.mid_legs = [lm_leg, rm_leg]
-		self.rear_legs = [lb_leg, rb_leg]
-
 		# set operating mode
 		self.current_pos = NORMAL_NEUTRAL
 		self.speed = NORMAL
 		self.front = "5-0"
+		self.front_index_offset = 0
 		# set all legs to neutral
 		self.set_hexwalker_position(TALL_NEUTRAL)
 
 	def print_self(self):
 		print("speed: " + str(self.speed) + " || self.current_pos: " + str(self.current_pos) + " || self.front: " + self.front)
-		for leg in self.all_legs:
+		for leg in self.leglist:
 			leg.print_self()
 
 	def set_speed(self, new_speed):
 		self.speed = new_speed
 
+	## convert given index to the actual leg object... trivial but whatever
+	# apply a custom "front" by circular offsetting the index into the array
+	# direct-index into leglist gets the absolute leg, using idx_to_leg gets the relative-to-current-direction leg
+	def idx_to_leg(self, n):
+		return self.leglist[(n + self.front_index_offset) % 6]
+	
+	
 	# this function will change the front from being between the "5-0" legs to being
 	# between any two legs. The key is "(leg on frontleft)-(leg on frontright)"
 	def set_new_front(self, new_front):
@@ -427,62 +415,32 @@ class Hex_Walker(object):
 		# check for which side should be the front and re-assign the legs
 		# accordingly
 		if( new_front == "0-1" ):
-			self.rf_leg = self.leg1
-			self.rm_leg = self.leg2
-			self.rb_leg = self.leg3
-			self.lb_leg = self.leg4
-			self.lm_leg = self.leg5
-			self.lf_leg = self.leg0
+			self.front_index_offset = 1
 			self.front = new_front
 			return SUCCESS
 
 		elif( new_front == "1-2" ):
-			self.rf_leg = self.leg2
-			self.rm_leg = self.leg3
-			self.rb_leg = self.leg4
-			self.lb_leg = self.leg5
-			self.lm_leg = self.leg0
-			self.lf_leg = self.leg1
+			self.front_index_offset = 2
 			self.front = new_front
 			return SUCCESS
 
 		elif( new_front == "2-3" ):
-			self.rf_leg = self.leg3
-			self.rm_leg = self.leg4
-			self.rb_leg = self.leg5
-			self.lb_leg = self.leg0
-			self.lm_leg = self.leg1
-			self.lf_leg = self.leg2
+			self.front_index_offset = 3
 			self.front = new_front
 			return SUCCESS
 
 		elif( new_front == "3-4" ):
-			self.rf_leg = self.leg4
-			self.rm_leg = self.leg5
-			self.rb_leg = self.leg0
-			self.lb_leg = self.leg1
-			self.lm_leg = self.leg2
-			self.lf_leg = self.leg3
+			self.front_index_offset = 4
 			self.front = new_front
 			return SUCCESS
 
 		elif( new_front == "4-5" ):
-			self.rf_leg = self.leg5
-			self.rm_leg = self.leg0
-			self.rb_leg = self.leg1
-			self.lb_leg = self.leg2
-			self.lm_leg = self.leg3
-			self.lf_leg = self.leg4
+			self.front_index_offset = 5
 			self.front = new_front
 			return SUCCESS
 
 		elif( new_front == "5-0" ):
-			self.rf_leg = self.leg0
-			self.rm_leg = self.leg1
-			self.rb_leg = self.leg2
-			self.lb_leg = self.leg3
-			self.lm_leg = self.leg4
-			self.lf_leg = self.leg5
+			self.front_index_offset = 0
 			self.front = new_front
 			return SUCCESS
 
@@ -530,19 +488,20 @@ class Hex_Walker(object):
 	## this multiple times without synchronize() between.
 	# if given dest=Leg_Position, set all specified legs to that same pose
 	# if given dest=Hex_Walker_Position, set all specified legs to the pose corresponding to that leg within the Hex_Walker_Position object
-	# leglist can be int or list, or none (defaults to all legs)
+	# legmask can be int or list, or none (defaults to all legs)
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
-	def set_hexwalker_leg_position(self, dest, leglist=GROUP_ALL_LEGS, time=self.speed):
-		# leglist: if given a single index rather than an iteratable, make it into a set
-		# if given something else, cast the leglist as a set to remove potential duplicates
-		legs = set((leglist)) if isinstance(leglist, int) else set(leglist)
+	def set_hexwalker_leg_position(self, dest, legmask=GROUP_ALL_LEGS, time=self.speed):
+		# legmask: if given a single index rather than an iteratable, make it into a set
+		# if given something else, cast the legmask as a set to remove potential duplicates
+		legs = set((legmask)) if isinstance(legmask, int) else set(legmask)
 		
 		if isinstance(dest, Hex_Walker_Position):
 			if USE_THREADING:
 				for n in legs:
 					# extract the appropriate pose from the object
 					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
+					# self.idx_to_leg(n).set_leg_position_thread(dest.list[n], time)
 					if n == LEG_RF:
 						pose = dest.rf_pos
 					elif n == LEG_RM:
@@ -560,6 +519,7 @@ class Hex_Walker(object):
 				for n in legs:
 					# extract the appropriate pose from the object
 					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
+					# self.idx_to_leg(n).set_leg_position(dest.list[n])
 					if n == LEG_RF:
 						pose = dest.rf_pos
 					elif n == LEG_RM:
@@ -587,15 +547,15 @@ class Hex_Walker(object):
 
 
 
-	# synchronize the legs with the main thread by not returning until all of the specified legs are done moving
-	# accepts list, set, int (treated as single-element set)
+	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
+	# legmask accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_LEGS
 	# depending on USE_THREADING, either simply sleep or do the actual synchro
-	def synchronize(self, masklist=GROUP_ALL_LEGS):
+	def synchronize(self, legmask=GROUP_ALL_LEGS):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
-			# if given something else, cast the masklist as a set to remove potential duplicates
-			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+			# if given something else, cast the legmask as a set to remove potential duplicates
+			mask = set((legmask)) if isinstance(legmask, int) else set(legmask)
 			
 			for leg in [self.idx_to_leg(n) for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
@@ -604,12 +564,6 @@ class Hex_Walker(object):
 			time.sleep(self.speed)
 		
 		
-	# convert given index to the actual leg object... trivial but whatever
-	# TODO: apply custom "front" offset here
-	def idx_to_leg(self, n):
-		return self.leglist[n]
-	
-	
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
 	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
 	def abort(self):

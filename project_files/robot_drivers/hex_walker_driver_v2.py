@@ -186,46 +186,48 @@ class Leg(object):
 
 
 	# conversion functions: use linear mapping from input to output
-	def angle_to_pwm(self, angle, motor):
-		if motor < 0 or motor > 2:
-			print("ERR#1: INVALID PARAM")
+	def angle_to_pwm(self, angle, servo):
+		if servo < 0 or servo > 2:
+			print("ERR#1: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
 			return INV_PARAM
-		return linear_map(self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_PWM_LIMITS[motor][0], 
-						self.SERVO_ANGLE_LIMITS[motor][1], self.SERVO_PWM_LIMITS[motor][1], 
+		return linear_map(self.SERVO_ANGLE_LIMITS[servo][0], self.SERVO_PWM_LIMITS[servo][0], 
+						self.SERVO_ANGLE_LIMITS[servo][1], self.SERVO_PWM_LIMITS[servo][1], 
 						angle)
 		
-	def pwm_to_angle(self, pwm, motor):
-		if motor < 0 or motor > 2:
-			print("ERR#2: INVALID PARAM")
+	def pwm_to_angle(self, pwm, servo):
+		if servo < 0 or servo > 2:
+			print("ERR#2: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", pwm="+str(pwm))
 			return INV_PARAM
-		return linear_map(self.SERVO_PWM_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][0], 
-						self.SERVO_PWM_LIMITS[motor][1], self.SERVO_ANGLE_LIMITS[motor][1], 
+		return linear_map(self.SERVO_PWM_LIMITS[servo][0], self.SERVO_ANGLE_LIMITS[servo][0], 
+						self.SERVO_PWM_LIMITS[servo][1], self.SERVO_ANGLE_LIMITS[servo][1], 
 						pwm)
 
-	def percent_to_angle(self, percent, motor):
-		# maps 0-100 to each motor's min and max angle values
-		if motor < 0 or motor > 2:
-			print("ERR#3: INVALID PARAM")
+	def percent_to_angle(self, percent, servo):
+		# maps 0-100 to each servo's min and max angle values
+		if servo < 0 or servo > 2:
+			print("ERR#3: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", percent="+str(percent))
 			return INV_PARAM
-		return linear_map(100, self.SERVO_ANGLE_LIMITS[motor][0], 
-						0, self.SERVO_ANGLE_LIMITS[motor][1], 
+		return linear_map(100, self.SERVO_ANGLE_LIMITS[servo][0], 
+						0, self.SERVO_ANGLE_LIMITS[servo][1], 
 						angle)
 
 	# convert-then-set functions:
-	def set_servo_percent(self, percent, motor):
+	def set_servo_percent(self, percent, servo):
 		# convert and pass off to set_servo_angle
-		self.set_servo_angle(self.percent_to_angle(percent, motor), motor)
-	def set_servo_pwm(self, pwm, motor):
+		self.set_servo_angle(self.percent_to_angle(percent, servo), servo)
+	def set_servo_pwm(self, pwm, servo):
 		# convert and pass off to set_servo_angle
-		self.set_servo_angle(self.angle_to_pwm(pwm, motor), motor)
+		self.set_servo_angle(self.angle_to_pwm(pwm, servo), servo)
 
 	# the old-fashioned "do the thing" command: clamps value to safety limits, ensures it won't collide with any thread operations, and calls do_set_servo_angle
-	def set_servo_angle(self, angle, motor):
-		if angle < 0 or angle > 360:
-			print("ERR#4: INVALID PARAM")
-			return INV_PARAM
-		if motor < 0 or motor > 2:
-			print("ERR#5: INVALID PARAM")
+	def set_servo_angle(self, angle, servo):
+		if servo < 0 or servo > 2:
+			# ensure servo index is valid
+			print("ERR#4: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
 			return INV_PARAM
 
 		# wait until running_flag is clear (idle_flag is set)
@@ -233,20 +235,25 @@ class Leg(object):
 		# you SHOULDN'T be using both the thread and the direct-set method, but better to be safe than sorry
 		self.idle_flag.wait()
 		
-		# safety checking for each motor
-		safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[motor][0], self.SERVO_ANGLE_LIMITS[motor][1])
+		# safety checking for each servo
+		safe_angle = bidirectional_clamp(angle, self.SERVO_ANGLE_LIMITS[servo][0], self.SERVO_ANGLE_LIMITS[servo][1])
 		
-		return self.do_set_servo_angle(safe_angle, motor)
+		return self.do_set_servo_angle(safe_angle, servo)
 		
 		
 	# creates a temporary "leg position" object to give to the leg_position_thread function
-	# changes the given motor to the given position over the given time
+	# changes the given servo to the given position over the given time
 	# OTHER MOTORS (on this leg) CANNOT CHANGE DURING THIS TIME, to change multiple motors at a time use set_leg_position_thread
-	def set_servo_angle_thread(self, angle, motor, time):
+	def set_servo_angle_thread(self, angle, servo, time):
+		if servo < 0 or servo > 2:
+			# ensure servo index is valid
+			print("ERR#5: INVALID SERVO INDEX! valid values are 0 to 2")
+			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
+			return INV_PARAM
 		# explicitly make a copy of current angles
 		v = list(self.curr_servo_angle)
 		# modify one entry of the copy
-		v[motor] = angle
+		v[servo] = angle
 		# init the Leg_Position from the list
 		L = Leg_Position(v[0], v[1], v[2])
 		

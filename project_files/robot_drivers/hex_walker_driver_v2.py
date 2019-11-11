@@ -406,7 +406,7 @@ class Hex_Walker(object):
 		self.speed = NORMAL
 		self.front = "5-0"
 		# set all legs to neutral
-		self.set_hex_walker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL)
 
 	def print_self(self):
 		print("speed: " + str(self.speed) + " || self.current_pos: " + str(self.current_pos) + " || self.front: " + self.front)
@@ -493,13 +493,12 @@ class Hex_Walker(object):
 
 	## take a list of INDICES of poses to run through.
 	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
-	# previously do_move_set
 	def run_move_list(self, hex_walker_position_list):
 		for next_pos in hex_walker_position_list:
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
 					print("Sending command")
-				self.set_hex_walker_position(next_pos)
+				self.set_hexwalker_position(next_pos)
 				self.synchronize()
 			else:
 				print("invalid move set")
@@ -511,7 +510,6 @@ class Hex_Walker(object):
 	# hexwalker_pose_id can be index or object. 
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
 	# optional arg with speed
-	# previously set_hex_walker_position
 	def set_hexwalker_position(self, hexwalker_pose_id, time=self.speed):
 		if isinstance(hexwalker_pose_id, int):
 			# if it is an index, then update current_pos and do the rest of the thing
@@ -587,39 +585,6 @@ class Hex_Walker(object):
 		else:
 			print("ERROR: given invalid hexwalker leg position type")
 
-'''
-	# new version: gradual motion
-	#TODO: make this better
-	def do_move_set_thread(self, hex_walker_position_list):
-		for next_pos in hex_walker_position_list:
-			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
-				if HW_MOVE_DEBUG:
-					print("Sending command")
-				self.set_hex_walker_position_thread(next_pos)
-				self.synchronize()
-			else:
-				print("invalid move set")
-				return ILLEGAL_MOVE
-		return SUCCESS
-		
-
-	#TODO: make this better
-	def set_hex_walker_position_thread(self, hex_walker_position_number):
-		if(HW_MOVE_DEBUG):
-			print("current position is : " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to position: " + HEX_WALKER_POSITIONS[hex_walker_position_number].description)
-		self.current_pos = hex_walker_position_number
-		self.do_set_hex_walker_position_thread(HEX_WALKER_POSITIONS[hex_walker_position_number])
-
-
-	#TODO: make this better
-	def do_set_hex_walker_position_thread(self, hex_walker_position):
-		self.rf_leg.set_leg_position_thread(hex_walker_position.rf_pos, self.speed)
-		self.rm_leg.set_leg_position_thread(hex_walker_position.rm_pos, self.speed)
-		self.rb_leg.set_leg_position_thread(hex_walker_position.rr_pos, self.speed)
-		self.lb_leg.set_leg_position_thread(hex_walker_position.lr_pos, self.speed)
-		self.lm_leg.set_leg_position_thread(hex_walker_position.lm_pos, self.speed)
-		self.lf_leg.set_leg_position_thread(hex_walker_position.lf_pos, self.speed)
-'''
 
 
 	# synchronize the legs with the main thread by not returning until all of the specified legs are done moving
@@ -667,7 +632,7 @@ class Hex_Walker(object):
 			print("walk dir: " + get_front_from_direction(direction))
 		
 		# start walk by lifting legs
-		self.set_hex_walker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
+		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
 		# define positions to go through to get steps from a neutral legs up
 		left_step = [
 		TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
@@ -685,19 +650,19 @@ class Hex_Walker(object):
 
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.do_move_set(left_step)
+				self.run_move_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.do_move_set(right_step)
+				self.run_move_list(right_step)
 				last_step = "right"
 		#cleanup
-		self.set_hex_walker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL)
 		self.set_new_front("5-0")
 
 	def rotate(self, num_steps, direction):
 		
 		# start rotate by lifting legs
-		self.set_hex_walker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
+		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
 		go_left_right_step = [
 		TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
@@ -733,18 +698,18 @@ class Hex_Walker(object):
 		last_step = "right"
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.do_move_set(left_step)
+				self.run_move_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.do_move_set(right_step)
+				self.run_move_list(right_step)
 				last_step = "right"
 		#cleanup
-		self.set_hex_walker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL)
 
 	def fine_rotate(self, num_steps, direction):
 		
 		# start rotate by lifting legs
-		self.set_hex_walker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
+		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
 		go_left_right_step = [
 		TALL_TRI_FINE_RIGHT_RIGHT_LEFT_UP_LEFT,
@@ -780,37 +745,46 @@ class Hex_Walker(object):
 		last_step = "right"
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.do_move_set(left_step)
+				self.run_move_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.do_move_set(right_step)
+				self.run_move_list(right_step)
 				last_step = "right"
 		#cleanup
-		self.set_hex_walker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL)
 
+	# "ripple" the legs around the robot in one direction or the other
 	def leg_wave(self, direction, speed, repetitions):
-		# TODO: figure out what the hell this is doing
 		for i in range(0, repetitions):
 			if(direction == RIGHT):
-				for leg in self.all_legs:
-					leg.set_leg_position(MISC_TABLE["PULL_UP"])
-					time.sleep(speed)
-					leg.set_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"])
+				for n in GROUP_ALL_LEGS:
+					# pull_up = (60, 75, 90), tip above horizontal
+					# normal neutral = (120, 90, 90)
+					# crouch neutral = (45, 135, 90)
+					self.set_hexwalker_leg_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.synchronize()
+					# tall neutral = (120, 45, 90)
+					self.set_hexwalker_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 			if(direction == LEFT):
-				for i in range(len(self.all_legs)-1, -1, -1):
-					self.all_legs[i].set_leg_position(MISC_TABLE["PULL_UP"])
-					time.sleep(speed)
-					self.all_legs[i].set_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"])
+				reverselist = GROUP_ALL_LEGS.copy()
+				reverselist.reverse()
+				for n in reverselist:
+					self.set_hexwalker_leg_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.synchronize()
+					self.set_hexwalker_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+		# one last synchronize() for the final movement to complete
+		self.synchronize()
 
+	# tea-bag
 	def bounce(self, wait, repetitions):
 		for i in range(0, repetitions):
-			self.set_hex_walker_position(TALL_TRI_BOUNCE_DOWN)
-			time.sleep(wait)
-			self.set_hex_walker_position(TALL_NEUTRAL)
-			time.sleep(wait)
+			self.set_hexwalker_position(TALL_TRI_BOUNCE_DOWN, wait)
+			self.synchronize()
+			self.set_hexwalker_position(TALL_NEUTRAL, wait)
+			self.synchronize()
 
 	def do_nothing(self):
-		self.set_hex_walker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL)
 		
 	########################################################################################
 	########################################################################################

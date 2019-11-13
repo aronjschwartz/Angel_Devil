@@ -486,7 +486,8 @@ class Hex_Walker(object):
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
 	# optional arg with speed
 	# previously "set_hex_walker_position"
-	def set_hexwalker_position(self, hexwalker_pose_id, time=self.speed):
+	def set_hexwalker_position(self, hexwalker_pose_id, time=-1):
+		time = self.speed if time==-1 else time
 		if isinstance(hexwalker_pose_id, int):
 			# if it is an index, then update current_pos and do the rest of the thing
 			self.current_pos = hexwalker_pose_id
@@ -510,7 +511,8 @@ class Hex_Walker(object):
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
 	# previously "do_set_hex_walker_position"
-	def do_set_hexwalker_position(self, dest, legmask=GROUP_ALL_LEGS, time=self.speed):
+	def do_set_hexwalker_position(self, dest, legmask=GROUP_ALL_LEGS, time=-1):
+		time = self.speed if time==-1 else time
 		# legmask: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the legmask as a set to remove potential duplicates
 		legs = set((legmask)) if isinstance(legmask, int) else set(legmask)

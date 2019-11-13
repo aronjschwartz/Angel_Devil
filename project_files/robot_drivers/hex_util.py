@@ -5,9 +5,6 @@
 # i just didn't want them cluttering up the class definitions in hex_walker_driver_v2
 
 
-import math
-
-
 # helper functions
 # returns slope given two points
 def slope(x1, y1, x2, y2):

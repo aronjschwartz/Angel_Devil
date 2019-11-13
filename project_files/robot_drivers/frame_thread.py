@@ -16,6 +16,7 @@
 
 import time
 import threading
+import math
 from hex_walker_constants import *
 
 # TODO: change debug prints to use "logging" module?

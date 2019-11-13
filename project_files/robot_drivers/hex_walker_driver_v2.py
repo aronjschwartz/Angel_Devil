@@ -364,7 +364,7 @@ class Rotator(Leg):
 # "synchronize" will wait until the specified legs are done moving before it returns (if empty waits for all).
 # For more basic control (old style), use "run_pose_list": each pose sets all legs at once and each pose
 # transition takes the same duration. Repeatedly calls "set_hexwalker_position" and "synchronize()".
-# For more advanced control (new style), use "set_hexwalker_leg_position": supports per-leg masking and
+# For more advanced control (new style), use "do_set_hexwalker_position": supports per-leg masking and
 # poses can be Hex_Walker_Position or Leg_Position, doesn't use the "safe pose transition" checking of
 # "run_pose_list" so this works with dynamically-created or dynamically-modified poses.
 class Hex_Walker(object):
@@ -376,7 +376,7 @@ class Hex_Walker(object):
 	# set_new_front
 	# run_pose_list
 	# set_hexwalker_position
-	# set_hexwalker_leg_position
+	# do_set_hexwalker_position
 	# synchronize
 	# abort
 	# + assorted "motion" functions

@@ -490,15 +490,15 @@ class Hex_Walker(object):
 		if isinstance(hexwalker_pose_id, int):
 			# if it is an index, then update current_pos and do the rest of the thing
 			self.current_pos = hexwalker_pose_id
-			pose = HEX_WALKER_POSITIONS[hexwalker_pose_id]
+			hex_pose = HEX_WALKER_POSITIONS[hexwalker_pose_id]
 			if(HW_MOVE_DEBUG):
-				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + pose.description)
+				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + hex_pose.description)
 		else:
-			# if it is the actual object, then it was probably dynamically created. don't update pose, dont print debug description
-			pose = hexwalker_pose_id
+			# if it is the actual object, then it was probably dynamically created. don't update hex_pose, dont print debug description
+			hex_pose = hexwalker_pose_id
 		
-		# self.set_hexwalker_leg_position(pose, GROUP_ALL_LEGS, self.speed)
-		self.set_hexwalker_leg_position(pose)
+		# self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, self.speed)
+		self.do_set_hexwalker_position(hex_pose)
 
 
 	## used to set the pose of some/all of the while keeping other legs untouched.
@@ -510,7 +510,7 @@ class Hex_Walker(object):
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
 	# previously "do_set_hex_walker_position"
-	def set_hexwalker_leg_position(self, dest, legmask=GROUP_ALL_LEGS, time=self.speed):
+	def do_set_hexwalker_position(self, dest, legmask=GROUP_ALL_LEGS, time=self.speed):
 		# legmask: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the legmask as a set to remove potential duplicates
 		legs = set((legmask)) if isinstance(legmask, int) else set(legmask)

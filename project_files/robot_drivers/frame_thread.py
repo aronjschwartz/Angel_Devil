@@ -27,8 +27,8 @@ from hex_walker_constants import *
 # _state_flag_lock
 # frame_queue
 # _frame_queue_lock
-# framethread
-# uid
+# framethread (debugging)
+# uid (debugging)
 # do_set_servo_angle()
 def Frame_Thread_Func(leg, DEBUG):
 	# looping forever

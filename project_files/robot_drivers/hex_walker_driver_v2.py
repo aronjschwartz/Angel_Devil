@@ -32,10 +32,14 @@ USE_THREADING = True
 # Hex_Walker_Position class defined in hex_walker_data.py
 # Torso_Position class defined in torso_data.py
 
-# a leg object should be able to associate itself with specific channels
-# on a specific i2c interface address and then control all parts of the
-# leg. It should be able to set each servo according to a degree, max, min,
-# or a value from 0-100 in terms of percent of maximum
+
+# A Leg object is a group of 3 servos that are controlled as one unit. It is used for the 6 legs
+# and both arms of Feynman bot, and the subclass Rotator is used for the waist. The servos in the
+# leg can be directly and immediately set or gradually/linearly transition to the destination pose
+# depending on the function used. They can be individually set via angle, PWM value, or percentage.
+# To set all at once, the Leg_Position object must be used. When initialized it is given the I2C
+# address of the PWM hat it is connected to, and the PWM channels on that hat the individual servos
+# connect to. All servos in a Leg must be on the same PWM hat.
 class Leg(object):
 	# list of functions:
 	# __init__
@@ -338,9 +342,10 @@ class Leg(object):
 
 # make the "rotator" class a subclass of "leg"
 # any functions that would work on a leg also work on the rotator, it inherits absolutely everything
-# redefines do_set_servo_angle to only touch the one servo, ignore other two
-# to use this with threading it will need to use set_servo_angle_thread(angle, motor, time)
-# technically you can try to set the other 2 leg motors and it won't crash but nothing will happen unless you are setting the waist motor
+# redefines lowest-level function do_set_servo_angle to only touch the one servo, ignore other two
+# set_servo_angle_thread(angle, motor=WAIST_MOTOR, time) is the "right" way to change the waist rotation
+# set_leg_position_thread(Leg_Position, time) also works because the non-WAIST_MOTOR servos will be ignored
+# nothing will change unless you are setting the waist motor, regardless how you try
 class Rotator(Leg):
 	# internal-use-only function
 	# if servo is not WAIST_MOTOR, then return & do nothing... otherwise call normal do_set_servo_angle()
@@ -353,13 +358,31 @@ class Rotator(Leg):
 
 
 
+# The Hex_Walker is a way of grouping the 6 actual legs for macro-control. This is totally
+# isolated from the torso servos. This contains the "motion functions" for things like walking and
+# turning, as well as the driver functions to execute these motions.
+# "synchronize" will wait until the specified legs are done moving before it returns (if empty waits for all).
+# For more basic control (old style), use "run_pose_list": each pose sets all legs at once and each pose
+# transition takes the same duration. Repeatedly calls "set_hexwalker_position" and "synchronize()".
+# For more advanced control (new style), use "set_hexwalker_leg_position": supports per-leg masking and
+# poses can be Hex_Walker_Position or Leg_Position, doesn't use the "safe pose transition" checking of
+# "run_pose_list" so this works with dynamically-created or dynamically-modified poses.
 class Hex_Walker(object):
+	# list of functions:
+	# __init__
+	# print_self
+	# set_speed
+	# idx_to_leg
+	# set_new_front
+	# run_pose_list
+	# set_hexwalker_position
+	# set_hexwalker_leg_position
+	# synchronize
+	# abort
+	# + assorted "motion" functions
 	def __init__(self, rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg):
-	
-		# TODO: make the leg objects live in an actual list so we can iterate over it
-		
-		# this is an initial array that serves as a permanent holder
-		# these need to stay
+		# create backup members permanently and explicitly tied to each leg
+		# currently not used but it couldn't hurt, really
 		self.leg0 = rf_leg
 		self.leg1 = rm_leg
 		self.leg2 = rb_leg
@@ -367,7 +390,7 @@ class Hex_Walker(object):
 		self.leg4 = lm_leg
 		self.leg5 = lf_leg
 		
-		# leglist indexed by LEG_RM, etc
+		# leglist indexed by leg ID, etc
 		self.leglist = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
 
 		# set operating mode
@@ -378,21 +401,24 @@ class Hex_Walker(object):
 		# set all legs to neutral
 		self.set_hexwalker_position(TALL_NEUTRAL)
 
+
 	def print_self(self):
 		print("speed: " + str(self.speed) + " || self.current_pos: " + str(self.current_pos) + " || self.front: " + self.front)
 		for leg in self.leglist:
 			leg.print_self()
 
+
 	def set_speed(self, new_speed):
 		self.speed = new_speed
+
 
 	## convert given index to the actual leg object... trivial but whatever
 	# apply a custom "front" by circular offsetting the index into the array
 	# direct-index into leglist gets the absolute leg, using idx_to_leg gets the relative-to-current-direction leg
 	def idx_to_leg(self, n):
 		return self.leglist[(n + self.front_index_offset) % 6]
-	
-	
+
+
 	# this function will change the front from being between the "5-0" legs to being
 	# between any two legs. The key is "(leg on frontleft)-(leg on frontright)"
 	def set_new_front(self, new_front):
@@ -440,7 +466,9 @@ class Hex_Walker(object):
 
 	## take a list of INDICES of poses to run through.
 	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
-	def run_move_list(self, hex_walker_position_list):
+	# will eventually remove this feature probably
+	# previously "do_move_set"
+	def run_pose_list(self, hex_walker_position_list):
 		for next_pos in hex_walker_position_list:
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
@@ -451,12 +479,13 @@ class Hex_Walker(object):
 				print("invalid move set")
 				return ILLEGAL_MOVE
 		return SUCCESS
-	
-	
+
+
 	## used to set the pose of the whole 6-leg system and update "current pose" if possible.
 	# hexwalker_pose_id can be index or object. 
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
 	# optional arg with speed
+	# previously "set_hex_walker_position"
 	def set_hexwalker_position(self, hexwalker_pose_id, time=self.speed):
 		if isinstance(hexwalker_pose_id, int):
 			# if it is an index, then update current_pos and do the rest of the thing
@@ -480,6 +509,7 @@ class Hex_Walker(object):
 	# legmask can be int or list, or none (defaults to all legs)
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
+	# previously "do_set_hex_walker_position"
 	def set_hexwalker_leg_position(self, dest, legmask=GROUP_ALL_LEGS, time=self.speed):
 		# legmask: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the legmask as a set to remove potential duplicates
@@ -535,7 +565,6 @@ class Hex_Walker(object):
 			print("ERROR: given invalid hexwalker leg position type")
 
 
-
 	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
 	# legmask accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_LEGS
@@ -551,8 +580,8 @@ class Hex_Walker(object):
 				leg.idle_flag.wait()
 		else:
 			time.sleep(self.speed)
-		
-		
+
+
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
 	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
 	def abort(self):
@@ -560,7 +589,7 @@ class Hex_Walker(object):
 		for leg in self.leglist:
 			leg.abort()
 		# then wait until all legs returned to "sleeping" state
-		self.synchronize(self.leglist)
+		self.synchronize()
 		# then wait for 3x the interpolate time, just to be safe
 		time.sleep(INTERPOLATE_TIME * 3)
 
@@ -593,17 +622,17 @@ class Hex_Walker(object):
 
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.run_move_list(left_step)
+				self.run_pose_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.run_move_list(right_step)
+				self.run_pose_list(right_step)
 				last_step = "right"
 		#cleanup
 		self.set_hexwalker_position(TALL_NEUTRAL)
 		self.set_new_front("5-0")
 
+
 	def rotate(self, num_steps, direction):
-		
 		# start rotate by lifting legs
 		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
@@ -641,16 +670,16 @@ class Hex_Walker(object):
 		last_step = "right"
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.run_move_list(left_step)
+				self.run_pose_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.run_move_list(right_step)
+				self.run_pose_list(right_step)
 				last_step = "right"
 		#cleanup
 		self.set_hexwalker_position(TALL_NEUTRAL)
+
 
 	def fine_rotate(self, num_steps, direction):
-		
 		# start rotate by lifting legs
 		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
 		# define positions to go through to get steps from neutral legs up
@@ -688,13 +717,14 @@ class Hex_Walker(object):
 		last_step = "right"
 		for i in range (0, num_steps):
 			if(last_step == "right"):
-				self.run_move_list(left_step)
+				self.run_pose_list(left_step)
 				last_step = "left"
 			elif(last_step == "left"):
-				self.run_move_list(right_step)
+				self.run_pose_list(right_step)
 				last_step = "right"
 		#cleanup
 		self.set_hexwalker_position(TALL_NEUTRAL)
+
 
 	# "ripple" the legs around the robot in one direction or the other
 	def leg_wave(self, direction, speed, repetitions):
@@ -718,6 +748,7 @@ class Hex_Walker(object):
 		# one last synchronize() for the final movement to complete
 		self.synchronize()
 
+
 	# tea-bag
 	def bounce(self, wait, repetitions):
 		for i in range(0, repetitions):
@@ -726,14 +757,25 @@ class Hex_Walker(object):
 			self.set_hexwalker_position(TALL_NEUTRAL, wait)
 			self.synchronize()
 
+
 	def do_nothing(self):
 		self.set_hexwalker_position(TALL_NEUTRAL)
-		
+		self.synchronize()
+
+
 	########################################################################################
 	########################################################################################
+	pass
 
 
-
+# TODO:
+# abort()
+# synchronize()
+# find threading-static branch point
+# change the function hierarchy?
+# change function names
+# change Torso_Position to include a waist entry? no, arms/waist should sometimes be independent
+# gonna have lots of almost redundant code but not quite enough overlap with Hex_Walker to make subclass viable
 class Robot_Torso(object):
 	def __init__(self, right_arm, left_arm, rotator):
 		self.right_arm = right_arm
@@ -759,6 +801,9 @@ class Robot_Torso(object):
 
 	def set_torso_rotation(self, rotation):
 		self.rotator.set_servo_angle(rotation, WAIST_MOTOR)
+
+	########################################################################################
+	########################################################################################
 
 	# torso movement functions
 	def monkey(self, repetitions):
@@ -837,3 +882,7 @@ class Robot_Torso(object):
 
 	def do_nothing(self):
 		self.set_torso_position(TORSO_NEUTRAL, 90)
+
+	########################################################################################
+	########################################################################################
+	pass

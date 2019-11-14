@@ -92,57 +92,57 @@ class Leg(object):
 		self.SERVO_PWM_LIMITS = [[0,1],[0,1],[0,1]]
 		if leg_num == LEG_0:
 			# leg: out in, up down, right left
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_0_TIP_MOTOR_OUT, 	c_0_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_0_MID_MOTOR_UP, 	c_0_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_0_ROT_MOTOR_RIGHT,c_0_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_0_TIP_SERVO_OUT, c_0_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_0_MID_SERVO_UP, c_0_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_0_ROT_SERVO_RIGHT, c_0_ROT_SERVO_LEFT]
 		elif leg_num == LEG_1:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_1_TIP_MOTOR_OUT, 	c_1_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_1_MID_MOTOR_UP, 	c_1_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_1_ROT_MOTOR_RIGHT,c_1_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_1_TIP_SERVO_OUT, c_1_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_1_MID_SERVO_UP, c_1_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_1_ROT_SERVO_RIGHT, c_1_ROT_SERVO_LEFT]
 		elif leg_num == LEG_2:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_2_TIP_MOTOR_OUT, 	c_2_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_2_MID_MOTOR_UP, 	c_2_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_2_ROT_MOTOR_RIGHT,c_2_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_2_TIP_SERVO_OUT, c_2_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_2_MID_SERVO_UP, c_2_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_2_ROT_SERVO_RIGHT, c_2_ROT_SERVO_LEFT]
 		elif leg_num == LEG_3:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_3_TIP_MOTOR_OUT, 	c_3_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_3_MID_MOTOR_UP, 	c_3_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_3_ROT_MOTOR_RIGHT,c_3_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_3_TIP_SERVO_OUT, c_3_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_3_MID_SERVO_UP, c_3_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_3_ROT_SERVO_RIGHT, c_3_ROT_SERVO_LEFT]
 		elif leg_num == LEG_4:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_4_TIP_MOTOR_OUT, 	c_4_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_4_MID_MOTOR_UP, 	c_4_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_4_ROT_MOTOR_RIGHT,c_4_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_4_TIP_SERVO_OUT, c_4_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_4_MID_SERVO_UP, c_4_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_4_ROT_SERVO_RIGHT, c_4_ROT_SERVO_LEFT]
 		elif leg_num == LEG_5:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_5_TIP_MOTOR_OUT, 	c_5_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_5_MID_MOTOR_UP, 	c_5_MID_MOTOR_DOWN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_5_ROT_MOTOR_RIGHT,c_5_ROT_MOTOR_LEFT]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_5_TIP_SERVO_OUT, c_5_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_5_MID_SERVO_UP, c_5_MID_SERVO_DOWN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_5_ROT_SERVO_RIGHT, c_5_ROT_SERVO_LEFT]
 		elif leg_num == ARM_R:
 			# arm: out in, out in, up down
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_R_ARM_TIP_MOTOR_OUT, 	c_R_ARM_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_R_ARM_MID_MOTOR_OUT, 	c_R_ARM_MID_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_R_ARM_ROT_MOTOR_UP,	c_R_ARM_ROT_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_R_ARM_TIP_SERVO_OUT, c_R_ARM_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_R_ARM_MID_SERVO_OUT, c_R_ARM_MID_SERVO_IN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_R_ARM_ROT_SERVO_UP, c_R_ARM_ROT_SERVO_DOWN]
 		elif leg_num == ARM_L:
-			self.SERVO_PWM_LIMITS[TIP_MOTOR] = [c_L_ARM_TIP_MOTOR_OUT, 	c_L_ARM_TIP_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[MID_MOTOR] = [c_L_ARM_MID_MOTOR_OUT, 	c_L_ARM_MID_MOTOR_IN]
-			self.SERVO_PWM_LIMITS[ROT_MOTOR] = [c_L_ARM_ROT_MOTOR_UP,	c_L_ARM_ROT_MOTOR_DOWN]
+			self.SERVO_PWM_LIMITS[TIP_SERVO] = [c_L_ARM_TIP_SERVO_OUT, c_L_ARM_TIP_SERVO_IN]
+			self.SERVO_PWM_LIMITS[MID_SERVO] = [c_L_ARM_MID_SERVO_OUT, c_L_ARM_MID_SERVO_IN]
+			self.SERVO_PWM_LIMITS[ROT_SERVO] = [c_L_ARM_ROT_SERVO_UP, c_L_ARM_ROT_SERVO_DOWN]
 		elif leg_num == WAIST:
 			# waist: left right
-			self.SERVO_PWM_LIMITS[WAIST_MOTOR] = [c_ROTATOR_MOTOR_LEFT, c_ROTATOR_MOTOR_RIGHT]
+			self.SERVO_PWM_LIMITS[WAIST_SERVO] = [c_WAIST_SERVO_PWM_LEFT, c_WAIST_SERVO_PWM_RIGHT]
 		
 
 		self.SERVO_ANGLE_LIMITS = [[0,1],[0,1],[0,1]]
 		if(leg_num == ARM_L or leg_num == ARM_R):
 			# arm: out in, out in, up down
-			self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [ARM_TIP_MOTOR_OUT_ANGLE, 	ARM_TIP_MOTOR_IN_ANGLE]
-			self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [ARM_MID_MOTOR_OUT_ANGLE, 	ARM_MID_MOTOR_IN_ANGLE]
-			self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ARM_ROT_MOTOR_UP_ANGLE, 	ARM_ROT_MOTOR_DOWN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[TIP_SERVO] = [ARM_TIP_SERVO_OUT_ANGLE, ARM_TIP_SERVO_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[MID_SERVO] = [ARM_MID_SERVO_OUT_ANGLE, ARM_MID_SERVO_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[ROT_SERVO] = [ARM_ROT_SERVO_UP_ANGLE, ARM_ROT_SERVO_DOWN_ANGLE]
 		elif leg_num == WAIST:
 			# waist: left right
-			self.SERVO_ANGLE_LIMITS[WAIST_MOTOR] = [ROTATOR_LEFT_ANGLE, ROTATOR_RIGHT_ANGLE]
+			self.SERVO_ANGLE_LIMITS[WAIST_SERVO] = [WAIST_SERVO_LEFT_ANGLE, WAIST_SERVO_RIGHT_ANGLE]
 		else:
 			# leg: out in, up down, right left
-			self.SERVO_ANGLE_LIMITS[TIP_MOTOR] = [TIP_MOTOR_OUT_ANGLE, 	TIP_MOTOR_IN_ANGLE]
-			self.SERVO_ANGLE_LIMITS[MID_MOTOR] = [MID_MOTOR_UP_ANGLE, 	MID_MOTOR_DOWN_ANGLE]
-			self.SERVO_ANGLE_LIMITS[ROT_MOTOR] = [ROT_MOTOR_RIGHT_ANGLE,ROT_MOTOR_LEFT_ANGLE]
+			self.SERVO_ANGLE_LIMITS[TIP_SERVO] = [TIP_SERVO_OUT_ANGLE, TIP_SERVO_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[MID_SERVO] = [MID_SERVO_UP_ANGLE, MID_SERVO_DOWN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[ROT_SERVO] = [ROT_SERVO_RIGHT_ANGLE, ROT_SERVO_LEFT_ANGLE]
 			
 
 		# declare these member variables, immediately have value overwritten...
@@ -155,7 +155,7 @@ class Leg(object):
 			# default position is with arms fully extended
 			self.set_leg_position(TORSO_ARM_TABLE["STRAIGHT_OUT"])
 		elif(leg_num == WAIST):
-			self.set_servo_angle(90, WAIST_MOTOR)
+			self.set_servo_angle(90, WAIST_SERVO)
 		else:
 			# default position is 90-degree crouch
 			# self.set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
@@ -250,9 +250,9 @@ class Leg(object):
 
 	# uses the "leg_position" objects, immediate set (no threading)
 	def set_leg_position(self, leg_position):
-		self.set_servo_angle(leg_position.tip_motor, TIP_MOTOR)
-		self.set_servo_angle(leg_position.mid_motor, MID_MOTOR)
-		self.set_servo_angle(leg_position.rot_motor, ROT_MOTOR)
+		self.set_servo_angle(leg_position.tip_motor, TIP_SERVO)
+		self.set_servo_angle(leg_position.mid_motor, MID_SERVO)
+		self.set_servo_angle(leg_position.rot_motor, ROT_SERVO)
 
 
 	# safety clamp (in angle space) 
@@ -269,12 +269,12 @@ class Leg(object):
 		# TODO: once Leg_Position is listified, replace the following code with:
 		# for s in range(3):
 			# dest[s] = bidirectional_clamp(leg_position.list[s], self.SERVO_ANGLE_LIMITS[s][0], self.SERVO_ANGLE_LIMITS[s][1])
-		dest[TIP_MOTOR] = bidirectional_clamp(leg_position.tip_motor, 
-					self.SERVO_ANGLE_LIMITS[TIP_MOTOR][0], self.SERVO_ANGLE_LIMITS[TIP_MOTOR][1])
-		dest[MID_MOTOR] = bidirectional_clamp(leg_position.mid_motor, 
-					self.SERVO_ANGLE_LIMITS[MID_MOTOR][0], self.SERVO_ANGLE_LIMITS[MID_MOTOR][1])
-		dest[ROT_MOTOR] = bidirectional_clamp(leg_position.rot_motor, 
-					self.SERVO_ANGLE_LIMITS[ROT_MOTOR][0], self.SERVO_ANGLE_LIMITS[ROT_MOTOR][1])
+		dest[TIP_SERVO] = bidirectional_clamp(leg_position.tip_motor,
+											  self.SERVO_ANGLE_LIMITS[TIP_SERVO][0], self.SERVO_ANGLE_LIMITS[TIP_SERVO][1])
+		dest[MID_SERVO] = bidirectional_clamp(leg_position.mid_motor,
+											  self.SERVO_ANGLE_LIMITS[MID_SERVO][0], self.SERVO_ANGLE_LIMITS[MID_SERVO][1])
+		dest[ROT_SERVO] = bidirectional_clamp(leg_position.rot_motor,
+											  self.SERVO_ANGLE_LIMITS[ROT_SERVO][0], self.SERVO_ANGLE_LIMITS[ROT_SERVO][1])
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.
 		# otherwise, interpolate from current position.
@@ -343,14 +343,14 @@ class Leg(object):
 # make the "rotator" class a subclass of "leg"
 # any functions that would work on a leg also work on the rotator, it inherits absolutely everything
 # redefines lowest-level function do_set_servo_angle to only touch the one servo, ignore other two
-# set_servo_angle_thread(angle, motor=WAIST_MOTOR, time) is the "right" way to change the waist rotation
-# set_leg_position_thread(Leg_Position, time) also works because the non-WAIST_MOTOR servos will be ignored
+# set_servo_angle_thread(angle, motor=WAIST_SERVO, time) is the "right" way to change the waist rotation
+# set_leg_position_thread(Leg_Position, time) also works because the non-WAIST_SERVO servos will be ignored
 # nothing will change unless you are setting the waist motor, regardless how you try
 class Rotator(Leg):
 	# internal-use-only function
-	# if servo is not WAIST_MOTOR, then return & do nothing... otherwise call normal do_set_servo_angle()
+	# if servo is not WAIST_SERVO, then return & do nothing... otherwise call normal do_set_servo_angle()
 	def do_set_servo_angle(self, angle, servo):
-		if servo != WAIST_MOTOR:
+		if servo != WAIST_SERVO:
 			# print("ERR#10: INVALID PARAM")
 			return INV_PARAM
 		# if it is valid, do the exact same code as the Leg would
@@ -395,7 +395,7 @@ class Hex_Walker(object):
 
 		# set operating mode
 		self.current_pos = NORMAL_NEUTRAL
-		self.speed = NORMAL
+		self.speed = NORMAL_SPEED
 		self.front = "5-0"
 		self.front_index_offset = 0
 		# set all legs to neutral
@@ -789,7 +789,7 @@ class Robot_Torso(object):
 		self.leglist = [left_arm, right_arm, rotator]
 		
 		# set default speed
-		self.speed = NORMAL
+		self.speed = NORMAL_SPEED
 		# go to default pose, arms and rotation
 		self.torso_neutral()
 
@@ -985,17 +985,17 @@ class Robot_Torso(object):
 
 	# go to default arms & default waist
 	def torso_neutral(self):
-		self.set_speed(NORMAL)
+		self.set_speed(NORMAL_SPEED)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
 		self.synchronize()
 	# go to default arms, doesn't change waist
 	def arms_neutral(self):
-		self.set_speed(NORMAL)
+		self.set_speed(NORMAL_SPEED)
 		self.set_arms_position(TORSO_NEUTRAL)
 		self.synchronize()
 	# go to default waist, doesn't change arms
 	def rotate_neutral(self):
-		self.set_speed(NORMAL)
+		self.set_speed(NORMAL_SPEED)
 		self.set_waist_position(90)
 		self.synchronize()
 

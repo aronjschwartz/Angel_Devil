@@ -232,7 +232,7 @@ class Leg(object):
 	# creates a temporary "leg position" object to give to the leg_position_thread function
 	# changes the given servo to the given position over the given time
 	# OTHER MOTORS (on this leg) CANNOT CHANGE DURING THIS TIME, to change multiple motors at a time use set_leg_position_thread
-	def set_servo_angle_thread(self, angle, servo, time):
+	def set_servo_angle_thread(self, angle, servo, durr):
 		if servo < 0 or servo > 2:
 			# ensure servo index is valid
 			print("ERR#5: INVALID SERVO INDEX! valid values are 0 to 2")
@@ -245,7 +245,7 @@ class Leg(object):
 		# init the Leg_Position from the list
 		L = Leg_Position(v[0], v[1], v[2])
 		
-		self.set_leg_position_thread(L, time)
+		self.set_leg_position_thread(L, durr)
 
 
 	# uses the "leg_position" objects, immediate set (no threading)
@@ -260,7 +260,7 @@ class Leg(object):
 	# adds frames to the frame queue (with lock)
 	# sets the "running" flag unconditionally (note: no harm in setting an already set flag)
 	# * thread will jump in with "do_set_servo_angle" when it is the correct time
-	def set_leg_position_thread(self, leg_position, time):
+	def set_leg_position_thread(self, leg_position, durr):
 		# assemble dest from the leg position
 		# TODO: add a time component to the leg position object? or make a new object type? or just build the dest like this? not sure how to best integrate/use this system
 		dest = [0, 0, 0]
@@ -289,7 +289,7 @@ class Leg(object):
 		
 		# run interpolation
 		# NOTE: "curr" only needs 3 elements, but when copied from frame_queue it has 4... the 4th is just unused
-		interpolate_list = ft.interpolate(dest, curr, time)
+		interpolate_list = ft.interpolate(dest, curr, durr)
 		
 		# add new frames onto the END of the frame queue (with lock)
 		with self._frame_queue_lock:
@@ -486,9 +486,9 @@ class Hex_Walker(object):
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
 	# optional arg with speed
 	# previously "set_hex_walker_position"
-	def set_hexwalker_position(self, hexwalker_pose_id, time=-1):
+	def set_hexwalker_position(self, hexwalker_pose_id, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		time = self.speed if time==-1 else time
+		durr = self.speed if durr==None else durr
 		# if given arms_pose_idx, convert to actual object
 		# arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 		if isinstance(hexwalker_pose_id, int):
@@ -501,8 +501,8 @@ class Hex_Walker(object):
 			# if it is the actual object, then it was probably dynamically created. don't update hex_pose, dont print debug description
 			hex_pose = hexwalker_pose_id
 		
-		# self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, self.speed)
-		self.do_set_hexwalker_position(hex_pose)
+		self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, durr)
+		# self.do_set_hexwalker_position(hex_pose)
 
 
 	## used to set the pose of some/all of the while keeping other legs untouched.
@@ -514,12 +514,12 @@ class Hex_Walker(object):
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
 	# previously "do_set_hex_walker_position"
-	def do_set_hexwalker_position(self, dest, masklist=GROUP_ALL_LEGS, time=-1):
+	def do_set_hexwalker_position(self, dest, masklist=GROUP_ALL_LEGS, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		time = self.speed if time==-1 else time
+		durr = self.speed if durr==None else durr
 		# masklist: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the masklist as a set to remove potential duplicates
-		legs = set([masklist]) if isinstance(masklist, int) else set(masklist)
+		legs = {masklist} if isinstance(masklist, int) else set(masklist)
 		
 		if isinstance(dest, Hex_Walker_Position):
 			if USE_THREADING:
@@ -539,7 +539,7 @@ class Hex_Walker(object):
 						pose = dest.lm_pos
 					elif n == LEG_LF:
 						pose = dest.lf_pos
-					self.idx_to_leg(n).set_leg_position_thread(pose, time)
+					self.idx_to_leg(n).set_leg_position_thread(pose, durr)
 			else:
 				for n in legs:
 					# extract the appropriate pose from the object
@@ -562,7 +562,7 @@ class Hex_Walker(object):
 			if USE_THREADING:
 				for leg in [self.idx_to_leg(n) for n in legs]:
 					# threading version
-					leg.set_leg_position_thread(dest, time)
+					leg.set_leg_position_thread(dest, durr)
 			else:
 				for leg in [self.idx_to_leg(n) for n in legs]:
 					# non-threading version
@@ -579,7 +579,7 @@ class Hex_Walker(object):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
 			# if given something else, cast the masklist as a set to remove potential duplicates
-			mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
+			mask = {masklist} if isinstance(masklist, int) else set(masklist)
 			
 			for leg in [self.idx_to_leg(n) for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
@@ -811,7 +811,7 @@ class Robot_Torso(object):
 	def synchronize(self, masklist=GROUP_ALL_TORSO):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
-			mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
+			mask = {masklist} if isinstance(masklist, int) else set(masklist)
 			for leg in [self.leglist[n - ARM_L] for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
 				leg.idle_flag.wait()
@@ -847,9 +847,9 @@ class Robot_Torso(object):
 
 
 	# do both set_arms_position and set_waist_position
-	def set_torso_position(self, arms_pose_idx, rotation, time=-1):
+	def set_torso_position(self, arms_pose_idx, rotation, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		time = self.speed if time==-1 else time
+		durr = self.speed if durr==None else durr
 		self.set_arms_position(arms_pose_idx)
 		self.set_waist_position(rotation)
 
@@ -857,9 +857,9 @@ class Robot_Torso(object):
 	# take Torso_Position object or index
 	# take mask of arm or arms, default is both arms
 	# previously set_torso_position(self, torso_position_number, rotation)
-	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, time=-1):
+	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=None):
 		# if given a single index rather than an iteratable, make it into a set
-		mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
+		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		# if given arms_pose_idx, convert to actual object
 		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 
@@ -868,20 +868,20 @@ class Robot_Torso(object):
 			# self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
 		if ARM_L in mask:
-			self.do_set_torso_position(arms_pose_obj.left_arm, ARM_L, time)
+			self.do_set_torso_position(arms_pose_obj.left_arm, ARM_L, durr)
 		if ARM_R in mask:
-			self.do_set_torso_position(arms_pose_obj.right_arm, ARM_R, time)
+			self.do_set_torso_position(arms_pose_obj.right_arm, ARM_R, durr)
 
 
 	# one-to-one: no mask needed
 	# accept Leg_Position or raw rotation, convert to leg object
 	# previously set_torso_rotation(self, rotation):
-	def set_waist_position(self, waist_rot, time=-1):
+	def set_waist_position(self, waist_rot, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		time = self.speed if time==-1 else time
+		durr = self.speed if durr==None else durr
 		# if given waist_rot as raw angle, convert to a leg-object
 		waist_rot_obj = Leg_Position(waist_rot, waist_rot, waist_rot) if isinstance(waist_rot, (float, int)) else waist_rot
-		self.do_set_torso_position(waist_rot_obj, WAIST, time)
+		self.do_set_torso_position(waist_rot_obj, WAIST, durr)
 
 
 	# take a Leg_Position (from torso object or built from waist rotation value)
@@ -889,14 +889,14 @@ class Robot_Torso(object):
 		# easiest to have no safety, allow assigning to both LR and W
 	# is assigning to multiple legs/arms actually useful here???
 	# previously do_set_torso_position(self, torso_position, rotation)
-	def do_set_torso_position(self, legobj, masklist=GROUP_ALL_TORSO, time=-1):
+	def do_set_torso_position(self, legobj, masklist=GROUP_ALL_TORSO, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		time = self.speed if time==-1 else time
+		durr = self.speed if durr==None else durr
 		# if given a single index rather than an iteratable, make it into a set
-		mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
+		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		for leg in [self.leglist[n - ARM_L] for n in mask]:
 			if USE_THREADING:
-				leg.set_leg_position_thread(legobj, time)
+				leg.set_leg_position_thread(legobj, durr)
 			else:
 				leg.set_leg_position(legobj)
 

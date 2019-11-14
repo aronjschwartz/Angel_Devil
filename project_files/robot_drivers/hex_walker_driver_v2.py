@@ -481,35 +481,55 @@ class Hex_Walker(object):
 		return SUCCESS
 
 
-	## used to set the pose of the whole 6-leg system and update "current pose" if possible.
-	# hexwalker_pose_id can be index or object. 
+	## used to set the pose of some/all of the legs from a Hex_Walker_Position while keeping other legs untouched.
+	## if using threading, can set multiple simultaneous leg transitions with different durations by calling
+	## this multiple times without synchronize() between.
+	# hexwalker_pose_idx can be index or object.
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
+	# masklist can be int or list, or none (defaults to all legs)
 	# optional arg with speed
 	# previously "set_hex_walker_position"
-	def set_hexwalker_position(self, hexwalker_pose_id, durr=None):
-		# default time if not given is self.speed, can't put "self" in default args tho
-		durr = self.speed if durr==None else durr
+	def set_hexwalker_position(self, hexwalker_pose_idx, masklist=GROUP_ALL_LEGS, durr=None):
+		# if given a single index rather than an iteratable, make it into a set
+		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		# if given arms_pose_idx, convert to actual object
 		# arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
-		if isinstance(hexwalker_pose_id, int):
+		if isinstance(hexwalker_pose_idx, int):
 			# if it is an index, then update current_pos and do the rest of the thing
-			self.current_pos = hexwalker_pose_id
-			hex_pose = HEX_WALKER_POSITIONS[hexwalker_pose_id]
+			self.current_pos = hexwalker_pose_idx
+			hex_pose = HEX_WALKER_POSITIONS[hexwalker_pose_idx]
 			if(HW_MOVE_DEBUG):
 				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + hex_pose.description)
 		else:
 			# if it is the actual object, then it was probably dynamically created. don't update hex_pose, dont print debug description
-			hex_pose = hexwalker_pose_id
+			hex_pose = hexwalker_pose_idx
 		
-		self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, durr)
+		for n in mask:
+			# extract the appropriate pose from the object
+			# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
+			# self.do_set_hexwalker_position(hex_pose.list[n], n, durr)
+			if n == LEG_RF:
+				pose = hex_pose.rf_pos
+			elif n == LEG_RM:
+				pose = hex_pose.rm_pos
+			elif n == LEG_RB:
+				pose = hex_pose.rr_pos
+			elif n == LEG_LB:
+				pose = hex_pose.lr_pos
+			elif n == LEG_LM:
+				pose = hex_pose.lm_pos
+			elif n == LEG_LF:
+				pose = hex_pose.lf_pos
+			self.do_set_hexwalker_position(pose, n, durr)
+
+		# self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, durr)
 		# self.do_set_hexwalker_position(hex_pose)
 
 
-	## used to set the pose of some/all of the while keeping other legs untouched.
+	## used to set the pose of some/all of the legs from a Leg_Position while keeping other legs untouched.
 	## if using threading, can set multiple simultaneous leg transitions with different durations by calling 
 	## this multiple times without synchronize() between.
-	# if given dest=Leg_Position, set all specified legs to that same pose
-	# if given dest=Hex_Walker_Position, set all specified legs to the pose corresponding to that leg within the Hex_Walker_Position object
+	# dest is Leg_Position, set all specified legs to that pose
 	# masklist can be int or list, or none (defaults to all legs)
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
@@ -519,56 +539,16 @@ class Hex_Walker(object):
 		durr = self.speed if durr==None else durr
 		# masklist: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the masklist as a set to remove potential duplicates
-		legs = {masklist} if isinstance(masklist, int) else set(masklist)
+		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		
-		if isinstance(dest, Hex_Walker_Position):
-			if USE_THREADING:
-				for n in legs:
-					# extract the appropriate pose from the object
-					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
-					# self.idx_to_leg(n).set_leg_position_thread(dest.list[n], time)
-					if n == LEG_RF:
-						pose = dest.rf_pos
-					elif n == LEG_RM:
-						pose = dest.rm_pos
-					elif n == LEG_RB:
-						pose = dest.rr_pos
-					elif n == LEG_LB:
-						pose = dest.lr_pos
-					elif n == LEG_LM:
-						pose = dest.lm_pos
-					elif n == LEG_LF:
-						pose = dest.lf_pos
-					self.idx_to_leg(n).set_leg_position_thread(pose, durr)
-			else:
-				for n in legs:
-					# extract the appropriate pose from the object
-					# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
-					# self.idx_to_leg(n).set_leg_position(dest.list[n])
-					if n == LEG_RF:
-						pose = dest.rf_pos
-					elif n == LEG_RM:
-						pose = dest.rm_pos
-					elif n == LEG_RB:
-						pose = dest.rr_pos
-					elif n == LEG_LB:
-						pose = dest.lr_pos
-					elif n == LEG_LM:
-						pose = dest.lm_pos
-					elif n == LEG_LF:
-						pose = dest.lf_pos
-					self.idx_to_leg(n).set_leg_position(pose)
-		elif isinstance(dest, Leg_Position):
-			if USE_THREADING:
-				for leg in [self.idx_to_leg(n) for n in legs]:
-					# threading version
-					leg.set_leg_position_thread(dest, durr)
-			else:
-				for leg in [self.idx_to_leg(n) for n in legs]:
-					# non-threading version
-					leg.set_leg_position(dest)
+		if USE_THREADING:
+			for leg in [self.idx_to_leg(n) for n in mask]:
+				# threading version
+				leg.set_leg_position_thread(dest, durr)
 		else:
-			print("ERROR: given invalid hexwalker leg position type")
+			for leg in [self.idx_to_leg(n) for n in mask]:
+				# non-threading version
+				leg.set_leg_position(dest)
 
 
 	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
@@ -740,17 +720,17 @@ class Hex_Walker(object):
 					# pull_up = (60, 75, 90), tip above horizontal
 					# normal neutral = (120, 90, 90)
 					# crouch neutral = (45, 135, 90)
-					self.set_hexwalker_leg_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
 					# tall neutral = (120, 45, 90)
-					self.set_hexwalker_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 			if(direction == LEFT):
 				reverselist = list(GROUP_ALL_LEGS)
 				reverselist.reverse()
 				for n in reverselist:
-					self.set_hexwalker_leg_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
-					self.set_hexwalker_leg_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 		# one last synchronize() for the final movement to complete
 		self.synchronize()
 
@@ -848,10 +828,8 @@ class Robot_Torso(object):
 
 	# do both set_arms_position and set_waist_position
 	def set_torso_position(self, arms_pose_idx, rotation, durr=None):
-		# default time if not given is self.speed, can't put "self" in default args tho
-		durr = self.speed if durr==None else durr
-		self.set_arms_position(arms_pose_idx)
-		self.set_waist_position(rotation)
+		self.set_arms_position(arms_pose_idx, GROUP_ALL_ARMS, durr)
+		self.set_waist_position(rotation, durr)
 
 
 	# take Torso_Position object or index
@@ -877,8 +855,6 @@ class Robot_Torso(object):
 	# accept Leg_Position or raw rotation, convert to leg object
 	# previously set_torso_rotation(self, rotation):
 	def set_waist_position(self, waist_rot, durr=None):
-		# default time if not given is self.speed, can't put "self" in default args tho
-		durr = self.speed if durr==None else durr
 		# if given waist_rot as raw angle, convert to a leg-object
 		waist_rot_obj = Leg_Position(waist_rot, waist_rot, waist_rot) if isinstance(waist_rot, (float, int)) else waist_rot
 		self.do_set_torso_position(waist_rot_obj, WAIST, durr)

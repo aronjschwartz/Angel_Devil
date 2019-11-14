@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from hex_walker_driver import *
+from project_files.deprecated.hex_walker_driver import *
 from shared_thread_library import *
 
 def execute_leg_action(legs_msg):

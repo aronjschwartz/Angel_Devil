@@ -1,6 +1,5 @@
 import Adafruit_PCA9685
-import time
-from hex_walker_driver import *
+from project_files.deprecated.hex_walker_driver import *
 import logging
 import threading
 import sys

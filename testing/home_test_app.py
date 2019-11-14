@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../robot_drivers/")
 
-from hex_walker_driver import *
+from project_files.deprecated.hex_walker_driver import *
 
 def leg_driver_test(leg):
     print("--------------------------leg driver test---------------------")

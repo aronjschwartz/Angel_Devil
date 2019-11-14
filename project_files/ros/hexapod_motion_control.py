@@ -8,7 +8,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Int32
 from time import sleep
 import Adafruit_PCA9685
-from hex_walker_driver import *
+from project_files.deprecated.hex_walker_driver import *
 
 #init the pwm stuffs and run selected tests
 pwm_40= Adafruit_PCA9685.PCA9685(address=0x40)

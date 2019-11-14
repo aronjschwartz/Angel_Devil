@@ -1,5 +1,4 @@
 from leg_data import *
-from hex_walker_data import *
 
 TORSO_ARM_TABLE = {
         "NEUTRAL"           : Leg_Position(0, 45, 90),

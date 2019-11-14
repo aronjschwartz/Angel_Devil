@@ -11,9 +11,9 @@
 from __future__ import division
 import time
 import threading
+from torso_data import *
 from hex_walker_data import *
 from leg_data import *
-from torso_data import *
 
 from hex_walker_constants import *
 from hex_util import *

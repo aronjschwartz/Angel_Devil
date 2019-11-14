@@ -1027,12 +1027,12 @@ HEX_WALKER_POSITIONS = {
         # past here are just positions that are used for testing.
         # They can only be reached by __set_hex_walker_position direct calls
         FRONT_LEGS_UP:
-        Hex_Walker_Position(Leg_Position(180, 180, 90),
+        Hex_Walker_Position(Leg_Position(90, 180, 90),
                             NORMAL_TRI_ROTATION_TABLE["NEUTRAL"],
                             NORMAL_TRI_ROTATION_TABLE["NEUTRAL"],
                             NORMAL_TRI_ROTATION_TABLE["NEUTRAL"],
                             NORMAL_TRI_ROTATION_TABLE["NEUTRAL"],
-                            Leg_Position(180, 180, 90),
+                            Leg_Position(90, 180, 90),
                             [],
                             "front two legs are raised",
                             )

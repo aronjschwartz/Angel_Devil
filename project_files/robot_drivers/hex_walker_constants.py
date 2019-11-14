@@ -151,8 +151,8 @@ c_PWM_ABSOLUTE_MAXIMUM = 700
 # used for linear mapping from angle-space to pwm-space, corresponds to the pwm endpoints listed above
 # also used for safety clamping
 # leg limits in degrees
-TIP_SERVO_OUT_ANGLE = 270
-TIP_SERVO_IN_ANGLE = 90
+TIP_SERVO_OUT_ANGLE = 180
+TIP_SERVO_IN_ANGLE = 0
 MID_SERVO_UP_ANGLE = 180
 MID_SERVO_DOWN_ANGLE = 45
 ROT_SERVO_RIGHT_ANGLE = 180

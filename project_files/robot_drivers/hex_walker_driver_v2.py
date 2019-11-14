@@ -30,7 +30,7 @@ USE_THREADING = True
 
 # Leg_Position class defined in leg_data.py
 # Hex_Walker_Position class defined in hex_walker_data.py
-# Torso_Position class defined in torso_data.py
+# Arms_Position class defined in torso_data.py
 
 
 # A Leg object is a group of 3 servos that are controlled as one unit. It is used for the 6 legs
@@ -756,8 +756,6 @@ class Hex_Walker(object):
 
 # terms: torso = (Larm + Rarm) + waist
 
-# TODO: rename "Torso_Position" to Arms_Position
-
 class Robot_Torso(object):
 	def __init__(self, right_arm, left_arm, rotator):
 		# individual member variables
@@ -832,7 +830,7 @@ class Robot_Torso(object):
 		self.set_waist_position(rotation, durr)
 
 
-	# take Torso_Position object or index
+	# take Arms_Position object or index
 	# take mask of arm or arms, default is both arms
 	# previously set_torso_position(self, torso_position_number, rotation)
 	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=None):
@@ -841,7 +839,7 @@ class Robot_Torso(object):
 		# if given arms_pose_idx, convert to actual object
 		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 
-		# TODO: this can be improved if the Torso_Position object is listified
+		# TODO: this can be improved if the Arms_Position object is listified
 		# for n in mask:
 			# self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj

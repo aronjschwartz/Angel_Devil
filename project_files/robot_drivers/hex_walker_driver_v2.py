@@ -487,7 +487,10 @@ class Hex_Walker(object):
 	# optional arg with speed
 	# previously "set_hex_walker_position"
 	def set_hexwalker_position(self, hexwalker_pose_id, time=-1):
+		# default time if not given is self.speed, can't put "self" in default args tho
 		time = self.speed if time==-1 else time
+		# if given arms_pose_idx, convert to actual object
+		# arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 		if isinstance(hexwalker_pose_id, int):
 			# if it is an index, then update current_pos and do the rest of the thing
 			self.current_pos = hexwalker_pose_id
@@ -507,15 +510,16 @@ class Hex_Walker(object):
 	## this multiple times without synchronize() between.
 	# if given dest=Leg_Position, set all specified legs to that same pose
 	# if given dest=Hex_Walker_Position, set all specified legs to the pose corresponding to that leg within the Hex_Walker_Position object
-	# legmask can be int or list, or none (defaults to all legs)
+	# masklist can be int or list, or none (defaults to all legs)
 	# optional arg with speed
 	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
 	# previously "do_set_hex_walker_position"
-	def do_set_hexwalker_position(self, dest, legmask=GROUP_ALL_LEGS, time=-1):
+	def do_set_hexwalker_position(self, dest, masklist=GROUP_ALL_LEGS, time=-1):
+		# default time if not given is self.speed, can't put "self" in default args tho
 		time = self.speed if time==-1 else time
-		# legmask: if given a single index rather than an iteratable, make it into a set
-		# if given something else, cast the legmask as a set to remove potential duplicates
-		legs = set((legmask)) if isinstance(legmask, int) else set(legmask)
+		# masklist: if given a single index rather than an iteratable, make it into a set
+		# if given something else, cast the masklist as a set to remove potential duplicates
+		legs = set((masklist)) if isinstance(masklist, int) else set(masklist)
 		
 		if isinstance(dest, Hex_Walker_Position):
 			if USE_THREADING:
@@ -568,14 +572,14 @@ class Hex_Walker(object):
 
 
 	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
-	# legmask accepts list, set, int (treated as single-element set)
+	# masklist accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_LEGS
 	# depending on USE_THREADING, either simply sleep or do the actual synchro
-	def synchronize(self, legmask=GROUP_ALL_LEGS):
+	def synchronize(self, masklist=GROUP_ALL_LEGS):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
-			# if given something else, cast the legmask as a set to remove potential duplicates
-			mask = set((legmask)) if isinstance(legmask, int) else set(legmask)
+			# if given something else, cast the masklist as a set to remove potential duplicates
+			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
 			
 			for leg in [self.idx_to_leg(n) for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
@@ -770,120 +774,230 @@ class Hex_Walker(object):
 	pass
 
 
-# TODO:
-# abort()
-# synchronize()
-# find threading-static branch point
-# change the function hierarchy?
-# change function names
-# change Torso_Position to include a waist entry? no, arms/waist should sometimes be independent
-# gonna have lots of almost redundant code but not quite enough overlap with Hex_Walker to make subclass viable
+# terms: torso = (Larm + Rarm) + waist
+
+# TODO: rename "Torso_Position" to Arms_Position
+
 class Robot_Torso(object):
 	def __init__(self, right_arm, left_arm, rotator):
-		self.right_arm = right_arm
+		# individual member variables
 		self.left_arm = left_arm
+		self.right_arm = right_arm
 		self.rotator = rotator
-		self.current_position = TORSO_NEUTRAL
-		self.set_torso_position(TORSO_NEUTRAL, 90)
+		
+		# list form
+		self.leglist = [left_arm, right_arm, rotator]
+		
+		# set default speed
+		self.speed = NORMAL
+		# go to default pose, arms and rotation
+		self.torso_neutral()
 
-	def set_torso_position(self, torso_position_number, rotation):
-		self.current_position = torso_position_number
-		self.do_set_torso_position(TORSO_POSITIONS[torso_position_number], rotation)
 
-	def do_set_torso_position(self, torso_position, rotation):
-		self.right_arm.set_leg_position(torso_position.right_arm)
-		self.left_arm.set_leg_position(torso_position.left_arm)
-		self.rotator.set_servo_angle(rotation, WAIST_MOTOR)
+	def print_self(self):
+		print("torso object: speed=" + str(self.speed))
+		for L in self.leglist:
+			L.print_self()
 
-	def do_moveset(self, positions, rotations, sleeps, repetitions):
-		for j in range(0, repetitions):
-			for i in range(0, len(positions)):
-				self.set_torso_position(positions[i], rotations[i])
-				time.sleep(sleeps[i])
 
-	def set_torso_rotation(self, rotation):
-		self.rotator.set_servo_angle(rotation, WAIST_MOTOR)
+	def set_speed(self, n):
+		self.speed = n
+
+
+	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
+	# masklist accepts list, set, int (treated as single-element set)
+	# if not given any arg, default is GROUP_ALL_TORSO
+	# depending on USE_THREADING, either simply sleep or do the actual synchro
+	def synchronize(self, masklist=GROUP_ALL_TORSO):
+		if USE_THREADING:
+			# if given a single index rather than an iteratable, make it into a set
+			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+			for leg in [self.leglist[n - ARM_L] for n in mask]:
+				# wait until the leg is done, if it is already done this returns immediately
+				leg.idle_flag.wait()
+		else:
+			time.sleep(self.speed)
+
+
+	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
+	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
+	def abort(self):
+		# first clear all the queues
+		for leg in self.leglist:
+			leg.abort()
+		# then wait until all legs returned to "sleeping" state
+		self.synchronize()
+		# then wait for 3x the interpolate time, just to be safe
+		time.sleep(INTERPOLATE_TIME * 3)
+
+
+	## take a list of INDICES of poses to run through.
+	# sets arms and waist at same time
+	# waits until each change is done
+	# previously do_moveset(self, positions, rotations, sleeps, repetitions):
+	def do_moveset(self, repetitions, position_indices, rotations):
+		if len(position_indices) != len(rotations):
+			print("ERR: len(position_indices) != len(rotations)")
+			return INV_PARAM
+		for j in range(repetitions):
+			for pose_idx, rot in zip(position_indices, rotations):
+				self.set_torso_position(pose_idx, rot)
+				self.synchronize()
+		return SUCCESS
+
+
+	# do both set_arms_position and set_waist_position
+	def set_torso_position(self, arms_pose_idx, rotation, time=-1):
+		# default time if not given is self.speed, can't put "self" in default args tho
+		time = self.speed if time==-1 else time
+		self.set_arms_position(arms_pose_idx)
+		self.set_waist_position(rotation)
+
+
+	# take Torso_Position object or index
+	# take mask of arm or arms, default is both arms
+	# previously set_torso_position(self, torso_position_number, rotation)
+	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, time=-1):
+		# if given a single index rather than an iteratable, make it into a set
+		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		# if given arms_pose_idx, convert to actual object
+		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
+
+		# TODO: this can be improved if the Torso_Position object is listified
+		# for n in mask:
+			# self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
+		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
+		if ARM_L in mask:
+			self.do_set_torso_position(arms_pose_obj.left_arm, ARM_L, time)
+		if ARM_R in mask:
+			self.do_set_torso_position(arms_pose_obj.right_arm, ARM_R, time)
+
+
+	# one-to-one: no mask needed
+	# accept Leg_Position or raw rotation, convert to leg object
+	# previously set_torso_rotation(self, rotation):
+	def set_waist_position(self, waist_rot, time=-1):
+		# default time if not given is self.speed, can't put "self" in default args tho
+		time = self.speed if time==-1 else time
+		# if given waist_rot as raw angle, convert to a leg-object
+		waist_rot_obj = Leg_Position(waist_rot, waist_rot, waist_rot) if isinstance(waist_rot, (float, int)) else waist_rot
+		self.do_set_torso_position(waist_rot_obj, WAIST, time)
+
+
+	# take a Leg_Position (from torso object or built from waist rotation value)
+	# take a masklist: specify L/R/W/L+R
+		# easiest to have no safety, allow assigning to both LR and W
+	# is assigning to multiple legs/arms actually useful here???
+	# previously do_set_torso_position(self, torso_position, rotation)
+	def do_set_torso_position(self, legobj, masklist=GROUP_ALL_TORSO, time=-1):
+		# default time if not given is self.speed, can't put "self" in default args tho
+		time = self.speed if time==-1 else time
+		# if given a single index rather than an iteratable, make it into a set
+		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		for leg in [self.leglist[n - ARM_L] for n in mask]:
+			if USE_THREADING:
+				leg.set_leg_position_thread(legobj, time)
+			else:
+				leg.set_leg_position(legobj)
+
 
 	########################################################################################
 	########################################################################################
-
 	# torso movement functions
+	
+	# TODO: change these to not use do_moveset function, put it in the queue and synchronize()
+	
+	# ????, then reset
 	def monkey(self, repetitions):
 		moves = []
 		moves.append(TORSO_MONKEY_RIGHT_UP)
 		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
-		rotations = [45, 45, 45, 45, 45, 45, 45, 45, 135, 135, 135, 135, 135, 135, 135,135]
-		sleeps =	[.1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1, .1]
-		self.do_moveset(moves, rotations, sleeps, repetitions)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
-	def look(self):
-		self.set_torso_position(TORSO_LOOKING, 90)
+		# duplicate this a total of 8 times
+		moves = moves * 8
+		rotations = [45] * 8 + [135] * 8
+		self.set_speed(0.1)
+		self.do_moveset(repetitions, moves, rotations)
+		# then go to the neutral position
+		self.torso_neutral()
 
-	def point(self, direction, duration):
-		if(direction == RIGHT):
-			self.set_torso_position(TORSO_POINTING_RIGHT, 90)
-		else:
-			self.set_torso_position(TORSO_POINTING_LEFT, 90)
-		time.sleep(duration)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
 
+	# beat the chest, then reset
 	def king_kong(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_DANCE_FRONT_LEFT_OUT)
 		moves.append(TORSO_DANCE_FRONT_RIGHT_OUT)
-		rotations = [rotation, rotation]
-		sleeps = [.4, .4]
-		self.do_moveset(moves, rotations, sleeps, repetitions)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
-	def stab(self, rotation, repetitions):
-		moves = []
-		moves.append(TORSO_POINTING_LEFT)
-		rotations = [rotation]
-		sleeps = [.4, .4]
-		self.do_moveset(moves, rotations, sleeps, repetitions)
-		self.set_torso_rotation(rotation)
+		rotations = [rotation] * 2
+		self.set_speed(0.4)
+		self.do_moveset(repetitions, moves, rotations)
+		# then go to the neutral position
+		self.torso_neutral()
 
+
+	# do handshake sequence (which hand?), then reset
 	def hand_shake(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_SHAKE_DOWN)
 		moves.append(TORSO_SHAKE_MID)
 		moves.append(TORSO_SHAKE_UP)
 		moves.append(TORSO_SHAKE_MID)
-		rotations = [rotation, rotation, rotation, rotation]
-		sleeps = [.1, .1, .1, .1]
-		self.do_moveset(moves, rotations, sleeps, repetitions)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
-	
+		rotations = [rotation] * 4
+		self.set_speed(0.1)
+		self.do_moveset(repetitions, moves, rotations)
+		# then go to the neutral position
+		self.torso_neutral()
+
+
+	# do waving sequence (which hand?), then reset
 	def wave(self, rotation, repetitions):
 		moves = []
 		moves.append(TORSO_WAVE_DOWN)
 		moves.append(TORSO_WAVE_UP)
-		rotations = [rotation, rotation]
-		sleeps = [.4, .4]
-		self.do_moveset(moves, rotations, sleeps, repetitions)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
+		rotations = [rotation] * 2
+		self.set_speed(0.4)
+		self.do_moveset(repetitions, moves, rotations)
+		# then go to the neutral position
+		self.torso_neutral()
 
-	def neutral_rotate(self, direction):
-		self.set_torso_position(TORSO_NEUTRAL, direction)
 
-	def do_nothing(self):
+	# ????, then hold
+	def look(self):
+		self.set_torso_position(TORSO_LOOKING, 90)
+		self.synchronize()
+
+
+	# point with left arm or right arm in the specified direction, then hold
+	# TODO: currently pointing sideways(?), change to pointing forwards
+	def point(self, hand, direction):
+		if(hand == RIGHT):
+			self.set_torso_position(TORSO_POINTING_RIGHT, direction)
+		elif(hand == LEFT):
+			self.set_torso_position(TORSO_POINTING_LEFT, direction)
+		self.synchronize()
+
+
+	# extend left arm straight out and turn maximum right, then hold
+	# no args needed
+	# TODO: add arguments and change pose to allow height/LR control
+	def stab(self):
+		self.set_torso_position(TORSO_POINTING_LEFT, 150)
+		self.synchronize()
+
+
+	# go to default arms & default waist
+	def torso_neutral(self):
+		self.set_speed(NORMAL)
 		self.set_torso_position(TORSO_NEUTRAL, 90)
+		self.synchronize()
+	# go to default arms, doesn't change waist
+	def arms_neutral(self):
+		self.set_speed(NORMAL)
+		self.set_arms_position(TORSO_NEUTRAL)
+		self.synchronize()
+	# go to default waist, doesn't change arms
+	def rotate_neutral(self):
+		self.set_speed(NORMAL)
+		self.set_waist_position(90)
+		self.synchronize()
 
 	########################################################################################
 	########################################################################################

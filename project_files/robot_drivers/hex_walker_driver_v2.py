@@ -519,7 +519,7 @@ class Hex_Walker(object):
 		time = self.speed if time==-1 else time
 		# masklist: if given a single index rather than an iteratable, make it into a set
 		# if given something else, cast the masklist as a set to remove potential duplicates
-		legs = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		legs = set([masklist]) if isinstance(masklist, int) else set(masklist)
 		
 		if isinstance(dest, Hex_Walker_Position):
 			if USE_THREADING:
@@ -579,7 +579,7 @@ class Hex_Walker(object):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
 			# if given something else, cast the masklist as a set to remove potential duplicates
-			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+			mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
 			
 			for leg in [self.idx_to_leg(n) for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
@@ -811,7 +811,7 @@ class Robot_Torso(object):
 	def synchronize(self, masklist=GROUP_ALL_TORSO):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
-			mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+			mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
 			for leg in [self.leglist[n - ARM_L] for n in mask]:
 				# wait until the leg is done, if it is already done this returns immediately
 				leg.idle_flag.wait()
@@ -859,7 +859,7 @@ class Robot_Torso(object):
 	# previously set_torso_position(self, torso_position_number, rotation)
 	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, time=-1):
 		# if given a single index rather than an iteratable, make it into a set
-		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
 		# if given arms_pose_idx, convert to actual object
 		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 
@@ -893,7 +893,7 @@ class Robot_Torso(object):
 		# default time if not given is self.speed, can't put "self" in default args tho
 		time = self.speed if time==-1 else time
 		# if given a single index rather than an iteratable, make it into a set
-		mask = set((masklist)) if isinstance(masklist, int) else set(masklist)
+		mask = set([masklist]) if isinstance(masklist, int) else set(masklist)
 		for leg in [self.leglist[n - ARM_L] for n in mask]:
 			if USE_THREADING:
 				leg.set_leg_position_thread(legobj, time)

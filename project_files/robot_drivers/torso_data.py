@@ -41,6 +41,9 @@ class Arms_Position(object):
 		left_arm_string = "left arm: " + str(self.left_arm)
 		right_arm_string = "right arm: " + str(self.right_arm)
 		return start_str + left_arm_string + "\n" + right_arm_string + "\n" + self.description
+	
+	def copy(self):
+		return copy.deepcopy(self)
 
 
 # relaxed

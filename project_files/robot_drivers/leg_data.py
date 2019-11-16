@@ -1,3 +1,4 @@
+import copy
 
 # NOTE: these values are ANGLES not raw pwms
 class Leg_Position(object):
@@ -11,6 +12,10 @@ class Leg_Position(object):
 	
 	def __str__(self):
 		return "ROT: " + str(self.rot_servo) + "|| MID : " + str(self.mid_servo) + "|| TIP : " + str(self.tip_servo)
+	
+	def copy(self):
+		return copy.deepcopy(self)
+
 
 # NOTE: table naming convention is: (standing height)_(gait)_(what type of movement)_TABLE
 

@@ -42,6 +42,9 @@ class Hex_Walker_Position(object):  # Class name should be camelcase but I'll le
 		lm_str = "lm: " + str(self.lm_pose) + "\n"
 		lf_str = "lf: " + str(self.lf_pose) + "\n"
 		return start_str + rf_str + rm_str + rr_str + lr_str + lm_str + lf_str
+	
+	def copy(self):
+		return copy.deepcopy(self)
 
 
 # NOTE: I have left in repeated steps and simply commented them out.

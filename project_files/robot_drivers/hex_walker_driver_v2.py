@@ -820,7 +820,7 @@ class Robot_Torso(object):
 
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
 		for n in mask:
-			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
+			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, durr)
 
 
 	# one-to-one: no mask needed
@@ -914,12 +914,32 @@ class Robot_Torso(object):
 
 
 	# point with left arm or right arm in the specified direction, then hold
-	# TODO: currently pointing sideways(?), change to pointing forwards
 	def point(self, hand, direction):
 		if(hand == RIGHT):
 			self.set_torso_position(TORSO_POINTING_RIGHT, direction)
 		elif(hand == LEFT):
 			self.set_torso_position(TORSO_POINTING_LEFT, direction)
+		self.synchronize()
+
+
+	# direction is from 0-359, will pick leftarm/rightarm to point in the chosen direction
+	# 0/360 = front
+	# this does not control the waist at all, just the arms
+	# !!! also demonstrates more dynamic control over the poses !!!
+	def point_better(self, direction):
+		direction = clamp(direction, 0, 359)
+		if direction >= 180:
+			# use left arm to point: dynamically create the leg-pose to have the angle i want
+			armspos = TORSO_POSITIONS[TORSO_POINTING_FWD_LEFT].copy()
+			# translate direction=[180=back, 270=left, 360=fwd] to [180=back, 90=out, 0=fwd]
+			armspos.left_arm.list[MID_SERVO] = (-(direction-180))+180
+			self.set_arms_position(armspos)
+		else:
+			# use right arm to point
+			armspos = TORSO_POSITIONS[TORSO_POINTING_FWD_RIGHT].copy()
+			# translate direction=[0=fwd, 90=right, 180=back] to [0=fwd, 90=out, 180=back], no translation
+			armspos.right_arm.list[MID_SERVO] = direction
+			self.set_arms_position(armspos)
 		self.synchronize()
 
 

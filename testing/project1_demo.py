@@ -50,6 +50,7 @@ while(cmd != 0):
 	print("18 - fine rotate left")
 	print("19 - fine rotate right")
 	print("20 - change speed")
+	print("21 - point better")
 
 	while(True):
 		r = input("Choose an option:")
@@ -127,6 +128,14 @@ while(cmd != 0):
 		try:
 			f = float(s)
 			hex_walker.set_speed(f)
+		except ValueError:
+			print("failed")
+	elif (cmd == 21):
+		print("better point")
+		s = input("point angle: ")
+		try:
+			f = float(s)
+			torso.point_better(f)
 		except ValueError:
 			print("failed")
 	else:

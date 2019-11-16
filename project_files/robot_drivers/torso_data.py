@@ -28,8 +28,7 @@ TORSO_ARM_TABLE = {
 # this is a bundle of Leg_Position objects, one for each arm, that describes a "pose" for the robot
 # DOES NOT INCLUDE WAIST INFORMATION
 class Arms_Position(object):
-	# TODO: swap right_arm/left_arm order (in args list only) because ARM_L=6 and ARM_R=7
-	def __init__(self, right_arm, left_arm, description="-"):
+	def __init__(self, left_arm, right_arm, description="-"):
 		self.left_arm = left_arm
 		self.right_arm = right_arm
 		# NOTE: this list is not actually indexed with ARM_L/ARM_R... might want to change this to a dict?
@@ -100,79 +99,79 @@ TORSO_POSITIONS = {
 					  "jumping jacks (up pos)"),
 	# 4
 	TORSO_WAVE_DOWN:
-		Arms_Position(TORSO_ARM_TABLE["WAVE_DOWN"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["WAVE_DOWN"],
 					  "waving with the right hand (down pos)"),
 	
 	# 5
 	TORSO_WAVE_UP:
-		Arms_Position(TORSO_ARM_TABLE["WAVE_UP"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["WAVE_UP"],
 					  "waving with the right hand (up pos)"),
 	# 6
 	TORSO_SHAKE_DOWN:
-		Arms_Position(TORSO_ARM_TABLE["HAND_SHAKE_DOWN"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["HAND_SHAKE_DOWN"],
 					  "handshaking with the right hand (down pos)"),
 	# 14
 	TORSO_SHAKE_MID:
-		Arms_Position(TORSO_ARM_TABLE["HAND_SHAKE_MID"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["HAND_SHAKE_MID"],
 					  "handshaking with the rigth hand (mid pos)"),
 	# 7
 	TORSO_SHAKE_UP:
-		Arms_Position(TORSO_ARM_TABLE["HAND_SHAKE_UP"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["HAND_SHAKE_UP"],
 					  "handshaking with the right hand (up pos)"),
 	# 8
 	TORSO_DANCE_FRONT_LEFT_OUT:
-		Arms_Position(TORSO_ARM_TABLE["BLOCKING_FRONT"],
-					  TORSO_ARM_TABLE["STRAIGHT_OUT"],
+		Arms_Position(TORSO_ARM_TABLE["STRAIGHT_OUT"],
+					  TORSO_ARM_TABLE["BLOCKING_FRONT"],
 					  "dance move with left arm out"),
 	# 9
 	TORSO_DANCE_FRONT_RIGHT_OUT:
-		Arms_Position(TORSO_ARM_TABLE["STRAIGHT_OUT"],
-					  TORSO_ARM_TABLE["BLOCKING_FRONT"],
+		Arms_Position(TORSO_ARM_TABLE["BLOCKING_FRONT"],
+					  TORSO_ARM_TABLE["STRAIGHT_OUT"],
 					  "dance move with right arm out"),
 	# 10
 	TORSO_DANCE_ABOVE_LEFT_UP:
-		Arms_Position(TORSO_ARM_TABLE["BLOCKING_UP"],
-					  TORSO_ARM_TABLE["WAVE_DOWN"],
+		Arms_Position(TORSO_ARM_TABLE["WAVE_DOWN"],
+					  TORSO_ARM_TABLE["BLOCKING_UP"],
 					  "dance move with left arm above head"),
 	
 	# 11
 	TORSO_DANCE_ABOVE_RIGHT_UP:
-		Arms_Position(TORSO_ARM_TABLE["WAVE_DOWN"],
-					  TORSO_ARM_TABLE["BLOCKING_UP"],
+		Arms_Position(TORSO_ARM_TABLE["BLOCKING_UP"],
+					  TORSO_ARM_TABLE["WAVE_DOWN"],
 					  "dance move with right arm above head"),
 	
 	# 13
 	TORSO_MONKEY_RIGHT_UP:
-		Arms_Position(TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_UP"],
-					  TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_DOWN"],
+		Arms_Position(TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_DOWN"],
+					  TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_UP"],
 					  "starting johnny bravo's monkey dance"),
 	
 	TORSO_MONKEY_LEFT_UP:
-		Arms_Position(TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_DOWN"],
-					  TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_UP"],
+		Arms_Position(TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_UP"],
+					  TORSO_ARM_TABLE["JOHNNY_BRAVO_MONKEY_DOWN"],
 					  "finishing johnny bravo's monkey dance"),
 	
 	# 15
 	TORSO_LOOKING:
-		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
-					  TORSO_ARM_TABLE["LOOKING"],
+		Arms_Position(TORSO_ARM_TABLE["LOOKING"],
+					  TORSO_ARM_TABLE["NEUTRAL"],
 					  "raising hand to act like it is looking around"),
 	
 	# 16
 	TORSO_POINTING_LEFT:
-		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
-					  TORSO_ARM_TABLE["STRAIGHT_OUT"],
+		Arms_Position(TORSO_ARM_TABLE["STRAIGHT_OUT"],
+					  TORSO_ARM_TABLE["NEUTRAL"],
 					  "pointing left arm out"),
 	
 	# 17
 	TORSO_POINTING_RIGHT:
-		Arms_Position(TORSO_ARM_TABLE["STRAIGHT_OUT"],
-					  TORSO_ARM_TABLE["NEUTRAL"],
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["STRAIGHT_OUT"],
 					  "pointing right arm out")
 	
 }

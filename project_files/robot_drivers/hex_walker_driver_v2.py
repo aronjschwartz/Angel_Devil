@@ -927,7 +927,7 @@ class Robot_Torso(object):
 	# no args needed
 	# TODO: add arguments and change pose to allow height/LR control
 	def stab(self):
-		self.set_torso_position(TORSO_POINTING_LEFT, 150)
+		self.set_torso_position(TORSO_POINTING_FWD_LEFT, 90)
 		self.synchronize()
 
 

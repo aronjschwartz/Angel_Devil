@@ -5,7 +5,7 @@ TORSO_ARM_TABLE = {
 	"ON_HIP":			Leg_Position(0, 90, 0),
 	"UP":				Leg_Position(90, 0, 180),
 	"STRAIGHT_OUT":		Leg_Position(90,90,90),
-	"STRAIGHT_FOR":		Leg_Position(90,0,90),
+	"STRAIGHT_FWD":		Leg_Position(90,0,90),
 	
 	"WAVE_UP":			Leg_Position(30, 40, 180),
 	"WAVE_DOWN":		Leg_Position(55,120,180),
@@ -40,7 +40,7 @@ class Arms_Position(object):
 		start_str = "-----------------------Arms position is-------------------------"
 		left_arm_string = "left arm: " + str(self.left_arm)
 		right_arm_string = "right arm: " + str(self.right_arm)
-		return left_arm_string + "\n" + right_arm_string + "\n" + self.description
+		return start_str + left_arm_string + "\n" + right_arm_string + "\n" + self.description
 
 
 # relaxed
@@ -79,6 +79,8 @@ TORSO_LOOKING = 15
 # pointing
 TORSO_POINTING_LEFT = 16
 TORSO_POINTING_RIGHT= 17
+TORSO_POINTING_FWD_LEFT = 18
+TORSO_POINTING_FWD_RIGHT = 19
 
 TORSO_POSITIONS = {
 	# 1
@@ -172,6 +174,16 @@ TORSO_POSITIONS = {
 	TORSO_POINTING_RIGHT:
 		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
 					  TORSO_ARM_TABLE["STRAIGHT_OUT"],
+					  "pointing right arm out"),
+	# 18
+	TORSO_POINTING_FWD_LEFT:
+		Arms_Position(TORSO_ARM_TABLE["STRAIGHT_FWD"],
+					  TORSO_ARM_TABLE["NEUTRAL"],
+					  "pointing right arm out"),
+	# 19
+	TORSO_POINTING_FWD_RIGHT:
+		Arms_Position(TORSO_ARM_TABLE["NEUTRAL"],
+					  TORSO_ARM_TABLE["STRAIGHT_FWD"],
 					  "pointing right arm out")
 	
 }

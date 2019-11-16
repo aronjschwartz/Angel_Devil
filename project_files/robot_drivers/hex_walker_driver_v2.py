@@ -72,8 +72,8 @@ class Leg(object):
 		self.frame_queue = []
 		# locking object to ensure no collisions happen around the frame queue
 		self._frame_queue_lock = threading.Lock()
-		# locking object to ensure no collisions happen around self.tip_motor/self.tip_motor_angle, etc
-		# might not be necessary but couldn't hurt, technically both the leg thread and leg object write into them
+		# locking object to ensure no collisions happen around self.curr_servo_angle/self.curr_servo_pwm
+		# might not be necessary but couldn't hurt, technically both the leg thread and leg object can write into them
 		self._curr_pos_lock = threading.Lock()
 
 		# create and launch the thread for this leg

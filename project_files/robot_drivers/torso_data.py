@@ -24,17 +24,25 @@ TORSO_ARM_TABLE = {
 	
 }
 
+
+# this is a bundle of Leg_Position objects, one for each arm, that describes a "pose" for the robot
+# DOES NOT INCLUDE WAIST INFORMATION
 class Arms_Position(object):
-	def __init__(self, right_arm, left_arm, description):
-		self.right_arm = right_arm
+	# TODO: swap right_arm/left_arm order (in args list only) because ARM_L=6 and ARM_R=7
+	def __init__(self, right_arm, left_arm, description="-"):
 		self.left_arm = left_arm
+		self.right_arm = right_arm
+		# NOTE: this list is not actually indexed with ARM_L/ARM_R... might want to change this to a dict?
+		# probably just fine like this
+		self.list = [self.left_arm, self.right_arm]
 		self.description = description
 	
 	def __str__(self):
-		start_str = "-----------------------Torso position is-------------------------"
-		right_arm_string = "right arm: " + str(self.right_arm) + "\n"
-		left_arm_string = "left arm: " + str(self.left_arm) + "\n"
-		return right_arm_string + left_arm_string + self.description
+		start_str = "-----------------------Arms position is-------------------------"
+		left_arm_string = "left arm: " + str(self.left_arm)
+		right_arm_string = "right arm: " + str(self.right_arm)
+		return left_arm_string + "\n" + right_arm_string + "\n" + self.description
+
 
 # relaxed
 TORSO_NEUTRAL = 1

@@ -3,10 +3,10 @@ from leg_data import *
 
 class Hex_Walker_Position(object):  # Class name should be camelcase but I'll let it go
 	"""
-	Object to store the positions of all legs for a desired stance. Also has a list of all save
+	Object to store the positions of all legs for a desired stance. Also has a list of all safe
 	moves that the hexapod can make from this stance.
 	"""
-	def __init__(self, rf_pos, rm_pos, rr_pos, lr_pos, lm_pos, lf_pos, safe_move_list, description):
+	def __init__(self, rf_pos, rm_pos, rr_pos, lr_pos, lm_pos, lf_pos, safe_move_list=None, description="-"):
 		"""
 		:param rf_pos: Right front leg position
 		:param rm_pos: Right mid leg position
@@ -17,12 +17,15 @@ class Hex_Walker_Position(object):  # Class name should be camelcase but I'll le
 		:param safe_move_list: List of approved moves that won't damage the robot
 		:param description: Short description of the current stance
 		"""
-		self.rf_pos = rf_pos
-		self.rm_pos = rm_pos
-		self.rr_pos = rr_pos
-		self.lr_pos = lr_pos
-		self.lm_pos = lm_pos
-		self.lf_pos = lf_pos
+		if safe_move_list is None:
+			safe_move_list = []
+		self.rf_pose = rf_pos
+		self.rm_pose = rm_pos
+		self.rb_pose = rr_pos
+		self.lb_pose = lr_pos
+		self.lm_pose = lm_pos
+		self.lf_pose = lf_pos
+		self.list = [self.rf_pose, self.rm_pose, self.rb_pose, self.lb_pose, self.lm_pose, self.lf_pose]
 		self.safe_moves = safe_move_list
 		self.description = description
 	
@@ -32,12 +35,12 @@ class Hex_Walker_Position(object):  # Class name should be camelcase but I'll le
 		:return: String with the positions of each leg in clockwise order
 		"""
 		start_str = "--------------------------hex_walker position is------------------\n"
-		rf_str = "rf: " + str(self.rf_pos) + "\n"
-		rm_str = "rm: " + str(self.rm_pos) + "\n"
-		rr_str = "rr: " + str(self.rr_pos) + "\n"
-		lr_str = "lr: " + str(self.lr_pos) + "\n"
-		lm_str = "lm: " + str(self.lm_pos) + "\n"
-		lf_str = "lf: " + str(self.lf_pos) + "\n"
+		rf_str = "rf: " + str(self.rf_pose) + "\n"
+		rm_str = "rm: " + str(self.rm_pose) + "\n"
+		rr_str = "rr: " + str(self.rb_pose) + "\n"
+		lr_str = "lr: " + str(self.lb_pose) + "\n"
+		lm_str = "lm: " + str(self.lm_pose) + "\n"
+		lf_str = "lf: " + str(self.lf_pose) + "\n"
 		return start_str + rf_str + rm_str + rr_str + lr_str + lm_str + lf_str
 
 

@@ -1,13 +1,16 @@
 
 # NOTE: these values are ANGLES not raw pwms
 class Leg_Position(object):
-	def __init__(self, tip_motor, mid_motor, rot_motor):
-		self.tip_motor = tip_motor
-		self.mid_motor = mid_motor
-		self.rot_motor = rot_motor
+	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
+	def __init__(self, tip_servo, mid_servo, rot_servo):
+		self.rot_servo = rot_servo
+		self.mid_servo = mid_servo
+		self.tip_servo = tip_servo
+		# TODO: once tip/rot servo values are swapped, swap their location in self.list too
+		self.list = [self.tip_servo, self.mid_servo, self.rot_servo]
 	
 	def __str__(self):
-		return "TIP: " + str(self.tip_motor) + "|| MID : " + str(self.mid_motor) + "|| ROT : " + str(self.rot_motor)
+		return "ROT: " + str(self.rot_servo) + "|| MID : " + str(self.mid_servo) + "|| TIP : " + str(self.tip_servo)
 
 # NOTE: table naming convention is: (standing height)_(gait)_(what type of movement)_TABLE
 

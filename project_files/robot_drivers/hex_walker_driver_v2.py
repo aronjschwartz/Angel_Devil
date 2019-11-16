@@ -250,9 +250,9 @@ class Leg(object):
 
 	# uses the "leg_position" objects, immediate set (no threading)
 	def set_leg_position(self, leg_position):
-		self.set_servo_angle(leg_position.tip_motor, TIP_SERVO)
-		self.set_servo_angle(leg_position.mid_motor, MID_SERVO)
-		self.set_servo_angle(leg_position.rot_motor, ROT_SERVO)
+		self.set_servo_angle(leg_position.tip_servo, TIP_SERVO)
+		self.set_servo_angle(leg_position.mid_servo, MID_SERVO)
+		self.set_servo_angle(leg_position.rot_servo, ROT_SERVO)
 
 
 	# safety clamp (in angle space) 
@@ -266,15 +266,8 @@ class Leg(object):
 		dest = [0, 0, 0]
 		
 		# safety checking for each motor
-		# TODO: once Leg_Position is listified, replace the following code with:
-		# for s in range(3):
-			# dest[s] = bidirectional_clamp(leg_position.list[s], self.SERVO_ANGLE_LIMITS[s][0], self.SERVO_ANGLE_LIMITS[s][1])
-		dest[TIP_SERVO] = bidirectional_clamp(leg_position.tip_motor,
-											  self.SERVO_ANGLE_LIMITS[TIP_SERVO][0], self.SERVO_ANGLE_LIMITS[TIP_SERVO][1])
-		dest[MID_SERVO] = bidirectional_clamp(leg_position.mid_motor,
-											  self.SERVO_ANGLE_LIMITS[MID_SERVO][0], self.SERVO_ANGLE_LIMITS[MID_SERVO][1])
-		dest[ROT_SERVO] = bidirectional_clamp(leg_position.rot_motor,
-											  self.SERVO_ANGLE_LIMITS[ROT_SERVO][0], self.SERVO_ANGLE_LIMITS[ROT_SERVO][1])
+		for s in range(3):
+			dest[s] = bidirectional_clamp(leg_position.list[s], self.SERVO_ANGLE_LIMITS[s][0], self.SERVO_ANGLE_LIMITS[s][1])
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.
 		# otherwise, interpolate from current position.
@@ -505,22 +498,8 @@ class Hex_Walker(object):
 			hex_pose = hexwalker_pose_idx
 		
 		for n in mask:
-			# extract the appropriate pose from the object
-			# TODO: listify the Hex_Walker_Position object and eliminate this case-statement chain
-			# self.do_set_hexwalker_position(hex_pose.list[n], n, durr)
-			if n == LEG_RF:
-				pose = hex_pose.rf_pos
-			elif n == LEG_RM:
-				pose = hex_pose.rm_pos
-			elif n == LEG_RB:
-				pose = hex_pose.rr_pos
-			elif n == LEG_LB:
-				pose = hex_pose.lr_pos
-			elif n == LEG_LM:
-				pose = hex_pose.lm_pos
-			elif n == LEG_LF:
-				pose = hex_pose.lf_pos
-			self.do_set_hexwalker_position(pose, n, durr)
+			# extract the appropriate pose from the object, send to appropriate leg
+			self.do_set_hexwalker_position(hex_pose.list[n], n, durr)
 
 		# self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, durr)
 		# self.do_set_hexwalker_position(hex_pose)
@@ -839,14 +818,9 @@ class Robot_Torso(object):
 		# if given arms_pose_idx, convert to actual object
 		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
 
-		# TODO: this can be improved if the Arms_Position object is listified
-		# for n in mask:
-			# self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
-		if ARM_L in mask:
-			self.do_set_torso_position(arms_pose_obj.left_arm, ARM_L, durr)
-		if ARM_R in mask:
-			self.do_set_torso_position(arms_pose_obj.right_arm, ARM_R, durr)
+		for n in mask:
+			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, time)
 
 
 	# one-to-one: no mask needed

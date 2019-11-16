@@ -13,30 +13,61 @@ import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
 from leg_data import *
 
+all_legs = None
+slider_names = ["Which Leg/Group", "Enable", 
+                "Tip Joint", "Mid Joint", "Rot Joint"]
+# first is init, second is max (min is always 0)
+slider_limits = [[0, 10], [0,1], 
+                [0, 180], [90, 180], [90, 180]]
+window_name = "Hexapod Leg Control"
+
+# TODO: leg groups
 
 def main():
+	global all_legs
     all_legs = initialize_legs()
-    slider_names = ["Leg", "Rotary Joint", "Mid Joint", "Tip Joint"]
-    # TODO: look up these limits, don't hard-code them
-    slider_limits = [[1, 5], [0, 180], [45, 180], [90, 270]]
-    window_name = "Hexapod Leg Control"
     cv.namedWindow(window_name)
 
-    for slider, limits in zip(slider_names, slider_limits):
+    cv.createTrackbar(slider_names[0], window_name, slider_limits[0][0], slider_limits[0][1], changeleg)
+    for slider, limits in zip(slider_names[1:], slider_limits[1:]):
         cv.createTrackbar(slider, window_name, limits[0], limits[1], dummy)
 
     user_inputs = fetch_trackbar_pos(window_name, slider_names)
-    all_legs[user_inputs[0]].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
+    all_legs[user_inputs[0]].set_leg_position(Leg_Position(user_inputs[2], user_inputs[3], user_inputs[4]))
     while True:
         previous_user_inputs = user_inputs
         user_inputs = fetch_trackbar_pos(window_name, slider_names)
         key = cv.waitKey(1) & 0xFF
-        time.sleep(0.05)    # Our poor processor....
-        if key == ord("q"):  # Quit if the user presses "q"
+        time.sleep(0.05) # Our poor processor....
+        if key == ord("q"): # Quit if the user presses "q"
             break
         if not compare_lists(user_inputs, previous_user_inputs):
-            print("Values changed")
-            all_legs[user_inputs[0]].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
+            # if the enable bar is set:
+            if user_inputs[1] == 1:
+                print("Values changed")
+                newleg = Leg_Position(user_inputs[2], user_inputs[3], user_inputs[4])
+                if user_inputs[0] == 6:
+                    # all legs at once
+                    for leg in [all_legs[n] for n in GROUP_ALL_LEGS]:
+                        leg.set_leg_position(newleg)
+                elif user_inputs[0] == 7:
+                    # left legs
+                    for leg in [all_legs[n] for n in GROUP_LEFT_LEGS]:
+                        leg.set_leg_position(newleg)
+                elif user_inputs[0] == 8:
+                    # right legs
+                    for leg in [all_legs[n] for n in GROUP_RIGHT_LEGS]:
+                        leg.set_leg_position(newleg)
+                elif user_inputs[0] == 9:
+                    # left tri
+                    for leg in [all_legs[n] for n in GROUP_LEFT_TRI]:
+                        leg.set_leg_position(newleg)
+                elif user_inputs[0] == 10:
+                    # right tri
+                    for leg in [all_legs[n] for n in GROUP_RIGHT_TRI]:
+                        leg.set_leg_position(newleg)
+                else:
+                    all_legs[user_inputs[0]].set_leg_position(newleg)
     cv.destroyAllWindows()
 
 
@@ -52,18 +83,58 @@ def compare_lists(list1, list2):
 
 
 def fetch_trackbar_pos(window_name, slider_names):
-    leg_num = cv.getTrackbarPos(slider_names[0], window_name)
-    rot_angle = cv.getTrackbarPos(slider_names[1], window_name)
-    mid_angle = cv.getTrackbarPos(slider_names[2], window_name)
-    tip_angle = cv.getTrackbarPos(slider_names[3], window_name)
-    return [leg_num, rot_angle, mid_angle, tip_angle]
+    r = []
+    for name in slider_names:
+        r.append(cv.getTrackbarPos(name, window_name))
+    return r
 
+def changeleg(x):
+    print("change leg")
+    # function called when leg is changed
+	# if x == 6:
+	if x >= 6: # temp code
+        # if x == 6, then selecting "all legs"...
+		# set the "enable" trackbar to 0
+		cv.setTrackbarPos(slider_names[1], window_name, 0)
+        # TODO: calculate average for each joint
+		# for leg in [all_legs[n] for n in GROUP_ALL_LEGS]:
+			# leg.curr_servo_angle
+        # for now, set to defaults
+        cv.setTrackbarPos(slider_names[2], window_name, 0)
+        cv.setTrackbarPos(slider_names[3], window_name, 90)
+        cv.setTrackbarPos(slider_names[4], window_name, 90)
+	# elif x == 7:
+		# # left legs
+		# for leg in [all_legs[n] for n in GROUP_LEFT_LEGS]:
+			# leg.set_leg_position(newleg)
+	# elif x == 8:
+		# # right legs
+		# for leg in [all_legs[n] for n in GROUP_RIGHT_LEGS]:
+			# leg.set_leg_position(newleg)
+	# elif x == 9:
+		# # left tri
+		# for leg in [all_legs[n] for n in GROUP_LEFT_TRI]:
+			# leg.set_leg_position(newleg)
+	# elif x == 10:
+		# # right tri
+		# for leg in [all_legs[n] for n in GROUP_RIGHT_TRI]:
+			# leg.set_leg_position(newleg)
+	else:
+		# set the "enable" trackbar to 1
+		cv.setTrackbarPos(slider_names[1], window_name, 1)
+        # lookup current angle values of leg and set trackbars to reflect that
+        curr = all_legs[x].curr_servo_angle
+        cv.setTrackbarPos(slider_names[2], window_name, curr[TIP_SERVO])
+        cv.setTrackbarPos(slider_names[3], window_name, curr[MID_SERVO])
+        cv.setTrackbarPos(slider_names[4], window_name, curr[ROT_SERVO])
+    
 
 def dummy(x):
     return
 
 
 def initialize_legs():
+	global all_legs
     pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
     rf = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[LEG_RF], LEG_RF) #0
     rm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[LEG_RM], LEG_RM) #1

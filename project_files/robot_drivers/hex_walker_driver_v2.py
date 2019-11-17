@@ -8,7 +8,6 @@
 # also improved code reuse by making Rotator object a subclass of Leb object.
 
 
-from __future__ import division
 import time
 import threading
 from torso_data import *
@@ -351,15 +350,18 @@ class Rotator(Leg):
 
 
 
-# The Hex_Walker is a way of grouping the 6 actual legs for macro-control. This is totally
-# isolated from the torso servos. This contains the "motion functions" for things like walking and
-# turning, as well as the driver functions to execute these motions.
-# "synchronize" will wait until the specified legs are done moving before it returns (if empty waits for all).
-# For more basic control (old style), use "run_pose_list": each pose sets all legs at once and each pose
-# transition takes the same duration. Repeatedly calls "set_hexwalker_position" and "synchronize()".
-# For more advanced control (new style), use "do_set_hexwalker_position": supports per-leg masking and
-# poses can be Hex_Walker_Position or Leg_Position, doesn't use the "safe pose transition" checking of
-# "run_pose_list" so this works with dynamically-created or dynamically-modified poses.
+
+# The Hex_Walker is a way of grouping the 6 actual legs for macro-control. This is totally isolated from the torso
+# servos. This contains the "motion functions" for things like walking and turning, as well as the driver functions
+# to execute these motions.
+# Most func accept optional arg "durr" to specify the duration of the transition; if missing, default is self.speed.
+# Most func accept optional arg "masklist" to specify the legs being set or waited on.
+# synchronize() will wait until the specified legs are done moving before it returns (default value is wait for all).
+# !!! WIP !!! abort() will flush the frame queues of each leg, stopping their movements immediately. They then hold
+# whatever in-between pose they happened to have when it was called. TODO: It also interrupts any in-progress "motion function", method TBD.
+# run_pose_list() takes a list of indices within HEX_WALKER_POSITIONS array and runs through them with durr=self.speed.
+# set_hexwalker_position() sets any combination of legs from an index or Hex_Walker_Position object.
+# do_set_hexwalker_position() sets any combination of legs from a Leg_Position object.
 class Hex_Walker(object):
 	# list of functions:
 	# __init__
@@ -457,16 +459,16 @@ class Hex_Walker(object):
 			return INV_PARAM
 
 
-	## take a list of INDICES of poses to run through.
+	## takes a list of indices within HEX_WALKER_POSITIONS array and runs through them with durr=self.speed.
 	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
-	# will eventually remove this feature probably
+	#    we will eventually remove this feature probably
 	# previously "do_move_set"
 	def run_pose_list(self, hex_walker_position_list):
 		for next_pos in hex_walker_position_list:
 			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
 				if HW_MOVE_DEBUG:
 					print("Sending command")
-				self.set_hexwalker_position(next_pos)
+				self.set_hexwalker_position(next_pos, masklist=GROUP_ALL_LEGS, durr=self.speed)
 				self.synchronize()
 			else:
 				print("invalid move set")
@@ -474,66 +476,51 @@ class Hex_Walker(object):
 		return SUCCESS
 
 
-	## used to set the pose of some/all of the legs from a Hex_Walker_Position while keeping other legs untouched.
-	## if using threading, can set multiple simultaneous leg transitions with different durations by calling
-	## this multiple times without synchronize() between.
-	# hexwalker_pose_idx can be index or object.
+	## sets any combination of legs from an index or Hex_Walker_Position while keeping other legs untouched.
 	# if index, update current_pos. if object, don't, because it was probably dynamically created.
+	#    we will eventually remove this feature probably
 	# masklist can be int or list, or none (defaults to all legs)
-	# optional arg with speed
 	# previously "set_hex_walker_position"
-	def set_hexwalker_position(self, hexwalker_pose_idx, masklist=GROUP_ALL_LEGS, durr=None):
+	def set_hexwalker_position(self, hex_pose_idx, masklist=GROUP_ALL_LEGS, durr=None):
 		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
-		# if given arms_pose_idx, convert to actual object
-		# arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
-		if isinstance(hexwalker_pose_idx, int):
+		# if given hex_pose_idx as an index, convert to Hex_Walker_Position object via lookup
+		# hex_pose_obj = hex_pose_idx if isinstance(hex_pose_idx, Hex_Walker_Position) else HEX_WALKER_POSITIONS[hex_pose_idx]
+		if isinstance(hex_pose_idx, int):
 			# if it is an index, then update current_pos and do the rest of the thing
-			self.current_pos = hexwalker_pose_idx
-			hex_pose = HEX_WALKER_POSITIONS[hexwalker_pose_idx]
+			self.current_pos = hex_pose_idx
+			hex_pose_obj = HEX_WALKER_POSITIONS[hex_pose_idx]
 			if(HW_MOVE_DEBUG):
-				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + hex_pose.description)
+				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + hex_pose_obj.description)
 		else:
 			# if it is the actual object, then it was probably dynamically created. don't update hex_pose, dont print debug description
-			hex_pose = hexwalker_pose_idx
+			hex_pose_obj = hex_pose_idx
 		
 		for n in mask:
 			# extract the appropriate pose from the object, send to appropriate leg
-			self.do_set_hexwalker_position(hex_pose.list[n], n, durr)
-
-		# self.do_set_hexwalker_position(hex_pose, GROUP_ALL_LEGS, durr)
-		# self.do_set_hexwalker_position(hex_pose)
+			self.do_set_hexwalker_position(hex_pose_obj.list[n], masklist=n, durr=durr)
 
 
-	## used to set the pose of some/all of the legs from a Leg_Position while keeping other legs untouched.
-	## if using threading, can set multiple simultaneous leg transitions with different durations by calling 
-	## this multiple times without synchronize() between.
-	# dest is Leg_Position, set all specified legs to that pose
+	## sets any combination of legs from a Leg_Position object while keeping other legs untouched.
 	# masklist can be int or list, or none (defaults to all legs)
-	# optional arg with speed
-	# check USE_THREADING and call set_leg_position or set_leg_position_thread 
 	# previously "do_set_hex_walker_position"
 	def do_set_hexwalker_position(self, dest, masklist=GROUP_ALL_LEGS, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		durr = self.speed if durr==None else durr
-		# masklist: if given a single index rather than an iteratable, make it into a set
-		# if given something else, cast the masklist as a set to remove potential duplicates
+		durr = self.speed if durr is None else durr
+		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		
-		if USE_THREADING:
-			for leg in [self.idx_to_leg(n) for n in mask]:
-				# threading version
-				leg.set_leg_position_thread(dest, durr)
-		else:
-			for leg in [self.idx_to_leg(n) for n in mask]:
-				# non-threading version
-				leg.set_leg_position(dest)
+		for leg in [self.idx_to_leg(n) for n in mask]:
+			if USE_THREADING:
+				leg.set_leg_position_thread(dest, durr) # threading version
+			else:
+				leg.set_leg_position(dest) # non-threading version
 
 
 	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
 	# masklist accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_LEGS
-	# depending on USE_THREADING, either simply sleep or do the actual synchro
+	# depending on USE_THREADING, either simply sleep or do the actual wait
 	def synchronize(self, masklist=GROUP_ALL_LEGS):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
@@ -730,19 +717,40 @@ class Hex_Walker(object):
 
 	########################################################################################
 	########################################################################################
-	pass
 
 
 # terms: torso = (Larm + Rarm) + waist
-
+# The Robot_Torso groups the 2 arms with the waist motor for macro-control. This is totally isolated from the 6 legs
+# in the Hex_Walker object. This contains the "motion functions" for things like dancing and pointing, as well as the
+# driver functions to execute these motions. Note that both arms and the waist are still technically "Leg" objects.
+# Most func accept optional arg "durr" to specify the duration of the transition; if missing, default is self.speed.
+# Most func accept optional arg "masklist" to specify the legs being set or waited on.
+# It has synchronize() and abort() just like the Hex_Walker object, and they work just the same.
+# do_moveset() takes a list of indices within TORSO_POSITIONS array, along with the waist-rotations to use for each.
+# set_torso_position() calls both set_arms_position() and set_waist_position(), thats it.
+# set_arms_position() will set LARM/RARM/both poses from an Arms_Position object or index within TORSO_POSITIONS.
+# set_waist_position() will set the waist pose from an angle(degrees) or a Leg_Position object.
+# do_set_torso_position() will set any combination of legs' poses from a Leg_Position object.
 class Robot_Torso(object):
+	# list of functions:
+	# __init__
+	# print_self
+	# set_speed
+	# synchronize
+	# abort
+	# do_moveset
+	# set_torso_position
+	# set_arms_position
+	# set_waist_position
+	# do_set_torso_position
+	# + assorted "motion" functions
 	def __init__(self, right_arm, left_arm, rotator):
 		# individual member variables
 		self.left_arm = left_arm
 		self.right_arm = right_arm
 		self.rotator = rotator
 		
-		# list form
+		# list form (must subtract ARM_L from ID before indexing into this list, may change to dict in the future)
 		self.leglist = [left_arm, right_arm, rotator]
 		
 		# set default speed
@@ -764,7 +772,7 @@ class Robot_Torso(object):
 	## synchronize the legs with the main thread by not returning until all of the specified legs are done moving
 	# masklist accepts list, set, int (treated as single-element set)
 	# if not given any arg, default is GROUP_ALL_TORSO
-	# depending on USE_THREADING, either simply sleep or do the actual synchro
+	# depending on USE_THREADING, either simply sleep or do the actual wait
 	def synchronize(self, masklist=GROUP_ALL_TORSO):
 		if USE_THREADING:
 			# if given a single index rather than an iteratable, make it into a set
@@ -788,9 +796,8 @@ class Robot_Torso(object):
 		time.sleep(INTERPOLATE_TIME * 3)
 
 
-	## take a list of INDICES of poses to run through.
-	# sets arms and waist at same time
-	# waits until each change is done
+	## takes a list of indices within TORSO_POSITIONS array, along with the waist-rotations to use for each.
+	# sets arms and waist at same time, waits until each change is done with synchronize()
 	# previously do_moveset(self, positions, rotations, sleeps, repetitions):
 	def do_moveset(self, repetitions, position_indices, rotations):
 		if len(position_indices) != len(rotations):
@@ -798,55 +805,53 @@ class Robot_Torso(object):
 			return INV_PARAM
 		for j in range(repetitions):
 			for pose_idx, rot in zip(position_indices, rotations):
-				self.set_torso_position(pose_idx, rot)
+				self.set_torso_position(pose_idx, rot, durr=self.speed)
 				self.synchronize()
 		return SUCCESS
 
 
-	# do both set_arms_position and set_waist_position
+	## do both set_arms_position and set_waist_position, thats it
 	def set_torso_position(self, arms_pose_idx, rotation, durr=None):
-		self.set_arms_position(arms_pose_idx, GROUP_ALL_ARMS, durr)
-		self.set_waist_position(rotation, durr)
+		self.set_arms_position(arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=durr)
+		self.set_waist_position(rotation, durr=durr)
 
 
-	# take Arms_Position object or index
-	# take mask of arm or arms, default is both arms
+	## set LARM/RARM/both poses from an Arms_Position object or index within TORSO_POSITIONS.
+	# take mask of arm or arms, default is both arms (cannot set the waist from this function)
 	# previously set_torso_position(self, torso_position_number, rotation)
 	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=None):
 		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
-		# if given arms_pose_idx, convert to actual object
-		arms_pose_obj = TORSO_POSITIONS[arms_pose_idx] if isinstance(arms_pose_idx, int) else arms_pose_idx
+		# if given arms_pose_idx as an index, convert to Arms_Position object via lookup
+		arms_pose_obj = arms_pose_idx if isinstance(arms_pose_idx, Arms_Position) else TORSO_POSITIONS[arms_pose_idx]
 
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
 		for n in mask:
-			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], n, durr)
-
-
+			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], masklist=n, durr=durr)
+	
+	## set the waist pose from an angle(degrees) or a Leg_Position object.
 	# one-to-one: no mask needed
-	# accept Leg_Position or raw rotation, convert to leg object
 	# previously set_torso_rotation(self, rotation):
 	def set_waist_position(self, waist_rot, durr=None):
 		# if given waist_rot as raw angle, convert to a leg-object
-		waist_rot_obj = Leg_Position(waist_rot, waist_rot, waist_rot) if isinstance(waist_rot, (float, int)) else waist_rot
-		self.do_set_torso_position(waist_rot_obj, WAIST, durr)
+		waist_rot_obj = waist_rot if isinstance(waist_rot, Leg_Position) else Leg_Position(waist_rot, waist_rot, waist_rot)
+		self.do_set_torso_position(waist_rot_obj, masklist=WAIST, durr=durr)
 
 
-	# take a Leg_Position (from torso object or built from waist rotation value)
-	# take a masklist: specify L/R/W/L+R
-		# easiest to have no safety, allow assigning to both LR and W
-	# is assigning to multiple legs/arms actually useful here???
+	## set any combination of legs' poses from a Leg_Position object.
+	# take a Leg_Position (extracted from Arms_Position or built from waist rotation angle)
+	# take a masklist: specify any combination of L/R/W, probably not useful to set multiple at once tho
 	# previously do_set_torso_position(self, torso_position, rotation)
 	def do_set_torso_position(self, legobj, masklist=GROUP_ALL_TORSO, durr=None):
 		# default time if not given is self.speed, can't put "self" in default args tho
-		durr = self.speed if durr==None else durr
+		durr = self.speed if durr is None else durr
 		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		for leg in [self.leglist[n - ARM_L] for n in mask]:
 			if USE_THREADING:
-				leg.set_leg_position_thread(legobj, durr)
+				leg.set_leg_position_thread(legobj, durr) # threading version
 			else:
-				leg.set_leg_position(legobj)
+				leg.set_leg_position(legobj) # non-threading version
 
 
 	########################################################################################
@@ -857,9 +862,8 @@ class Robot_Torso(object):
 	
 	# ????, then reset
 	def monkey(self, repetitions):
-		moves = []
-		moves.append(TORSO_MONKEY_RIGHT_UP)
-		moves.append(TORSO_MONKEY_LEFT_UP)
+		moves = [TORSO_MONKEY_RIGHT_UP,
+				 TORSO_MONKEY_LEFT_UP]
 		# duplicate this a total of 8 times
 		moves = moves * 8
 		rotations = [45] * 8 + [135] * 8
@@ -871,9 +875,8 @@ class Robot_Torso(object):
 
 	# beat the chest, then reset
 	def king_kong(self, rotation, repetitions):
-		moves = []
-		moves.append(TORSO_DANCE_FRONT_LEFT_OUT)
-		moves.append(TORSO_DANCE_FRONT_RIGHT_OUT)
+		moves = [TORSO_DANCE_FRONT_LEFT_OUT,
+				 TORSO_DANCE_FRONT_RIGHT_OUT]
 		rotations = [rotation] * 2
 		self.set_speed(0.4)
 		self.do_moveset(repetitions, moves, rotations)
@@ -883,11 +886,10 @@ class Robot_Torso(object):
 
 	# do handshake sequence (which hand?), then reset
 	def hand_shake(self, rotation, repetitions):
-		moves = []
-		moves.append(TORSO_SHAKE_DOWN)
-		moves.append(TORSO_SHAKE_MID)
-		moves.append(TORSO_SHAKE_UP)
-		moves.append(TORSO_SHAKE_MID)
+		moves = [TORSO_SHAKE_DOWN,
+				 TORSO_SHAKE_MID,
+				 TORSO_SHAKE_UP,
+				 TORSO_SHAKE_MID]
 		rotations = [rotation] * 4
 		self.set_speed(0.1)
 		self.do_moveset(repetitions, moves, rotations)
@@ -897,9 +899,8 @@ class Robot_Torso(object):
 
 	# do waving sequence (which hand?), then reset
 	def wave(self, rotation, repetitions):
-		moves = []
-		moves.append(TORSO_WAVE_DOWN)
-		moves.append(TORSO_WAVE_UP)
+		moves = [TORSO_WAVE_DOWN,
+				 TORSO_WAVE_UP]
 		rotations = [rotation] * 2
 		self.set_speed(0.4)
 		self.do_moveset(repetitions, moves, rotations)
@@ -969,4 +970,4 @@ class Robot_Torso(object):
 
 	########################################################################################
 	########################################################################################
-	pass
+

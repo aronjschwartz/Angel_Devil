@@ -73,6 +73,8 @@ MID_SERVO = 1
 ROT_SERVO = 2
 WAIST_SERVO = 0
 
+GROUP_ALL_SERVOS = [TIP_SERVO, MID_SERVO, ROT_SERVO]
+
 # ==========================================================
 
 

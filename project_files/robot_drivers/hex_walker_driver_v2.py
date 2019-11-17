@@ -249,9 +249,8 @@ class Leg(object):
 
 	# uses the "leg_position" objects, immediate set (no threading)
 	def set_leg_position(self, leg_position):
-		self.set_servo_angle(leg_position.tip_servo, TIP_SERVO)
-		self.set_servo_angle(leg_position.mid_servo, MID_SERVO)
-		self.set_servo_angle(leg_position.rot_servo, ROT_SERVO)
+		for s in GROUP_ALL_SERVOS:
+			self.set_servo_angle(leg_position.list[s], s)
 
 
 	# safety clamp (in angle space) 
@@ -265,7 +264,7 @@ class Leg(object):
 		dest = [0, 0, 0]
 		
 		# safety checking for each motor
-		for s in range(3):
+		for s in GROUP_ALL_SERVOS:
 			dest[s] = bidirectional_clamp(leg_position.list[s], self.SERVO_ANGLE_LIMITS[s][0], self.SERVO_ANGLE_LIMITS[s][1])
 		
 		# if there is a queued interpolation frame, interpolate from the final frame in the queue to the desired pose.

@@ -55,9 +55,8 @@ def Frame_Thread_Func(leg, DEBUG):
 			# set the leg to the pose indicated by the frame
 			# skip the safety checks in set_servo_angle or set_leg_position because safety is checked before interpolating
 			# use the unprotected leg member function: also updates the position stored in the leg
-			leg.do_set_servo_angle(frame[TIP_SERVO], TIP_SERVO)
-			leg.do_set_servo_angle(frame[MID_SERVO], MID_SERVO)
-			leg.do_set_servo_angle(frame[ROT_SERVO], ROT_SERVO)
+			for s in GROUP_ALL_SERVOS:
+				leg.do_set_servo_angle(frame[s], s)
 			
 			# sleep for frame-delay
 			time.sleep(frame[3])

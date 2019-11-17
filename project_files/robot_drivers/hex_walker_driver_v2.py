@@ -200,7 +200,7 @@ class Leg(object):
 			return INV_PARAM
 		return linear_map(100, self.SERVO_ANGLE_LIMITS[servo][0], 
 						0, self.SERVO_ANGLE_LIMITS[servo][1], 
-						angle)
+						percent)
 
 	# convert-then-set functions:
 	def set_servo_percent(self, percent, servo):

@@ -1,6 +1,16 @@
 """
 Simple way to control the torso through a ui
 Author: Patrick Gmerek
+v2: Brian Henson
+
+Not sure where the extra invisible buttons come from, or what they do, or the big black rectangle... but at least
+the sliders are working as intended. Looks pretty messy, not at all like the screenshot in the docs, but it works.
+
+Changes to the sliders are immediately sent to the relevant servos.
+
+The WAIST servo can only move from [30-150] but the slider range must start at 0 so I expanded the slider to [0-180].
+
+This uses the non-threading direct-set functions of the Leg objects.
 """
 import sys
 sys.path.append("../project_files/robot_drivers/")
@@ -19,7 +29,7 @@ def main():
 	slider_names = ["Waist",
 					"Right Tip Joint", "Right Mid Joint", "Right Rotary Joint",
 					"Left Tip Joint", "Left Mid Joint", "Left Rotary Joint"]
-	# TODO: look up these limits, don't hard-code them
+	# note: min is always 0. below values are [initial, max]
 	slider_limits = [[90, 180],
 					 [90, 180], [90, 180], [90, 180],
 					 [90, 180], [90, 180], [90, 180]]
@@ -31,19 +41,20 @@ def main():
 
 	user_inputs = fetch_trackbar_pos(window_name, slider_names)
 
-	torso[0].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
-	torso[1].set_leg_position(Leg_Position(user_inputs[4], user_inputs[5], user_inputs[6]))
+	torso[1].set_leg_position(Leg_Position(user_inputs[1+TIP_SERVO], user_inputs[1+MID_SERVO], user_inputs[1+ROT_SERVO]))
+	torso[0].set_leg_position(Leg_Position(user_inputs[4+TIP_SERVO], user_inputs[4+MID_SERVO], user_inputs[4+ROT_SERVO]))
 	torso[2].set_servo_angle(user_inputs[0], WAIST_SERVO)
 	while True:
 		previous_user_inputs = user_inputs
 		user_inputs = fetch_trackbar_pos(window_name, slider_names)
 		key = cv.waitKey(1) & 0xFF
+		time.sleep(0.05)  # 20Hz refresh rate
 		if key == ord("q"):  # Quit if the user presses "q"
 			break
 		if not compare_lists(user_inputs, previous_user_inputs):
 			print("Values changed")
-			torso[0].set_leg_position(Leg_Position(user_inputs[1], user_inputs[2], user_inputs[3]))
-			torso[1].set_leg_position(Leg_Position(user_inputs[4], user_inputs[5], user_inputs[6]))
+			torso[1].set_leg_position(Leg_Position(user_inputs[1 + TIP_SERVO], user_inputs[1 + MID_SERVO], user_inputs[1 + ROT_SERVO]))
+			torso[0].set_leg_position(Leg_Position(user_inputs[4 + TIP_SERVO], user_inputs[4 + MID_SERVO], user_inputs[4 + ROT_SERVO]))
 			torso[2].set_servo_angle(user_inputs[0], WAIST_SERVO)
 	cv.destroyAllWindows()
 
@@ -51,23 +62,17 @@ def main():
 def compare_lists(list1, list2):
 	if not len(list1) == len(list1):
 		return -1
-
 	for i in range(0, len(list1)):
 		if not list1[i] == list2[i]:
 			return 0
-
 	return 1
 
 
-def fetch_trackbar_pos(window_name, slider_names):
-	waist = cv.getTrackbarPos(slider_names[0], window_name)
-	rr = cv.getTrackbarPos(slider_names[1], window_name)
-	rm = cv.getTrackbarPos(slider_names[2], window_name)
-	rt = cv.getTrackbarPos(slider_names[3], window_name)
-	lr = cv.getTrackbarPos(slider_names[4], window_name)
-	lm = cv.getTrackbarPos(slider_names[5], window_name)
-	lt = cv.getTrackbarPos(slider_names[6], window_name)
-	return [waist, rr, rm, rt, lr, lm, lt]
+def fetch_trackbar_pos(mwindow_name, mslider_names):
+	r = []
+	for name in mslider_names:
+		r.append(cv.getTrackbarPos(name, mwindow_name))
+	return r
 
 
 def dummy(x):
@@ -88,11 +93,7 @@ def initialize_torso():
 	lf = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[LEG_LF], LEG_LF) #5
 	rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R) #7
 
-	all = [rf, rm, rb, lb, lm, lf, larm, rarm, rot]
-	
-	# no need to create hex_walker or torso objects
-	
-	return [rarm, larm, rot]
+	return [larm, rarm, rot]
 
 
 if __name__ == '__main__':

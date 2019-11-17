@@ -535,6 +535,17 @@ class Hex_Walker(object):
 
 	# abort all queued leg thread movements, and wait a bit to ensure they all actually stopped.
 	# their "current angle/pwm" variables should still be correct, unless it was trying to move beyond its range somehow.
+	# TODO: the "flushing" part is good, now decide how to break out of a "movement function"
+	# ideas:
+	# A) Set “aborting” flag, leave it high. Make hex.do_leg_position check it and do nothing, causes any motion
+	# functions to rapidly “fall through” their list of commands. Requires cleanup function at end of each movement
+	# function to clear the flag.
+	# B) Synchronize() checks for “aborting” flag before returning. If high, clear it, clear “running” flag, release
+	# locks, whatever. Raise a custom exception that needs to be caught somewhere…?
+	# C) Launch motion functions in a separate thread (only permit one running at a time). Synchronize() checks for
+	# “aborting” flag before returning. If high, clear it, clear “running” flag, release locks, whatever. Then call
+	# sys.exit() to terminate the thread early. Very similar to the "raise an exception" idea, actually raising an
+	# uncaught exception from a thread is pretty much the same as calling sys.exit() from a thread
 	def abort(self):
 		# first clear all the queues
 		for leg in self.leglist:

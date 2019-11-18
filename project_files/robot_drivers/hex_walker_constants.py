@@ -79,7 +79,6 @@ GROUP_ALL_SERVOS = [TIP_SERVO, MID_SERVO, ROT_SERVO]
 
 
 # all constants related to the hex_walker leg servos
-# TODO: revisit and tune these constants!!! arms done, waist done, leg0 done
 # these are PWM values that correspond to the ends of the range for that servo (match the angles listed below)
 # used for linear mapping from angle-space to pwm-space
 c_0_TIP_SERVO_OUT = 158

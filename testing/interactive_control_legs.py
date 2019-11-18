@@ -33,7 +33,7 @@ all_legs = None
 slider_names = ["Which Leg/Group", "Enable", 
 				"Tip Joint", "Mid Joint", "Rot Joint"]
 # first is init, second is max (min is always 0)
-slider_limits = [[0, 8], [0, 1],
+slider_limits = [[0, 8], [1, 1],
 				 [0, 180], [90, 180], [90, 180]]
 window_name = "Hexapod Leg Control"
 
@@ -102,7 +102,6 @@ def fetch_trackbar_pos(mwindow_name, mslider_names):
 def changeleg(x):
 	print("change leg")
 	# function called when leg is changed
-	legs_list = []
 	if x == 6:
 		# if x == 6, then selecting "all legs"...
 		legs_list = GROUP_ALL_LEGS
@@ -115,6 +114,7 @@ def changeleg(x):
 		legs_list = GROUP_RIGHT_TRI
 		cv.setTrackbarPos(slider_names[1], window_name, 0)
 	else:
+		legs_list = [x]
 		# set the "enable" trackbar to 1 if selecting a single leg
 		cv.setTrackbarPos(slider_names[1], window_name, 1)
 		# lookup current angle values of leg and set trackbars to reflect that

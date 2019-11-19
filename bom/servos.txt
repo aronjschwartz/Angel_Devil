@@ -1,3 +1,6 @@
 tip servos: HiTec HS-485HB
 rot/mid servos: HiTec HS-645MG
 torso servos (waist and arms): TWM SV4032
+
+
+NOTE: leg3 mid servo is sluggish compared to other mid servos!!! "slow leg bug"

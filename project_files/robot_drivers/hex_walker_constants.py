@@ -73,11 +73,12 @@ MID_SERVO = 1
 ROT_SERVO = 2
 WAIST_SERVO = 0
 
+GROUP_ALL_SERVOS = [TIP_SERVO, MID_SERVO, ROT_SERVO]
+
 # ==========================================================
 
 
 # all constants related to the hex_walker leg servos
-# TODO: revisit and tune these constants!!! arms done, waist done, leg0 done
 # these are PWM values that correspond to the ends of the range for that servo (match the angles listed below)
 # used for linear mapping from angle-space to pwm-space
 c_0_TIP_SERVO_OUT = 158
@@ -87,38 +88,40 @@ c_0_MID_SERVO_DOWN = 260
 c_0_ROT_SERVO_RIGHT = 145
 c_0_ROT_SERVO_LEFT = 595
 
-c_1_TIP_SERVO_OUT = 129
-c_1_TIP_SERVO_IN = 606
-c_1_MID_SERVO_UP = 604
-c_1_MID_SERVO_DOWN = 259
+c_1_TIP_SERVO_OUT = 133
+c_1_TIP_SERVO_IN = 612
+c_1_MID_SERVO_UP = 610
+c_1_MID_SERVO_DOWN = 270
 c_1_ROT_SERVO_RIGHT = 154
-c_1_ROT_SERVO_LEFT = 603
+c_1_ROT_SERVO_LEFT = 620
 
-c_2_TIP_SERVO_OUT = 140
-c_2_TIP_SERVO_IN = 616
+c_2_TIP_SERVO_OUT = 165
+c_2_TIP_SERVO_IN = 645
 c_2_MID_SERVO_UP = 613
-c_2_MID_SERVO_DOWN = 266
+c_2_MID_SERVO_DOWN = 275
 c_2_ROT_SERVO_RIGHT = 144
 c_2_ROT_SERVO_LEFT = 620
 
-c_3_TIP_SERVO_OUT = 634
+
+c_3_TIP_SERVO_OUT = 640
 c_3_TIP_SERVO_IN = 164
+# TODO: leg 3 mid servo needs replaced and re-calibrated... malfunctioning
 c_3_MID_SERVO_UP = 148
 c_3_MID_SERVO_DOWN = 493
-c_3_ROT_SERVO_RIGHT = 155
-c_3_ROT_SERVO_LEFT = 601
+c_3_ROT_SERVO_RIGHT = 145
+c_3_ROT_SERVO_LEFT = 590
 
-c_4_TIP_SERVO_OUT = 624
-c_4_TIP_SERVO_IN = 140
-c_4_MID_SERVO_UP = 145
-c_4_MID_SERVO_DOWN = 487
-c_4_ROT_SERVO_RIGHT = 154
+c_4_TIP_SERVO_OUT = 635
+c_4_TIP_SERVO_IN = 148
+c_4_MID_SERVO_UP = 155
+c_4_MID_SERVO_DOWN = 500
+c_4_ROT_SERVO_RIGHT = 150
 c_4_ROT_SERVO_LEFT = 590
 
-c_5_TIP_SERVO_OUT = 627
-c_5_TIP_SERVO_IN = 157
-c_5_MID_SERVO_UP = 142
-c_5_MID_SERVO_DOWN = 482
+c_5_TIP_SERVO_OUT = 635
+c_5_TIP_SERVO_IN = 163
+c_5_MID_SERVO_UP = 145
+c_5_MID_SERVO_DOWN = 479
 c_5_ROT_SERVO_RIGHT = 155
 c_5_ROT_SERVO_LEFT = 614
 

@@ -15,8 +15,6 @@
 # interpolate() actually happens in the main thread but because it is used only for this background thread it makes sense to define it here.
 
 import time
-import threading
-import math
 from hex_walker_constants import *
 
 # TODO: change debug prints to use "logging" module?
@@ -33,7 +31,7 @@ from hex_walker_constants import *
 # do_set_servo_angle()
 def Frame_Thread_Func(leg, DEBUG):
 	# looping forever
-	while(True):
+	while True:
 	
 		# wait until leg."running" event is set by leg object
 		leg.running_flag.wait()
@@ -41,7 +39,7 @@ def Frame_Thread_Func(leg, DEBUG):
 		if DEBUG and leg.uid == 0:
 			print(str(leg.framethread.name) + ": thread wakeup")
 
-		while(True):
+		while True:
 			frame = []
 			# if there are frames in the frame queue, pop one off (with lock). otherwise, break.
 			# if an abort happened while sleeping, the queue will be empty and it will exit, no separate event needed.
@@ -55,10 +53,10 @@ def Frame_Thread_Func(leg, DEBUG):
 				print(str(leg.framethread.name) + ": execute frame " + str(frame))
 			
 			# set the leg to the pose indicated by the frame
+			# skip the safety checks in set_servo_angle or set_leg_position because safety is checked before interpolating
 			# use the unprotected leg member function: also updates the position stored in the leg
-			leg.do_set_servo_angle(frame[TIP_SERVO], TIP_SERVO)
-			leg.do_set_servo_angle(frame[MID_SERVO], MID_SERVO)
-			leg.do_set_servo_angle(frame[ROT_SERVO], ROT_SERVO)
+			for s in GROUP_ALL_SERVOS:
+				leg.do_set_servo_angle(frame[s], s)
 			
 			# sleep for frame-delay
 			time.sleep(frame[3])
@@ -80,19 +78,23 @@ def Frame_Thread_Func(leg, DEBUG):
 
 
 # return a list of lists
-# interpolating in angle space, so its all floating-point if that matters
-# inputs: dest[ A, B, C ], curr[ A, B, C ], time
+# interpolating in angle space, so its all floating-point inputs/outputs
+# inputs: dest[ A, B, C ], curr[ A, B, C ], dur
 # the TIP/MID/ROT order doesnt matter, as long as the order is the same for dest and curr, the output will match
-# time between interpolated poses is known constant, number of interpolated poses is dynamic
-	# might change this in the future tho so i will return the time between poses anyway
-def interpolate(dest, curr, time):
+# time between interpolated poses is very close to INTERPOLATE_TIME but not exactly
+# num_frames * frame_time exactly equals requested duration
+# minimum duration is INTERPOLATE_TIME, rounds up if it is less
+def interpolate(dest, curr, dur):
 	# find the delta(s)
 	delta = [dest[0] - curr[0], dest[1] - curr[1], dest[2] - curr[2]]
-	# determine how many sections this time must be broken into
-	# total time is rounded up to next multiple of INTERPOLATE_TIME... i.e. # of frames is rounded up
-	num_frames = math.ceil(time / INTERPOLATE_TIME)
+	# total time must not be less than INTERPOLATE_TIME
+	dur = max(dur, INTERPOLATE_TIME)
+	# determine how many sections this time must be broken into: round up/down to nearest whole number
+	num_frames = round(dur / INTERPOLATE_TIME)
+	# from number of frames, calculate the time between each frame (should be very close to INTERPOLATE_TIME)
+	frame_time = dur / num_frames
 	# initialize the list with the proper number of entries so I dont have to keep appending
-	frame_list = [[0,0,0,INTERPOLATE_TIME] for i in range(num_frames)]
+	frame_list = [[0,0,0,frame_time] for i in range(num_frames)]
 	for i in range(num_frames):
 		# math is ((i+1)/num_frames * delta) + curr
 		# the +1 is because the first frame should NOT be curr, and the final frame SHOULD be dest (curr+delta)

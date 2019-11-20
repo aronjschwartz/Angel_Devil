@@ -462,16 +462,17 @@ class Hex_Walker(object):
 	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
 	#    we will eventually remove this feature probably
 	# previously "do_move_set"
-	def run_pose_list(self, hex_walker_position_list):
-		for next_pos in hex_walker_position_list:
-			if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
-				if HW_MOVE_DEBUG:
-					print("Sending command")
-				self.set_hexwalker_position(next_pos, masklist=GROUP_ALL_LEGS, durr=self.speed)
-				self.synchronize()
-			else:
-				print("invalid move set")
-				return ILLEGAL_MOVE
+	def run_pose_list(self, hex_walker_position_list, repeat=1, masklist=GROUP_ALL_LEGS, durr=None):
+		for i in range(repeat):
+			for next_pos in hex_walker_position_list:
+				if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
+					if HW_MOVE_DEBUG:
+						print("Sending command")
+					self.set_hexwalker_position(next_pos, masklist=masklist, durr=durr)
+					self.synchronize()
+				else:
+					print("invalid move set")
+					return ILLEGAL_MOVE
 		return SUCCESS
 
 
@@ -809,18 +810,19 @@ class Robot_Torso(object):
 	## takes a list of indices within TORSO_POSITIONS array, along with the waist-rotations to use for each.
 	# sets arms and waist at same time, waits until each change is done with synchronize()
 	# previously do_moveset(self, positions, rotations, sleeps, repetitions):
-	def do_moveset(self, repetitions, position_indices, rotations):
+	def do_moveset(self, position_indices, rotations, repeat=1, masklist=GROUP_ALL_LEGS, durr=None):
 		if len(position_indices) != len(rotations):
 			print("ERR: len(position_indices) != len(rotations)")
 			return INV_PARAM
-		for j in range(repetitions):
+		for j in range(repeat):
 			for pose_idx, rot in zip(position_indices, rotations):
-				self.set_torso_position(pose_idx, rot, durr=self.speed)
+				self.set_arms_position(pose_idx, masklist=masklist, durr=durr)
+				self.set_waist_position(rot, durr=durr)
 				self.synchronize()
 		return SUCCESS
 
 
-	## do both set_arms_position and set_waist_position, thats it
+	## do both set_arms_position and set_waist_position, thats it. no mask ability
 	def set_torso_position(self, arms_pose_idx, rotation, durr=None):
 		self.set_arms_position(arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=durr)
 		self.set_waist_position(rotation, durr=durr)
@@ -877,8 +879,7 @@ class Robot_Torso(object):
 		# duplicate this a total of 8 times
 		moves = moves * 8
 		rotations = [45] * 8 + [135] * 8
-		self.set_speed(0.1)
-		self.do_moveset(repetitions, moves, rotations)
+		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.1)
 		# then go to the neutral position
 		self.torso_neutral()
 
@@ -888,8 +889,7 @@ class Robot_Torso(object):
 		moves = [TORSO_DANCE_FRONT_LEFT_OUT,
 				 TORSO_DANCE_FRONT_RIGHT_OUT]
 		rotations = [rotation] * 2
-		self.set_speed(0.4)
-		self.do_moveset(repetitions, moves, rotations)
+		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.4)
 		# then go to the neutral position
 		self.torso_neutral()
 
@@ -901,8 +901,7 @@ class Robot_Torso(object):
 				 TORSO_SHAKE_UP,
 				 TORSO_SHAKE_MID]
 		rotations = [rotation] * 4
-		self.set_speed(0.1)
-		self.do_moveset(repetitions, moves, rotations)
+		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.1)
 		# then go to the neutral position
 		self.torso_neutral()
 
@@ -912,8 +911,7 @@ class Robot_Torso(object):
 		moves = [TORSO_WAVE_DOWN,
 				 TORSO_WAVE_UP]
 		rotations = [rotation] * 2
-		self.set_speed(0.4)
-		self.do_moveset(repetitions, moves, rotations)
+		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.4)
 		# then go to the neutral position
 		self.torso_neutral()
 

@@ -29,13 +29,13 @@ def interpret_angle_for_rotation_code(angle):
 
 	correction_code = 0
 	if ((angle >= 5) and (angle < 15.0)):
-		correction_code = 1
+		correction_code = 1 # move left
 	elif ((angle >= 15.0) and (angle < 30.0)):
 		correction_code = 2
 	elif ((angle >= 30.0) and (angle < 45.0)):
-		correction_code = 2
+		correction_code = 3
 	elif ((angle < -5) and (angle > -15.0)):
-		correction_code = -1
+		correction_code = -1 #move right
 	elif ((angle <= -15.0) and (angle > -30.0)):
 		correction_code = -2
 	elif ((angle <= -30.0) and (angle > -45.0)):
@@ -74,9 +74,10 @@ def get_xy_values(rho, theta):
 	return [x1, y1, x2, y2, slope]
 
 
-def process_image(img):
+def process_image():
 	
 	#Resize the image for consistency
+	img = cv2.VideoCapture(0)
 	img = cv2.resize(img, (1200, 960))
 	#Display original image
 	#Crop the portion of the photo we care about

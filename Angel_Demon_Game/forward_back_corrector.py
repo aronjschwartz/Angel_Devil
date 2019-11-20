@@ -65,9 +65,9 @@ def get_xy_values(rho, theta):
 		slope = 0
 	return [x1, y1, x2, y2, slope]
 	
-def process_image(img):
+def process_image():
 	
-	
+	img = cv2.VideoCapture(0)
 	#Resize the image for consistency
 	img = cv2.resize(img, (1200, 960))
 	#Display original image

@@ -471,16 +471,27 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 0
 				self.turn_num +=1
-				rotation_check_pic = cv2.VideoCapture(0)
-	
-				rotation_check_code = rotation_corrector.process_image(rotation_corrector.read_image(rotation_check_pic))
-				print("Rotation code needed: ", str(rotation_check_code))
-				input("Press any key when done")
 				
-				forward_back_pic =cv2.VideoCapture(0)
-				forward_back_code = forward_back_corrector.process_image(forward_back_corrector.read_image(forward_back_pic))
-				print("The forward back code is: ", str(forward_back_code))
-				input("Press any key when done")
+	
+				rotation_check_code = rotation_corrector.process_image()
+				print("Rotation code needed: ", str(rotation_check_code))
+				if (rotation_check_code < 0):
+					hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+				elif(rotation_check_code > 0):
+					hex_walker.rotate(rotation_check_code, LEFT)
+				else:
+					#nothing
+					
+				
+				forward_back_code = forward_back_corrector.process_image()
+				if (forward_back_code < 0):
+					hex_walker.walk(1, 180)
+				elif(forward_back_code > 0):
+					hex_walker.rotate(1, 0)
+				else:
+					#nothing
+				print("Forward/back code needed: ", str(forward_back_code))
+				
 				
 				
 				if (self.turn_num == self.max_turns):
@@ -643,14 +654,25 @@ class Angel_Demon_Game():
 				self.angel_turn = 1
 				self.turn_num +=1
 				
-				rotation_check_code = rotation_corrector.process_image(rotation_corrector.read_image(rotation_check_pic))
+				rotation_check_code = rotation_corrector.process_image()
 				print("Rotation code needed: ", str(rotation_check_code))
-				input("Press any key when done")
+				if (rotation_check_code < 0):
+					hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+				elif(rotation_check_code > 0):
+					hex_walker.rotate(rotation_check_code, LEFT)
+				else:
+					#nothing
+					
 				
-				forward_back_pic =cv2.VideoCapture(0)
-				forward_back_code = forward_back_corrector.process_image(forward_back_corrector.read_image(forward_back_pic))
-				print("The forward back code is: ", str(forward_back_code))
-				input("Press any key when done")
+				forward_back_code = forward_back_corrector.process_image()
+				if (forward_back_code < 0):
+					hex_walker.walk(1, 180)
+				elif(forward_back_code > 0):
+					hex_walker.rotate(1, 0)
+				else:
+					#nothing
+				print("Forward/back code needed: ", str(forward_back_code))
+				
 				
 				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):

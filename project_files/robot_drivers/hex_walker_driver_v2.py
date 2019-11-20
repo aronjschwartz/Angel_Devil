@@ -11,7 +11,7 @@
 import time
 import threading
 from posedata_arms import *
-from hex_walker_data import *
+from posedata_walker import *
 from posedata_leg import *
 
 from hex_walker_constants import *
@@ -28,7 +28,7 @@ USE_THREADING = True
 
 
 # Leg_Position class defined in posedata_leg.py
-# Hex_Walker_Position class defined in hex_walker_data.py
+# Hex_Walker_Position class defined in posedata_walker.py
 # Arms_Position class defined in posedata_arms.py
 
 

@@ -10,7 +10,7 @@
 
 import time
 import threading
-from torso_data import *
+from posedata_arms import *
 from hex_walker_data import *
 from posedata_leg import *
 
@@ -29,7 +29,7 @@ USE_THREADING = True
 
 # Leg_Position class defined in posedata_leg.py
 # Hex_Walker_Position class defined in hex_walker_data.py
-# Arms_Position class defined in torso_data.py
+# Arms_Position class defined in posedata_arms.py
 
 
 # A Leg object is a group of 3 servos that are controlled as one unit. It is used for the 6 legs

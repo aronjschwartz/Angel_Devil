@@ -14,7 +14,8 @@ import numpy as np
 import sensor_input
 import random
 import quantum_circuit
-
+import rotation_corrector
+import forward_back_corrector
 
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
@@ -470,7 +471,18 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 0
 				self.turn_num +=1
-
+				rotation_check_pic = cv2.VideoCapture(0)
+	
+				rotation_check_code = rotation_corrector.process_image(rotation_corrector.read_image(rotation_check_pic))
+				print("Rotation code needed: ", str(rotation_check_code))
+				input("Press any key when done")
+				
+				forward_back_pic =cv2.VideoCapture(0)
+				forward_back_code = forward_back_corrector.process_image(forward_back_corrector.read_image(forward_back_pic))
+				print("The forward back code is: ", str(forward_back_code))
+				input("Press any key when done")
+				
+				
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")
 					self.angel_victory = True
@@ -630,6 +642,15 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 1
 				self.turn_num +=1
+				
+				rotation_check_code = rotation_corrector.process_image(rotation_corrector.read_image(rotation_check_pic))
+				print("Rotation code needed: ", str(rotation_check_code))
+				input("Press any key when done")
+				
+				forward_back_pic =cv2.VideoCapture(0)
+				forward_back_code = forward_back_corrector.process_image(forward_back_corrector.read_image(forward_back_pic))
+				print("The forward back code is: ", str(forward_back_code))
+				input("Press any key when done")
 				
 				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):

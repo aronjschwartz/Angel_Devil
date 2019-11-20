@@ -76,7 +76,6 @@ def get_xy_values(rho, theta):
 
 def process_image(img):
 	
-	img = read_image(image)
 	#Resize the image for consistency
 	img = cv2.resize(img, (1200, 960))
 	#Display original image

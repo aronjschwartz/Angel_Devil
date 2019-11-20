@@ -12,7 +12,7 @@ import time
 import threading
 from torso_data import *
 from hex_walker_data import *
-from leg_data import *
+from posedata_leg import *
 
 from hex_walker_constants import *
 from hex_util import *
@@ -27,7 +27,7 @@ USE_THREADING = True
 
 
 
-# Leg_Position class defined in leg_data.py
+# Leg_Position class defined in posedata_leg.py
 # Hex_Walker_Position class defined in hex_walker_data.py
 # Arms_Position class defined in torso_data.py
 

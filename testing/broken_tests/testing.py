@@ -229,11 +229,11 @@ hex_walker.do_move_set([TALL_NEUTRAL])
 '''
 for leg in all_legs:
     print("-----------------------------next leg-----------------------------")
-    test_leg_position_table(NORMAL_TRI_ROTATION_TABLE, [leg])
+    test_leg_position_table(LEG_NORMAL_ROTATION_TABLE, [leg])
 '''
 
-#test_leg_position(rf, CROUCH_TRI_MOVEMENT_TABLE["NEUTRAL"], CROUCH_TRI_MOVEMENT_TABLE["SIDE_LEFT"])
-#test_leg_position_table(CROUCH_TRI_MOVEMENT_TABLE, [rf])
+#test_leg_position(rf, LEG_CROUCH_MOVEMENT_TABLE["NEUTRAL"], LEG_CROUCH_MOVEMENT_TABLE["SIDE_LEFT"])
+#test_leg_position_table(LEG_CROUCH_MOVEMENT_TABLE, [rf])
 # create a test walker
 #crouch_rotate_test(hex_walker)
 #crouch_walk_test(hex_walker)

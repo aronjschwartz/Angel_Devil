@@ -157,8 +157,8 @@ class Leg(object):
 			self.set_servo_angle(90, WAIST_SERVO)
 		else:
 			# default position is 90-degree crouch
-			# self.set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
-			self.set_leg_position(MISC_TABLE["INIT"])
+			# self.set_leg_position(LEG_MISC_TABLE["STRAIGHT_OUT"])
+			self.set_leg_position(LEG_MISC_TABLE["INIT"])
 
 		# start the thread
 		self.framethread.start()
@@ -697,17 +697,17 @@ class Hex_Walker(object):
 					# pull_up = (60, 75, 90), tip above horizontal
 					# normal neutral = (120, 90, 90)
 					# crouch neutral = (45, 135, 90)
-					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
 					# tall neutral = (120, 45, 90)
-					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 			if(direction == LEFT):
 				reverselist = list(GROUP_ALL_LEGS)
 				reverselist.reverse()
 				for n in reverselist:
-					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
-					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 		# one last synchronize() for the final movement to complete
 		self.synchronize()
 

@@ -17,10 +17,12 @@ class Leg_Position(object):
 		return copy.deepcopy(self)
 
 
+# TODO: remove normal/couch version and make them derived from tall version
+
 # NOTE: table naming convention is: (standing height)_(gait)_(what type of movement)_TABLE
 
 # table to be used when the robot is trying to rotate in place
-NORMAL_TRI_ROTATION_TABLE = {
+LEG_NORMAL_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(0, 90, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 135, 90),
 	
@@ -34,7 +36,7 @@ NORMAL_TRI_ROTATION_TABLE = {
 
 # table to be used when the robot is trying to move in a "normal" way (moving with two legs forward)
 # tip motor, mid motor, rot motor
-NORMAL_TRI_MOVEMENT_TABLE = {
+LEG_NORMAL_MOVEMENT_TABLE = {
 	#all the positions for the front and back legs
 	"NEUTRAL":			Leg_Position(30, 90, 90),
 	"UP_NEUTRAL":		Leg_Position(30, 135, 90),
@@ -53,21 +55,21 @@ NORMAL_TRI_MOVEMENT_TABLE = {
 	"SIDE_UP_LEFT":		Leg_Position(0, 135, 65)
 }
 
-# table to be used when the robot is trying to move in a "sideways" way (moving with a single leg forward)
-NORMAL_TRI_SIDE_MOVEMENT_TABLE = {
-	"NEUTRAL":			Leg_Position(0, 90, 90),
-	"UP_NEUTRAL":		Leg_Position(0, 135, 90),
-	"CORN_LEFT":		Leg_Position(0, 0, 0),
-	"CORN_RIGHT":		Leg_Position(0, 0, 0),
-	"CENT_OUT":			Leg_Position(0, 0, 0),
-	"CENT_IN":			Leg_Position(0, 0, 0)
-}
+# # table to be used when the robot is trying to move in a "sideways" way (moving with a single leg forward)
+# NORMAL_TRI_SIDE_MOVEMENT_TABLE = {
+# 	"NEUTRAL":			Leg_Position(0, 90, 90),
+# 	"UP_NEUTRAL":		Leg_Position(0, 135, 90),
+# 	"CORN_LEFT":		Leg_Position(0, 0, 0),
+# 	"CORN_RIGHT":		Leg_Position(0, 0, 0),
+# 	"CENT_OUT":			Leg_Position(0, 0, 0),
+# 	"CENT_IN":			Leg_Position(0, 0, 0)
+# }
 
 
 
 # this is extra. don't do this until the above is working
 # table to be used when the robot is trying to rotate in place
-CROUCH_TRI_ROTATION_TABLE = {
+LEG_CROUCH_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(0, 135, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 180, 90),
 	
@@ -79,7 +81,7 @@ CROUCH_TRI_ROTATION_TABLE = {
 	
 }
 
-CROUCH_TRI_MOVEMENT_TABLE = {
+LEG_CROUCH_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(0, 135, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 180, 90),
 	
@@ -96,19 +98,19 @@ CROUCH_TRI_MOVEMENT_TABLE = {
 	"SIDE_UP_LEFT":			Leg_Position(0, 170, 85)
 }
 
-CROUCH_TRI_SIDE_MOVEMENT_TABLE = {
-	"OUT_RIGHT":		Leg_Position(0, 0, 0),
-	"OUT":				Leg_Position(0, 0, 0),
-	"OUT_LEFT":			Leg_Position(0, 0, 0),
-	"RIGHT":			Leg_Position(0, 0, 0),
-	"NEUTRAL":			Leg_Position(0, 0, 0),
-	"LEFT":				Leg_Position(0, 0, 0),
-	"TUCK_RIGHT":		Leg_Position(0, 0, 0),
-	"TUCK":				Leg_Position(0, 0, 0),
-	"TUCK_LEFT":		Leg_Position(0, 0, 0)
-}
+# CROUCH_TRI_SIDE_MOVEMENT_TABLE = {
+# 	"OUT_RIGHT":		Leg_Position(0, 0, 0),
+# 	"OUT":				Leg_Position(0, 0, 0),
+# 	"OUT_LEFT":			Leg_Position(0, 0, 0),
+# 	"RIGHT":			Leg_Position(0, 0, 0),
+# 	"NEUTRAL":			Leg_Position(0, 0, 0),
+# 	"LEFT":				Leg_Position(0, 0, 0),
+# 	"TUCK_RIGHT":		Leg_Position(0, 0, 0),
+# 	"TUCK":				Leg_Position(0, 0, 0),
+# 	"TUCK_LEFT":		Leg_Position(0, 0, 0)
+# }
 
-TALL_TRI_ROTATION_TABLE = {
+LEG_TALL_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 90, 90),
 	
@@ -120,7 +122,7 @@ TALL_TRI_ROTATION_TABLE = {
 	
 }
 
-TALL_TRI_FINE_ROTATION_TABLE = {
+LEG_TALL_FINE_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 90, 90),
 	
@@ -132,7 +134,7 @@ TALL_TRI_FINE_ROTATION_TABLE = {
 	
 }
 
-TALL_TRI_MOVEMENT_TABLE = {
+LEG_TALL_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
 	
@@ -150,7 +152,7 @@ TALL_TRI_MOVEMENT_TABLE = {
 }
 
 # There's no center in because the mid motor is limited to 45 degrees 
-TALL_TRI_SIDE_MOVEMENT_TABLE = {
+LEG_TALL_SIDE_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
 	
@@ -167,7 +169,7 @@ TALL_TRI_SIDE_MOVEMENT_TABLE = {
 
 
 # misc table
-MISC_TABLE = {
+LEG_MISC_TABLE = {
 	"BOUNCE":			Leg_Position(0, 75, 90),
 	"PULL_UP":			Leg_Position(0, 75, 90),
 	"INIT":				Leg_Position(0, 90, 90),

@@ -80,7 +80,7 @@ print("")
 print("Moving to 'star position', press Enter when ready")
 input()
 for L in range(6):
-	all_legs[L].set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
+	all_legs[L].set_leg_position(LEG_MISC_TABLE["STRAIGHT_OUT"])
 
 
 # ask if using PWM or angle mode

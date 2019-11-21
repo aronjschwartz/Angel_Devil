@@ -595,51 +595,126 @@ class Hex_Walker(object):
 		self.set_new_front("5-0")
 
 
+	# next is to do partial-step
+	# issue: need to adapt run_pose_list() to accept list of poses, not just list of pose indexes
+	# that way I can actually dynamically modify them
+	# that change would require removing the "current pose" system
+	# also, create run_pose_list() without the synchronize() calls
+	
+	# 1. change Hex_Walker_Position to have its ID# as a member, too, not just the array index
+	# 2. change run_pose_list() to accept list of objects, not just indices
+	# 3. if running with synchronize(), it works. curr_pose corresponds to actual current pose
+	# 4. if running append-style, curr_pose corresponds to the pose of the last thing i added to the queue... as long as abort() not called, this would be weird but it wold work!!
+	# when dynamically modifying a pose, need to modify the proper (closest) pose, not just pick 1 at random
+	
+	# to apply "stance" changes: set_hexwalker_position(), probably?
+	
+	# TODO: TEST THIS!!! should be running exactly the same as before
+	# assumes beginning in true neutral position
+	# true neutral -> Ahalf-raised -> {Asequence -> Bhalf-raised -> Bsequence -> Ahalf-raised}, repeat -> true neutral
+	# always begins with a "left step", regardless of turn direction... just means which legs are being moved
+	# can end from any half-raised pose, i.e. can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
 	def rotate(self, num_steps, direction):
-		# start rotate by lifting legs
+		if not (direction == LEFT or direction == RIGHT):
+			print("ERR: rotate() accepts only direction = (LEFT or RIGHT)")
+			return INV_PARAM
+		if num_steps < 1:
+			print("ERR: rotate() accepts only num_steps >= 1")
+			return INV_PARAM
+		# these all ultimately reference the LEG_TALL_ROTATION_TABLE in posedata_leg.py
+		
+		# define positions to go through, technically this is the turning-left sequence
+		
+		# start 			TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL
+		temp_left_step = [	TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
+							TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
+							TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT]
+		# then 				TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+		temp_right_step = [	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
+							TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
+							TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT]
+		# finally 			TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL
+		
+		# if direction is right, the sequence is the same but LR swapped and each list reversed
+		if direction == RIGHT:
+			temp_left_step.reverse()
+			temp_right_step.reverse()
+			left_step = temp_right_step
+			right_step = temp_left_step
+		else:
+			left_step = temp_left_step
+			right_step = temp_right_step
+		# end with "half-raised neutral position"
+		left_step.append( TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
+		right_step.append(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
+		
+		# begin rotate by lifting some of the legs: "half-raised neutral position"
+		# this is the pose at the end of a right-step
 		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
-		# define positions to go through to get steps from neutral legs up
-		go_left_right_step = [
-		TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
-		TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
-		TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT,
-		TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
-
-		go_left_left_step = [
-		TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
-		TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
-		TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
-		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
-
-		go_right_right_step = [
-		TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
-		TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
-		TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
-		TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
-
-		go_right_left_step = [
-		TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT,
-		TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
-		TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
-		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
-
-		if(direction == RIGHT):
-			left_step = go_right_left_step
-			right_step = go_right_right_step
-		if(direction == LEFT):
-			left_step = go_left_left_step
-			right_step = go_left_right_step
-
-		last_step = "right"
-		for i in range (0, num_steps):
-			if(last_step == "right"):
+		self.synchronize()
+		
+		last_step_right = True
+		for i in range (num_steps):
+			if last_step_right: # if last_step_right == True:
+				# this branch always runs first!!
+				# if last step was right, do a left
 				self.run_pose_list(left_step)
-				last_step = "left"
-			elif(last_step == "left"):
+				last_step_right = False
+			else: # elif last_step_right == False:
+				# if last step was left, do a right
 				self.run_pose_list(right_step)
-				last_step = "right"
+				last_step_right = True
+			self.synchronize()
 		#cleanup
 		self.set_hexwalker_position(TALL_NEUTRAL)
+		self.synchronize()
+
+
+	# def rotate(self, num_steps, direction):
+	# 	# start rotate by lifting legs
+	# 	self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL)
+	# 	# define positions to go through to get steps from neutral legs up
+	# 	go_left_right_step = [
+	# 	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
+	# 	TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
+	# 	TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT,
+	# 	TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+	#
+	# 	go_left_left_step = [
+	# 	TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
+	# 	TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
+	# 	TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
+	# 	TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
+	#
+	# 	go_right_right_step = [
+	# 	TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
+	# 	TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
+	# 	TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
+	# 	TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+	#
+	# 	go_right_left_step = [
+	# 	TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT,
+	# 	TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
+	# 	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
+	# 	TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
+	#
+	# 	if(direction == RIGHT):
+	# 		left_step = go_right_left_step
+	# 		right_step = go_right_right_step
+	# 	if(direction == LEFT):
+	# 		left_step = go_left_left_step
+	# 		right_step = go_left_right_step
+	#
+	# 	last_step = "right"
+	# 	for i in range (0, num_steps):
+	# 		if(last_step == "right"):
+	# 			self.run_pose_list(left_step)
+	# 			last_step = "left"
+	# 		elif(last_step == "left"):
+	# 			self.run_pose_list(right_step)
+	# 			last_step = "right"
+	# 	#cleanup
+	# 	self.set_hexwalker_position(TALL_NEUTRAL)
 
 
 	def fine_rotate(self, num_steps, direction):

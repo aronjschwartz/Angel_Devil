@@ -81,8 +81,11 @@ class Angel_Demon_Game():
 
 		#Initialize the bot starting position
 		self.game_grid[self.game_height - 1][0] = "BOT"
-
-
+		
+		#Booleans for correction modes 
+		self.rotation_correction = False
+		self.forward_back_correction = False
+		
 	#Function to clear the board.  Writes all values in the grid to a 1-character empty string
 	def clear_board(self):
 		for i in range(0, self.game_width):
@@ -472,34 +475,26 @@ class Angel_Demon_Game():
 				self.angel_turn = 0
 				self.turn_num +=1
 				
-	
-				rotation_check_code = rotation_corrector.process_image()
-				print("Rotation code needed: ", str(rotation_check_code))
-				if (rotation_check_code < 0):
-					hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-				elif(rotation_check_code > 0):
-					hex_walker.rotate(rotation_check_code, LEFT)
-				else:
-					#nothing
-					
-				
-				forward_back_code = forward_back_corrector.process_image()
-				if (forward_back_code < 0):
-					hex_walker.walk(1, 180)
-				elif(forward_back_code > 0):
-					hex_walker.rotate(1, 0)
-				else:
-					#nothing
-				print("Forward/back code needed: ", str(forward_back_code))
-				
-				
+				if (self.rotation_correction == True):
+					rotation_check_code = rotation_corrector.process_image()
+					print("Rotation code needed: ", str(rotation_check_code))
+					if (rotation_check_code < 0):
+						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+					elif(rotation_check_code > 0):
+						hex_walker.rotate(rotation_check_code, LEFT)
+										
+				if (self.forward_back_correction == True):
+					forward_back_code = forward_back_corrector.process_image()
+					print("Forward/back code needed: ", str(forward_back_code))
+					if (forward_back_code < 0):
+						hex_walker.walk(1, 180)
+					elif(forward_back_code > 0):
+						hex_walker.rotate(1, 0)		
 				
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")
 					self.angel_victory = True
 					break
-
-
 
 			#Devils Turn
 			elif(self.angel_turn == 0):
@@ -653,27 +648,23 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 1
 				self.turn_num +=1
-				
-				rotation_check_code = rotation_corrector.process_image()
-				print("Rotation code needed: ", str(rotation_check_code))
-				if (rotation_check_code < 0):
-					hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-				elif(rotation_check_code > 0):
-					hex_walker.rotate(rotation_check_code, LEFT)
-				else:
-					#nothing
+				if (self.rotation_correction == True):
+					rotation_check_code = rotation_corrector.process_image()
+					print("Rotation code needed: ", str(rotation_check_code))
+					if (rotation_check_code < 0):
+						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+					elif(rotation_check_code > 0):
+						hex_walker.rotate(rotation_check_code, LEFT)
 					
-				
-				forward_back_code = forward_back_corrector.process_image()
-				if (forward_back_code < 0):
-					hex_walker.walk(1, 180)
-				elif(forward_back_code > 0):
-					hex_walker.rotate(1, 0)
-				else:
-					#nothing
-				print("Forward/back code needed: ", str(forward_back_code))
-				
-				
+						
+				if (self.forward_back_correction == True):
+					forward_back_code = forward_back_corrector.process_image()
+					print("Forward/back code needed: ", str(forward_back_code))
+					if (forward_back_code < 0):
+						hex_walker.walk(1, 180)
+					elif(forward_back_code > 0):
+						hex_walker.rotate(1, 0)
+					
 				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")

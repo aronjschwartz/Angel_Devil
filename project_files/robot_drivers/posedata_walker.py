@@ -142,7 +142,8 @@ TALL_TRI_FRONT_NEUTRAL_BACK_UP_NEUTRAL = 53
 # bounce position
 TALL_TRI_BOUNCE_DOWN = 54
 
-# Fine rotations 
+# Fine rotations
+# TODO: fine rotation poses are obsolete, remove this
 TALL_TRI_FINE_RIGHT_RIGHT_LEFT_UP_LEFT = 55
 TALL_TRI_FINE_RIGHT_RIGHT_LEFT_LEFT = 56
 TALL_TRI_FINE_RIGHT_UP_RIGHT_LEFT_LEFT = 57

@@ -123,6 +123,7 @@ LEG_TALL_ROTATION_TABLE = {
 	
 }
 
+# TODO: fine rotation table is obsolete, remove this
 LEG_TALL_FINE_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 90, 90),

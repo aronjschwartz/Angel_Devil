@@ -21,6 +21,7 @@ class Hex_Walker_Position(object):  # Class name should be camelcase but I'll le
 		if safe_move_list is None:
 			safe_move_list = []
 		self.id = m_id
+		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
 		self.rf_pose = rf_pos
 		self.rm_pose = rm_pos
 		self.rb_pose = rr_pos

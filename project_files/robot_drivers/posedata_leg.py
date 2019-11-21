@@ -4,6 +4,7 @@ import copy
 class Leg_Position(object):
 	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
 	def __init__(self, tip_servo, mid_servo, rot_servo):
+		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
 		self.rot_servo = rot_servo
 		self.mid_servo = mid_servo
 		self.tip_servo = tip_servo

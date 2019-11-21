@@ -86,11 +86,11 @@ LEG_CROUCH_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(0, 135, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 180, 90),
 	
-	"CORN_OUT_LEFT":		Leg_Position(0, 125, 85),
-	"CORN_OUT_RIGHT":		Leg_Position(0, 125, 95),
+	"CORN_LEFT":		Leg_Position(0, 125, 85),
+	"CORN_RIGHT":		Leg_Position(0, 125, 95),
 	
-	"CORN_UP_OUT_LEFT":		Leg_Position(0, 175, 85),
-	"CORN_UP_OUT_RIGHT":	Leg_Position(0, 175, 95),
+	"CORN_UP_LEFT":		Leg_Position(0, 175, 85),
+	"CORN_UP_RIGHT":	Leg_Position(0, 175, 95),
 	
 	"SIDE_RIGHT":			Leg_Position(0, 125, 105),
 	"SIDE_LEFT":			Leg_Position(0, 125, 75),
@@ -140,11 +140,11 @@ LEG_TALL_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
 	
-	"CORN_OUT_LEFT":		Leg_Position(35, 52, 80),
-	"CORN_OUT_RIGHT":		Leg_Position(35, 52, 100),
+	"CORN_LEFT":		Leg_Position(35, 52, 80),
+	"CORN_RIGHT":		Leg_Position(35, 52, 100),
 	
-	"CORN_UP_OUT_LEFT":		Leg_Position(0, 90, 80),
-	"CORN_UP_OUT_RIGHT":	Leg_Position(0, 90, 100),
+	"CORN_UP_LEFT":		Leg_Position(0, 90, 80),
+	"CORN_UP_RIGHT":	Leg_Position(0, 90, 100),
 	
 	"SIDE_RIGHT":			Leg_Position(25, 60, 130),
 	"SIDE_LEFT":			Leg_Position(25, 60, 50),

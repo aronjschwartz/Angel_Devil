@@ -6,7 +6,7 @@ sys.path.append("../project_files/robot_drivers/")
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
-from leg_data import *
+from posedata_leg import *
 pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
 rf = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[LEG_RF], LEG_RF) #0
 rm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[LEG_RM], LEG_RM) #1
@@ -80,7 +80,7 @@ print("")
 print("Moving to 'star position', press Enter when ready")
 input()
 for L in range(6):
-	all_legs[L].set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
+	all_legs[L].set_leg_position(LEG_MISC_TABLE["STRAIGHT_OUT"])
 
 
 # ask if using PWM or angle mode

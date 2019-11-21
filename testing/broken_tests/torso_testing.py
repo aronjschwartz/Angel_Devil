@@ -138,9 +138,9 @@ rot = Rotator(8, pwm, 6)
 #rotator_test(rot)
 
 
-#test_leg_positions(TORSO_ARM_TABLE, ["HAND_SHAKE_DOWN","HAND_SHAKE_MID", "HAND_SHAKE_UP", "HAND_SHAKE_MID"], r)
+#test_leg_positions(ARMS_ARM_TABLE, ["HAND_SHAKE_DOWN","HAND_SHAKE_MID", "HAND_SHAKE_UP", "HAND_SHAKE_MID"], r)
 
-#test_leg_positions(TORSO_ARM_TABLE, ["WAVE_UP", "WAVE_DOWN"], r)
+#test_leg_positions(ARMS_ARM_TABLE, ["WAVE_UP", "WAVE_DOWN"], r)
 
 torso = Robot_Torso(r, l, rot)
 

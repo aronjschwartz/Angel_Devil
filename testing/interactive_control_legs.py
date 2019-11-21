@@ -26,7 +26,7 @@ import time
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
-from leg_data import *
+from posedata_leg import *
 
 # these must be globally available
 all_legs = None

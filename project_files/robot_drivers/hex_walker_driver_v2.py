@@ -10,9 +10,9 @@
 
 import time
 import threading
-from torso_data import *
-from hex_walker_data import *
-from leg_data import *
+from posedata_arms import *
+from posedata_walker import *
+from posedata_leg import *
 
 from hex_walker_constants import *
 from hex_util import *
@@ -27,9 +27,9 @@ USE_THREADING = True
 
 
 
-# Leg_Position class defined in leg_data.py
-# Hex_Walker_Position class defined in hex_walker_data.py
-# Arms_Position class defined in torso_data.py
+# Leg_Position class defined in posedata_leg.py
+# Hex_Walker_Position class defined in posedata_walker.py
+# Arms_Position class defined in posedata_arms.py
 
 
 # A Leg object is a group of 3 servos that are controlled as one unit. It is used for the 6 legs
@@ -139,7 +139,7 @@ class Leg(object):
 			self.SERVO_ANGLE_LIMITS[WAIST_SERVO] = [WAIST_SERVO_LEFT_ANGLE, WAIST_SERVO_RIGHT_ANGLE]
 		else:
 			# leg: out in, up down, right left
-			self.SERVO_ANGLE_LIMITS[TIP_SERVO] = [LEG_TIP_SERVO_OUT_ANGLE, LEG_TIP_SERVO_IN_ANGLE]
+			self.SERVO_ANGLE_LIMITS[TIP_SERVO] = [LEG_TIP_SERVO_UP_ANGLE, LEG_TIP_SERVO_DOWN_ANGLE]
 			self.SERVO_ANGLE_LIMITS[MID_SERVO] = [LEG_MID_SERVO_UP_ANGLE, LEG_MID_SERVO_DOWN_ANGLE]
 			self.SERVO_ANGLE_LIMITS[ROT_SERVO] = [LEG_ROT_SERVO_RIGHT_ANGLE, LEG_ROT_SERVO_LEFT_ANGLE]
 			
@@ -152,13 +152,13 @@ class Leg(object):
 		# NEEDS to use the non-thread versions
 		if(leg_num == ARM_L or leg_num == ARM_R):
 			# default position is with arms fully extended
-			self.set_leg_position(TORSO_ARM_TABLE["STRAIGHT_OUT"])
+			self.set_leg_position(ARMS_ARM_TABLE["STRAIGHT_OUT"])
 		elif(leg_num == WAIST):
 			self.set_servo_angle(90, WAIST_SERVO)
 		else:
 			# default position is 90-degree crouch
-			# self.set_leg_position(MISC_TABLE["STRAIGHT_OUT"])
-			self.set_leg_position(MISC_TABLE["INIT"])
+			# self.set_leg_position(LEG_MISC_TABLE["STRAIGHT_OUT"])
+			self.set_leg_position(LEG_MISC_TABLE["INIT"])
 
 		# start the thread
 		self.framethread.start()
@@ -697,17 +697,17 @@ class Hex_Walker(object):
 					# pull_up = (60, 75, 90), tip above horizontal
 					# normal neutral = (120, 90, 90)
 					# crouch neutral = (45, 135, 90)
-					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
 					# tall neutral = (120, 45, 90)
-					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 			if(direction == LEFT):
 				reverselist = list(GROUP_ALL_LEGS)
 				reverselist.reverse()
 				for n in reverselist:
-					self.do_set_hexwalker_position(MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
 					self.synchronize()
-					self.do_set_hexwalker_position(TALL_TRI_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
 		# one last synchronize() for the final movement to complete
 		self.synchronize()
 
@@ -737,9 +737,9 @@ class Hex_Walker(object):
 # Most func accept optional arg "durr" to specify the duration of the transition; if missing, default is self.speed.
 # Most func accept optional arg "masklist" to specify the legs being set or waited on.
 # It has synchronize() and abort() just like the Hex_Walker object, and they work just the same.
-# do_moveset() takes a list of indices within TORSO_POSITIONS array, along with the waist-rotations to use for each.
+# do_moveset() takes a list of indices within ARMS_POSITIONS array, along with the waist-rotations to use for each.
 # set_torso_position() calls both set_arms_position() and set_waist_position(), thats it.
-# set_arms_position() will set LARM/RARM/both poses from an Arms_Position object or index within TORSO_POSITIONS.
+# set_arms_position() will set LARM/RARM/both poses from an Arms_Position object or index within ARMS_POSITIONS.
 # set_waist_position() will set the waist pose from an angle(degrees) or a Leg_Position object.
 # do_set_torso_position() will set any combination of legs' poses from a Leg_Position object.
 class Robot_Torso(object):
@@ -807,7 +807,7 @@ class Robot_Torso(object):
 		time.sleep(INTERPOLATE_TIME * 3)
 
 
-	## takes a list of indices within TORSO_POSITIONS array, along with the waist-rotations to use for each.
+	## takes a list of indices within ARMS_POSITIONS array, along with the waist-rotations to use for each.
 	# sets arms and waist at same time, waits until each change is done with synchronize()
 	# previously do_moveset(self, positions, rotations, sleeps, repetitions):
 	def do_moveset(self, position_indices, rotations, repeat=1, masklist=GROUP_ALL_LEGS, durr=None):
@@ -828,14 +828,14 @@ class Robot_Torso(object):
 		self.set_waist_position(rotation, durr=durr)
 
 
-	## set LARM/RARM/both poses from an Arms_Position object or index within TORSO_POSITIONS.
+	## set LARM/RARM/both poses from an Arms_Position object or index within ARMS_POSITIONS.
 	# take mask of arm or arms, default is both arms (cannot set the waist from this function)
 	# previously set_torso_position(self, torso_position_number, rotation)
 	def set_arms_position(self, arms_pose_idx, masklist=GROUP_ALL_ARMS, durr=None):
 		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		# if given arms_pose_idx as an index, convert to Arms_Position object via lookup
-		arms_pose_obj = arms_pose_idx if isinstance(arms_pose_idx, Arms_Position) else TORSO_POSITIONS[arms_pose_idx]
+		arms_pose_obj = arms_pose_idx if isinstance(arms_pose_idx, Arms_Position) else ARMS_POSITIONS[arms_pose_idx]
 
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
 		for n in mask:
@@ -874,8 +874,8 @@ class Robot_Torso(object):
 	
 	# ????, then reset
 	def monkey(self, repetitions):
-		moves = [TORSO_MONKEY_RIGHT_UP,
-				 TORSO_MONKEY_LEFT_UP]
+		moves = [ARMS_MONKEY_RIGHT_UP,
+				 ARMS_MONKEY_LEFT_UP]
 		# duplicate this a total of 8 times
 		moves = moves * 8
 		rotations = [45] * 8 + [135] * 8
@@ -886,8 +886,8 @@ class Robot_Torso(object):
 
 	# beat the chest, then reset
 	def king_kong(self, rotation, repetitions):
-		moves = [TORSO_DANCE_FRONT_LEFT_OUT,
-				 TORSO_DANCE_FRONT_RIGHT_OUT]
+		moves = [ARMS_DANCE_FRONT_LEFT_OUT,
+				 ARMS_DANCE_FRONT_RIGHT_OUT]
 		rotations = [rotation] * 2
 		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.4)
 		# then go to the neutral position
@@ -896,10 +896,10 @@ class Robot_Torso(object):
 
 	# do handshake sequence (which hand?), then reset
 	def hand_shake(self, rotation, repetitions):
-		moves = [TORSO_SHAKE_DOWN,
-				 TORSO_SHAKE_MID,
-				 TORSO_SHAKE_UP,
-				 TORSO_SHAKE_MID]
+		moves = [ARMS_SHAKE_DOWN,
+				 ARMS_SHAKE_MID,
+				 ARMS_SHAKE_UP,
+				 ARMS_SHAKE_MID]
 		rotations = [rotation] * 4
 		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.1)
 		# then go to the neutral position
@@ -908,8 +908,8 @@ class Robot_Torso(object):
 
 	# do waving sequence (which hand?), then reset
 	def wave(self, rotation, repetitions):
-		moves = [TORSO_WAVE_DOWN,
-				 TORSO_WAVE_UP]
+		moves = [ARMS_WAVE_DOWN,
+				 ARMS_WAVE_UP]
 		rotations = [rotation] * 2
 		self.do_moveset(moves, rotations, repeat=repetitions, durr=0.4)
 		# then go to the neutral position
@@ -918,16 +918,16 @@ class Robot_Torso(object):
 
 	# ????, then hold
 	def look(self):
-		self.set_torso_position(TORSO_LOOKING, 90)
+		self.set_torso_position(ARMS_LOOKING, 90)
 		self.synchronize()
 
 
 	# point with left arm or right arm in the specified direction, then hold
 	def point(self, hand, direction):
 		if(hand == RIGHT):
-			self.set_torso_position(TORSO_POINTING_RIGHT, direction)
+			self.set_torso_position(ARMS_POINTING_RIGHT, direction)
 		elif(hand == LEFT):
-			self.set_torso_position(TORSO_POINTING_LEFT, direction)
+			self.set_torso_position(ARMS_POINTING_LEFT, direction)
 		self.synchronize()
 
 
@@ -939,13 +939,13 @@ class Robot_Torso(object):
 		direction = clamp(direction, 0, 359)
 		if direction >= 180:
 			# use left arm to point: dynamically create the leg-pose to have the angle i want
-			armspos = TORSO_POSITIONS[TORSO_POINTING_FWD_LEFT].copy()
+			armspos = ARMS_POSITIONS[ARMS_POINTING_FWD_LEFT].copy()
 			# translate direction=[180=back, 270=left, 360=fwd] to [180=back, 90=out, 0=fwd]
 			armspos.left_arm.list[MID_SERVO] = (-(direction-180))+180
 			self.set_arms_position(armspos)
 		else:
 			# use right arm to point
-			armspos = TORSO_POSITIONS[TORSO_POINTING_FWD_RIGHT].copy()
+			armspos = ARMS_POSITIONS[ARMS_POINTING_FWD_RIGHT].copy()
 			# translate direction=[0=fwd, 90=right, 180=back] to [0=fwd, 90=out, 180=back], no translation
 			armspos.right_arm.list[MID_SERVO] = direction
 			self.set_arms_position(armspos)
@@ -956,19 +956,19 @@ class Robot_Torso(object):
 	# no args needed
 	# TODO: add arguments and change pose to allow height/LR control
 	def stab(self):
-		self.set_torso_position(TORSO_POINTING_FWD_LEFT, 90)
+		self.set_torso_position(ARMS_POINTING_FWD_LEFT, 90)
 		self.synchronize()
 
 
 	# go to default arms & default waist
 	def torso_neutral(self):
 		self.set_speed(NORMAL_SPEED)
-		self.set_torso_position(TORSO_NEUTRAL, 90)
+		self.set_torso_position(ARMS_NEUTRAL, 90)
 		self.synchronize()
 	# go to default arms, doesn't change waist
 	def arms_neutral(self):
 		self.set_speed(NORMAL_SPEED)
-		self.set_arms_position(TORSO_NEUTRAL)
+		self.set_arms_position(ARMS_NEUTRAL)
 		self.synchronize()
 	# go to default waist, doesn't change arms
 	def rotate_neutral(self):

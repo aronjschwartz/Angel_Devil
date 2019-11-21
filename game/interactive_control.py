@@ -79,28 +79,28 @@ def tall_side_walk_test(hw, direction):
     ]
 
     if direction == 'left':
-        hw.set_new_front("3-4")
+        hw.set_new_front(DIR_BL)
     else: 
-        hw.set_new_front("0-1")
+        hw.set_new_front(DIR_FR)
 
     hw.do_move_set(moves)
-    hw.set_new_front("5-0")
+    hw.set_new_front(DIR_F)
     hw.do_move_set([TALL_NEUTRAL])
 
 
 def walk(hw, direction):
     if direction == 'forward':
-        hw.walk(1,0)
+        hw.walk(1, DIR_F)
     elif direction == 'backward':
-        hw.walk(1,180)
+        hw.walk(1, DIR_B)
     elif direction == 'right_forward':
-        hw.walk(1,60)
+        hw.walk(1, DIR_FR)
     elif direction == 'left_forward':
-        hw.walk(1,300)
+        hw.walk(1, DIR_FL)
     elif direction == 'right_backward':
-        hw.walk(1,120)
+        hw.walk(1, DIR_BR)
     elif direction == 'left_backward':
-        hw.walk(1,240)
+        hw.walk(1, DIR_BL)
 
     hw.do_move_set([TALL_NEUTRAL])
 

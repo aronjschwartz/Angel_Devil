@@ -73,22 +73,22 @@ while(cmd != 0):
 		torso.wave(45, 3)
 	elif(cmd == 3):
 		print("walking one step forward")
-		hex_walker.walk(1, 0)
+		hex_walker.walk(1, DIR_F)
 	elif(cmd == 4):
 		print("walking 4 steps forward")
-		hex_walker.walk(4,0)
+		hex_walker.walk(4, DIR_F)
 	elif(cmd == 5):
 		print("walking 1 step backward")
-		hex_walker.walk(1, 180)
+		hex_walker.walk(1, DIR_B)
 	elif(cmd == 6):
 		print("walking 4 steps backward")
-		hex_walker.walk(4, 180)
+		hex_walker.walk(4, DIR_B)
 	elif(cmd == 7):
 		print("walking 1 step at 120 degrees")
-		hex_walker.walk(1, 120)
+		hex_walker.walk(1, DIR_BR)
 	elif(cmd == 8):
 		print("walking 4 steps at 120 degrees")
-		hex_walker.walk(4, 120)
+		hex_walker.walk(4, DIR_BR)
 	elif(cmd == 9):
 		print("rotate left l step")
 		hex_walker.rotate(1, LEFT)

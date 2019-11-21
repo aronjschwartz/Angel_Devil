@@ -314,15 +314,15 @@ class Angel_Demon_Game():
 
 		elif (move_code == "UP"):
 			print("Move up")
-			hex_walker.walk(20, 0)
+			hex_walker.walk(20, DIR_F)
 
 		elif (move_code == "UR"):
 			print("Move up right")
-			hex_walker.walk(20, 0)
+			hex_walker.walk(20, DIR_F)
 			time.sleep(0.1)
 			hex_walker.rotate(5, RIGHT)
 			time.sleep(0.1)
-			hex_walker.walk(20, 0)
+			hex_walker.walk(20, DIR_F)
 			time.sleep(0.1)
 			hex_walker.rotate(5, LEFT)
 
@@ -330,7 +330,7 @@ class Angel_Demon_Game():
 			print("Move right")
 			hex_walker.rotate(5, RIGHT)
 			time.sleep(0.1)
-			hex_walker.walk(20, 0)
+			hex_walker.walk(20, DIR_F)
 			time.sleep(0.1)
 			hex_walker.rotate(5,LEFT)
 	
@@ -487,7 +487,7 @@ class Angel_Demon_Game():
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
 					if (forward_back_code < 0):
-						hex_walker.walk(1, 180)
+						hex_walker.walk(1, DIR_B)
 					elif(forward_back_code > 0):
 						hex_walker.rotate(1, 0)		
 				
@@ -661,7 +661,7 @@ class Angel_Demon_Game():
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
 					if (forward_back_code < 0):
-						hex_walker.walk(1, 180)
+						hex_walker.walk(1, DIR_B)
 					elif(forward_back_code > 0):
 						hex_walker.rotate(1, 0)
 					

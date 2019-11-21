@@ -420,47 +420,36 @@ class Hex_Walker(object):
 
 	# this function will change the front from being between the "5-0" legs to being
 	# between any two legs. The key is "(leg on frontleft)-(leg on frontright)"
+	# NEW: now accepts only [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]
 	def set_new_front(self, new_front):
 		cp = self.current_pose
 		if(cp != TALL_NEUTRAL and cp != NORMAL_NEUTRAL and cp != CROUCH_NEUTRAL):
 			print("Cannot change front while not in the neutral position")
 			return ILLEGAL_MOVE
 		
-		# check for which side should be the front and re-assign the legs
-		# accordingly
-		if( new_front == "0-1" ):
-			self.front_index_offset = 1
-			self.front = new_front
-			return SUCCESS
-
-		elif( new_front == "1-2" ):
-			self.front_index_offset = 2
-			self.front = new_front
-			return SUCCESS
-
-		elif( new_front == "2-3" ):
-			self.front_index_offset = 3
-			self.front = new_front
-			return SUCCESS
-
-		elif( new_front == "3-4" ):
-			self.front_index_offset = 4
-			self.front = new_front
-			return SUCCESS
-
-		elif( new_front == "4-5" ):
-			self.front_index_offset = 5
-			self.front = new_front
-			return SUCCESS
-
-		elif( new_front == "5-0" ):
+		# check for which side should be the front and re-assign the leg offset accordingly
+		if new_front == DIR_F:
 			self.front_index_offset = 0
 			self.front = new_front
-			return SUCCESS
-
+		elif new_front == DIR_FR:
+			self.front_index_offset = 1
+			self.front = new_front
+		elif new_front == DIR_BR:
+			self.front_index_offset = 2
+			self.front = new_front
+		elif new_front == DIR_B:
+			self.front_index_offset = 3
+			self.front = new_front
+		elif new_front == DIR_BL:
+			self.front_index_offset = 4
+			self.front = new_front
+		elif new_front == DIR_FL:
+			self.front_index_offset = 5
+			self.front = new_front
 		else:
-			print("invalid front specified") 
+			print("ERR: set_new_front() accepts only direction = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
 			return INV_PARAM
+		return SUCCESS
 
 
 	## takes a list of indices within HEX_WALKER_POSITIONS array, or Hex_Walker_Position objects, and runs through them.
@@ -559,10 +548,16 @@ class Hex_Walker(object):
 	########################################################################################
 	# movement functions
 	def walk(self, num_steps, direction):
-		
-		self.set_new_front(get_front_from_direction(direction))
+		if direction not in [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]:
+			print("ERR: walk() accepts only direction = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
+			return INV_PARAM
+		if num_steps < 1:
+			print("ERR: walk() accepts only num_steps >= 1")
+			return INV_PARAM
+
+		self.set_new_front(direction)
 		if HW_MOVE_DEBUG:
-			print("walk dir: " + get_front_from_direction(direction))
+			print("walk dir: " + str(direction))
 		
 		# start walk by lifting legs
 		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
@@ -590,7 +585,7 @@ class Hex_Walker(object):
 				last_step = "right"
 		#cleanup
 		self.set_hexwalker_position(TALL_NEUTRAL)
-		self.set_new_front("5-0")
+		self.set_new_front(DIR_F)
 
 
 	# to apply "stance" changes: set_hexwalker_position(), probably?

@@ -387,8 +387,13 @@ class Hex_Walker(object):
 		# leglist indexed by leg ID, etc
 		self.leglist = [rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg]
 
-		# set operating mode
-		self.current_pos = NORMAL_NEUTRAL
+		# if running with synchronize(), it works. curr_pose corresponds to actual current pose.
+		# if running append-style, curr_pose corresponds to the pose of the last thing i added to the queue... this
+		# would not correspond to the actual physical pose of the robot any more, but as long as abort() not called,
+		# this would work for safety-checking.
+		# when dynamically modifying a pose, need to modify the proper (closest) pose, not just pick 1 at random.
+		self.current_pose = NORMAL_NEUTRAL
+		# set operating speed
 		self.speed = NORMAL_SPEED
 		self.front = "5-0"
 		self.front_index_offset = 0
@@ -397,7 +402,7 @@ class Hex_Walker(object):
 
 
 	def print_self(self):
-		print("speed: " + str(self.speed) + " || self.current_pos: " + str(self.current_pos) + " || self.front: " + self.front)
+		print("speed: " + str(self.speed) + " || self.current_pose: " + str(self.current_pose) + " || self.front: " + self.front)
 		for leg in self.leglist:
 			leg.print_self()
 
@@ -416,7 +421,7 @@ class Hex_Walker(object):
 	# this function will change the front from being between the "5-0" legs to being
 	# between any two legs. The key is "(leg on frontleft)-(leg on frontright)"
 	def set_new_front(self, new_front):
-		cp = self.current_pos
+		cp = self.current_pose
 		if(cp != TALL_NEUTRAL and cp != NORMAL_NEUTRAL and cp != CROUCH_NEUTRAL):
 			print("Cannot change front while not in the neutral position")
 			return ILLEGAL_MOVE
@@ -458,43 +463,36 @@ class Hex_Walker(object):
 			return INV_PARAM
 
 
-	## takes a list of indices within HEX_WALKER_POSITIONS array and runs through them with durr=self.speed.
+	## takes a list of indices within HEX_WALKER_POSITIONS array, or Hex_Walker_Position objects, and runs through them.
 	# safety: for each transition, checks that the next pose is listed as a "safe pose" of the current pose
-	#    we will eventually remove this feature probably
 	# previously "do_move_set"
 	def run_pose_list(self, hex_walker_position_list, repeat=1, masklist=GROUP_ALL_LEGS, durr=None):
 		for i in range(repeat):
-			for next_pos in hex_walker_position_list:
-				if next_pos in HEX_WALKER_POSITIONS[self.current_pos].safe_moves:
-					if HW_MOVE_DEBUG:
-						print("Sending command")
-					self.set_hexwalker_position(next_pos, masklist=masklist, durr=durr)
+			for next_pose in hex_walker_position_list:
+				# if next_pose is a Hex_Walker_Position object, convert it to its id
+				next_pose_idx = next_pose if isinstance(next_pose, int) else next_pose.id
+				if next_pose_idx in HEX_WALKER_POSITIONS[self.current_pose].safe_moves:
+					self.set_hexwalker_position(next_pose_idx, masklist=masklist, durr=durr)
 					self.synchronize()
 				else:
-					print("invalid move set")
+					print("ERR: invalid move set")
 					return ILLEGAL_MOVE
 		return SUCCESS
 
 
 	## sets any combination of legs from an index or Hex_Walker_Position while keeping other legs untouched.
-	# if index, update current_pos. if object, don't, because it was probably dynamically created.
-	#    we will eventually remove this feature probably
+	# also updates the current_pose value
 	# masklist can be int or list, or none (defaults to all legs)
 	# previously "set_hex_walker_position"
 	def set_hexwalker_position(self, hex_pose_idx, masklist=GROUP_ALL_LEGS, durr=None):
 		# if given a single index rather than an iteratable, make it into a set
 		mask = {masklist} if isinstance(masklist, int) else set(masklist)
 		# if given hex_pose_idx as an index, convert to Hex_Walker_Position object via lookup
-		# hex_pose_obj = hex_pose_idx if isinstance(hex_pose_idx, Hex_Walker_Position) else HEX_WALKER_POSITIONS[hex_pose_idx]
-		if isinstance(hex_pose_idx, int):
-			# if it is an index, then update current_pos and do the rest of the thing
-			self.current_pos = hex_pose_idx
-			hex_pose_obj = HEX_WALKER_POSITIONS[hex_pose_idx]
-			if(HW_MOVE_DEBUG):
-				print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pos].description + ", moving to pose: " + hex_pose_obj.description)
-		else:
-			# if it is the actual object, then it was probably dynamically created. don't update hex_pose, dont print debug description
-			hex_pose_obj = hex_pose_idx
+		hex_pose_obj = hex_pose_idx if isinstance(hex_pose_idx, Hex_Walker_Position) else HEX_WALKER_POSITIONS[hex_pose_idx]
+		
+		if HW_MOVE_DEBUG:
+			print("current pose is: " + HEX_WALKER_POSITIONS[self.current_pose].description + ", moving to pose: " + hex_pose_obj.description)
+		self.current_pose = hex_pose_obj.id
 		
 		for n in mask:
 			# extract the appropriate pose from the object, send to appropriate leg
@@ -595,20 +593,12 @@ class Hex_Walker(object):
 		self.set_new_front("5-0")
 
 
-	# next is to do partial-step
-	# issue: need to adapt run_pose_list() to accept list of poses, not just list of pose indexes
-	# that way I can actually dynamically modify them
-	# that change would require removing the "current pose" system
-	# also, create run_pose_list() without the synchronize() calls
 	
-	# 1. change Hex_Walker_Position to have its ID# as a member, too, not just the array index
-	# 2. change run_pose_list() to accept list of objects, not just indices
-	# 3. if running with synchronize(), it works. curr_pose corresponds to actual current pose
-	# 4. if running append-style, curr_pose corresponds to the pose of the last thing i added to the queue... as long as abort() not called, this would be weird but it wold work!!
-	# when dynamically modifying a pose, need to modify the proper (closest) pose, not just pick 1 at random
 	
 	# to apply "stance" changes: set_hexwalker_position(), probably?
-	
+	# next is to do partial-step
+	# also, create run_pose_list() without the synchronize() calls
+
 	# TODO: TEST THIS!!! should be running exactly the same as before
 	# assumes beginning in true neutral position
 	# true neutral -> Ahalf-raised -> {Asequence -> Bhalf-raised -> Bsequence -> Ahalf-raised}, repeat -> true neutral

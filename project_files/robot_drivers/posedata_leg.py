@@ -136,6 +136,7 @@ LEG_TALL_FINE_ROTATION_TABLE = {
 	
 }
 
+# TODO: duplicate neutral/up_neutral with corn_ and side_ names, for readability
 LEG_TALL_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
@@ -171,10 +172,13 @@ LEG_TALL_SIDE_MOVEMENT_TABLE = {
 
 
 # misc table
+# TODO: make neutral/up_neutral in the other movement tables all reference it in this table... only change it in one place!
 LEG_MISC_TABLE = {
+	"INIT":				Leg_Position(0, 90, 90),
+	"NEUTRAL": 			Leg_Position(30, 45, 90),
+	"UP_NEUTRAL": 		Leg_Position(0, 90, 90),
 	"BOUNCE":			Leg_Position(0, 75, 90),
 	"PULL_UP":			Leg_Position(0, 75, 90),
-	"INIT":				Leg_Position(0, 90, 90),
 	"STRAIGHT_OUT":		Leg_Position(90, 90, 90)
 	
 }

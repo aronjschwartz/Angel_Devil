@@ -547,45 +547,70 @@ class Hex_Walker(object):
 	########################################################################################
 	########################################################################################
 	# movement functions
-	def walk(self, num_steps, direction):
-		if direction not in [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]:
-			print("ERR: walk() accepts only direction = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
+	
+	# note: TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL are used in both walk and rotate
+	
+	# assumes beginning in true neutral position
+	### true neutral -> Bhalf-raised -> {Asequence -> Ahalf-raised -> Bsequence -> Bhalf-raised}, repeat -> true neutral
+	# always begins with a "left step"... just means which legs are being moved forward first
+	# can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
+	# variable speed, number of steps, and distance per step
+	def walk(self, num_steps, front=DIR_F, scale=1.0, durr=None):
+		if front not in [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]:
+			print("ERR: walk() accepts only front = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
 			return INV_PARAM
 		if num_steps < 1:
 			print("ERR: walk() accepts only num_steps >= 1")
 			return INV_PARAM
+		if scale <= 0.0 or scale > 2.0:
+			# todo: depends on actual motions of the legs
+			# basic walk moves legs by ?????
+			# i'll limit the scale to 2.0 so max turn is 30 or 150
+			print("ERR: walk() accepts only scale = (0.0 - 2.0]")
+			return INV_PARAM
 
-		self.set_new_front(direction)
+		# apply a new front so we can use the same walk cycle unmodified to walk in 6 different directions by just
+		# redefining which leg is which.
+		self.set_new_front(front)
 		if HW_MOVE_DEBUG:
-			print("walk dir: " + str(direction))
+			print("walk dir: " + str(front))
 		
-		# start walk by lifting legs
-		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL)
 		# define positions to go through to get steps from a neutral legs up
-		left_step = [
-		TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
-		TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
-		TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
-		TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL ]
+		# these all ultimately reference the LEG_TALL_MOVEMENT_TABLE in posedata_leg.py
+		# TODO: first, understand the current animation. then, improve it with full-range motion.
+		# start 		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+		left_step = [	TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
+						TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
+						TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
+						TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+		right_step = [	TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
+						TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
+						TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
+						TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
 		
-		right_step = [
-		TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
-		TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
-		TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
-		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL ]
+		# todo: scale
 		
-		last_step = "right"
+		# begin walk sequence by lifting some of the legs: "half-raised neutral position"
+		# this is the pose at the end of a right-step or beginning of a left-step
+		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)
+		self.synchronize()
 
-		for i in range (0, num_steps):
-			if(last_step == "right"):
-				self.run_pose_list(left_step)
-				last_step = "left"
-			elif(last_step == "left"):
-				self.run_pose_list(right_step)
-				last_step = "right"
+		last_step_right = True
+		for i in range(num_steps):
+			if last_step_right:
+				# this branch always runs first!!
+				# if last step was right, do a left
+				self.run_pose_list(left_step, durr=durr)
+				last_step_right = False
+			else:
+				# if last step was left, do a right
+				self.run_pose_list(right_step, durr=durr)
+				last_step_right = True
+			self.synchronize()
 		#cleanup
-		self.set_hexwalker_position(TALL_NEUTRAL)
+		self.set_hexwalker_position(TALL_NEUTRAL, durr=durr)
 		self.set_new_front(DIR_F)
+		self.synchronize()
 
 
 	# to apply "stance" changes: set_hexwalker_position(), probably?
@@ -593,9 +618,9 @@ class Hex_Walker(object):
 
 	# TODO: TEST THIS!!! should be running exactly the same as before
 	# assumes beginning in true neutral position
-	# true neutral -> Ahalf-raised -> {Asequence -> Bhalf-raised -> Bsequence -> Ahalf-raised}, repeat -> true neutral
+	# true neutral -> Bhalf-raised -> {Asequence -> Ahalf-raised -> Bsequence -> Bhalf-raised}, repeat -> true neutral
 	# always begins with a "left step", regardless of turn direction... just means which legs are being moved forward first
-	# can end from any half-raised pose, i.e. can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
+	# can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
 	# variable speed, number of steps, and distance per step
 	def rotate(self, num_steps, direction, scale=1.0, durr=None):
 		if not (direction == LEFT or direction == RIGHT):
@@ -613,15 +638,15 @@ class Hex_Walker(object):
 		# define positions to go through: technically this is just the turning-left sequence but you'll see how it works
 		# these all ultimately reference the LEG_TALL_ROTATION_TABLE in posedata_leg.py
 		# left turn: run these top to bottom, right turn: run these bottom to top
-		# start 			TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL
-		temp_left_step = [	TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
-							TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
-							TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
-							TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
-		temp_right_step = [	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
+		# start 			TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+		temp_left_step = [	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT,
 							TALL_TRI_RIGHT_RIGHT_LEFT_LEFT,
 							TALL_TRI_RIGHT_UP_RIGHT_LEFT_LEFT,
 							TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+		temp_right_step = [	TALL_TRI_RIGHT_UP_LEFT_LEFT_RIGHT,
+							TALL_TRI_RIGHT_LEFT_LEFT_RIGHT,
+							TALL_TRI_RIGHT_LEFT_LEFT_UP_RIGHT,
+							TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
 		
 		# if direction is not left, mirror the rot-servo values by using a negative scale
 		# equivalent to reversing & L/R swapping the pose-list, but less confusing this way
@@ -641,7 +666,7 @@ class Hex_Walker(object):
 		
 		# begin rotate sequence by lifting some of the legs: "half-raised neutral position"
 		# this is the pose at the end of a right-step or beginning of a left-step
-		self.set_hexwalker_position(TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL, durr=durr)
+		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)
 		self.synchronize()
 		
 		last_step_right = True

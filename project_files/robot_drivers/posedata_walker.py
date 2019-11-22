@@ -1,18 +1,22 @@
 from posedata_leg import *
+from hex_walker_constants import LEG_RF, LEG_RM, LEG_RB, LEG_LB, LEG_LM, LEG_LF
 
 
-class Hex_Walker_Position(object):  # Class name should be camelcase but I'll let it go
+# thing.leg_rf and thing.list[LEG_RF] are synonymous/aliases that point to the same underlying data, for both read/write
+class Hex_Walker_Position(object):
 	"""
 	Object to store the positions of all legs for a desired stance. Also has a list of all safe
 	moves that the hexapod can make from this stance.
 	"""
-	def __init__(self, m_id, rf_pos, rm_pos, rr_pos, lr_pos, lm_pos, lf_pos, safe_move_list=None, description="-"):
+	
+	def __init__(self, m_id: int, rf_pos: Leg_Position, rm_pos: Leg_Position, rb_pos: Leg_Position,
+				lb_pos: Leg_Position, lm_pos: Leg_Position, lf_pos: Leg_Position, safe_move_list=None, description="-"):
 		"""
 		:param m_id: the index used to store this object within the HEX_WALKER_POSITIONS array
 		:param rf_pos: Right front leg position
 		:param rm_pos: Right mid leg position
-		:param rr_pos: Right rear leg position
-		:param lr_pos: Left rear leg position
+		:param rb_pos: Right rear leg position
+		:param lb_pos: Left rear leg position
 		:param lm_pos: Left mid leg position
 		:param lf_pos: Left front leg position
 		:param safe_move_list: List of approved moves that won't damage the robot
@@ -20,30 +24,65 @@ class Hex_Walker_Position(object):  # Class name should be camelcase but I'll le
 		"""
 		if safe_move_list is None:
 			safe_move_list = []
-		self.id = m_id
-		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
-		self.rf_pose = rf_pos
-		self.rm_pose = rm_pos
-		self.rb_pose = rr_pos
-		self.lb_pose = lr_pos
-		self.lm_pose = lm_pos
-		self.lf_pose = lf_pos
-		self.list = [self.rf_pose, self.rm_pose, self.rb_pose, self.lb_pose, self.lm_pose, self.lf_pose]
 		self.safe_moves = safe_move_list
 		self.description = description
-	
+		self.id = m_id
+		self.list = [None, None, None, None, None, None]
+		self.list[LEG_RF] = rf_pos
+		self.list[LEG_RM] = rm_pos
+		self.list[LEG_RB] = rb_pos
+		self.list[LEG_LB] = lb_pos
+		self.list[LEG_LM] = lm_pos
+		self.list[LEG_LF] = lf_pos
+
+	def getrf(self) -> Leg_Position:
+		return self.list[LEG_RF]
+	def setrf(self, v: Leg_Position):
+		self.list[LEG_RF] = v
+	leg_rf = property(getrf, setrf)
+
+	def getrm(self) -> Leg_Position:
+		return self.list[LEG_RM]
+	def setrm(self, v: Leg_Position):
+		self.list[LEG_RM] = v
+	leg_rm = property(getrm, setrm)
+
+	def getrb(self) -> Leg_Position:
+		return self.list[LEG_RB]
+	def setrb(self, v: Leg_Position):
+		self.list[LEG_RB] = v
+	leg_rb = property(getrb, setrb)
+
+	def getlb(self) -> Leg_Position:
+		return self.list[LEG_LB]
+	def setlb(self, v: Leg_Position):
+		self.list[LEG_LB] = v
+	leg_lb = property(getlb, setlb)
+
+	def getlm(self) -> Leg_Position:
+		return self.list[LEG_LM]
+	def setlm(self, v: Leg_Position):
+		self.list[LEG_LM] = v
+	leg_lm = property(getlm, setlm)
+
+	def getlf(self) -> Leg_Position:
+		return self.list[LEG_LF]
+	def setlf(self, v: Leg_Position):
+		self.list[LEG_LF] = v
+	leg_lf = property(getlf, setlf)
+
 	def __str__(self):
 		"""
 		Simple function to assemble a console message when the hex walker object is instantiated
 		:return: String with the positions of each leg in clockwise order
 		"""
 		start_str = "--------------------------hex_walker position is------------------\n"
-		rf_str = "rf: " + str(self.rf_pose) + "\n"
-		rm_str = "rm: " + str(self.rm_pose) + "\n"
-		rr_str = "rr: " + str(self.rb_pose) + "\n"
-		lr_str = "lr: " + str(self.lb_pose) + "\n"
-		lm_str = "lm: " + str(self.lm_pose) + "\n"
-		lf_str = "lf: " + str(self.lf_pose) + "\n"
+		rf_str = "rf: " + str(self.leg_rf) + "\n"
+		rm_str = "rm: " + str(self.leg_rm) + "\n"
+		rr_str = "rr: " + str(self.leg_rb) + "\n"
+		lr_str = "lr: " + str(self.leg_lb) + "\n"
+		lm_str = "lm: " + str(self.leg_lm) + "\n"
+		lf_str = "lf: " + str(self.leg_lf) + "\n"
 		return start_str + rf_str + rm_str + rr_str + lr_str + lm_str + lf_str
 	
 	def copy(self):

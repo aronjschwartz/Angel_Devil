@@ -1,4 +1,5 @@
 from posedata_leg import *
+from hex_walker_constants import ARM_L, ARM_R
 
 ARMS_ARM_TABLE = {
 	"NEUTRAL":			Leg_Position(0, 45, 90),
@@ -27,20 +28,31 @@ ARMS_ARM_TABLE = {
 
 # this is a bundle of Leg_Position objects, one for each arm, that describes a "pose" for the robot
 # DOES NOT INCLUDE WAIST INFORMATION
+# thing.arm_l and thing.list[ARM_L] are synonymous/aliases that point to the same underlying data, for both read/write
 class Arms_Position(object):
-	def __init__(self, left_arm, right_arm, description="-"):
-		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
-		self.left_arm = left_arm
-		self.right_arm = right_arm
-		# NOTE: this list is not actually indexed with ARM_L/ARM_R... might want to change this to a dict?
-		# probably just fine like this
-		self.list = [self.left_arm, self.right_arm]
+	def __init__(self, left_arm: Leg_Position, right_arm: Leg_Position, description="-"):
 		self.description = description
+		# technically its a dict and not a list but whatever its gotta use the same name as the other classes
+		self.list = dict()
+		self.list[ARM_L] = left_arm
+		self.list[ARM_R] = right_arm
+	
+	def getarml(self) -> Leg_Position:
+		return self.list[ARM_L]
+	def setarml(self, v: Leg_Position):
+		self.list[ARM_L] = v
+	arm_l = property(getarml, setarml)
+	
+	def getarmr(self) -> Leg_Position:
+		return self.list[ARM_R]
+	def setarmr(self, v: Leg_Position):
+		self.list[ARM_R] = v
+	arm_r = property(getarmr, setarmr)
 	
 	def __str__(self):
 		start_str = "-----------------------Arms position is-------------------------"
-		left_arm_string = "left arm: " + str(self.left_arm)
-		right_arm_string = "right arm: " + str(self.right_arm)
+		left_arm_string = "left arm: " + str(self.arm_l)
+		right_arm_string = "right arm: " + str(self.arm_r)
 		return start_str + left_arm_string + "\n" + right_arm_string + "\n" + self.description
 	
 	def copy(self):

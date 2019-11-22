@@ -1,15 +1,39 @@
 import copy
+from hex_walker_constants import TIP_SERVO, MID_SERVO, ROT_SERVO, WAIST_SERVO
 
 # NOTE: these values are ANGLES not raw pwms
+# thing.rot_servo and thing.list[ROT_SERVO] are synonymous/aliases that point to the same underlying data, for both read/write
 class Leg_Position(object):
 	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
-	def __init__(self, tip_servo, mid_servo, rot_servo):
-		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
-		self.rot_servo = rot_servo
-		self.mid_servo = mid_servo
-		self.tip_servo = tip_servo
-		# TODO: once tip/rot servo values are swapped, swap their location in self.list too
-		self.list = [self.tip_servo, self.mid_servo, self.rot_servo]
+	def __init__(self, tip_servo: float, mid_servo: float, rot_servo: float):
+		self.list = [0.0, 0.0, 0.0]
+		self.list[ROT_SERVO] = rot_servo
+		self.list[MID_SERVO] = mid_servo
+		self.list[TIP_SERVO] = tip_servo
+	
+	def getrot(self) -> float:
+		return self.list[ROT_SERVO]
+	def setrot(self, v: float):
+		self.list[ROT_SERVO] = v
+	rot_servo = property(getrot, setrot)
+	
+	def getmid(self) -> float:
+		return self.list[MID_SERVO]
+	def setmid(self, v: float):
+		self.list[MID_SERVO] = v
+	mid_servo = property(getmid, setmid)
+	
+	def gettip(self) -> float:
+		return self.list[TIP_SERVO]
+	def settip(self, v: float):
+		self.list[TIP_SERVO] = v
+	tip_servo = property(gettip, settip)
+	
+	def getwaist(self) -> float:
+		return self.list[WAIST_SERVO]
+	def setwaist(self, v: float):
+		self.list[WAIST_SERVO] = v
+	waist_servo = property(getwaist, setwaist)
 	
 	def __str__(self):
 		return "ROT: " + str(self.rot_servo) + "|| MID : " + str(self.mid_servo) + "|| TIP : " + str(self.tip_servo)
@@ -18,7 +42,7 @@ class Leg_Position(object):
 		return copy.deepcopy(self)
 
 
-# TODO: remove normal/couch version and make them derived from tall version
+# TODO: remove normal/crouch version and make them derived from tall version
 
 # NOTE: table naming convention is: (standing height)_(gait)_(what type of movement)_TABLE
 

@@ -940,7 +940,7 @@ class Robot_Torso(object):
 
 		# check which arms are in mask and extract appropriate leg-pose from the arms-obj
 		for n in mask:
-			self.do_set_torso_position(arms_pose_obj.list[n-ARM_L], masklist=n, durr=durr)
+			self.do_set_torso_position(arms_pose_obj.list[n], masklist=n, durr=durr)
 	
 	## set the waist pose from an angle(degrees) or a Leg_Position object.
 	# one-to-one: no mask needed

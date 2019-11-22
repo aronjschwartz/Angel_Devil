@@ -16,6 +16,7 @@ import random
 import quantum_circuit
 import rotation_corrector
 import forward_back_corrector
+import pyttsx3
 
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
@@ -44,6 +45,15 @@ torso = hwd.Robot_Torso(rarm, larm, rot)
 
 stab_angle = 150
 
+class Voice:
+    def __init__(self, voice_num):
+        self.tts = pyttsx3.init()
+        voices = self.tts.getProperty('voices')
+        self.tts.setProperty('voice', voices[voice_num].id)
+
+    def say(self, message):
+        self.tts.say(message)
+        self.tts.runAndWait()
 
 class Angel_Demon_Game():
 
@@ -60,7 +70,7 @@ class Angel_Demon_Game():
 		self.hexapod_move = ""
 		#Variable to hold the state ------------->  [TURN_BIT, LIGHT_BIT_0, LIGHT_BIT_1]
 		self.state = [0,0,0]
-	
+
 
 		#Game variables to track the current turn and maximum amount of turns
 		self.turn_num = 0
@@ -81,11 +91,13 @@ class Angel_Demon_Game():
 
 		#Initialize the bot starting position
 		self.game_grid[self.game_height - 1][0] = "BOT"
-		
-		#Booleans for correction modes 
+
+		#Booleans for correction modes
 		self.rotation_correction = False
 		self.forward_back_correction = False
-		
+		voice = Voice(12)
+		voice.say("Hello")
+
 	#Function to clear the board.  Writes all values in the grid to a 1-character empty string
 	def clear_board(self):
 		for i in range(0, self.game_width):
@@ -100,11 +112,11 @@ class Angel_Demon_Game():
 		done = False
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_height):
-			for j in range(0, self.game_width):			
+			for j in range(0, self.game_width):
 				#Bot found
 				if (self.game_grid[i][j] == "BOT"):
 					#i = 0 corresponds to the top row, therefore cant move up more
-					if (i == 0): 
+					if (i == 0):
 						#Set status to "out of bounds" and break
 						status = 2
 						done = True
@@ -114,7 +126,7 @@ class Angel_Demon_Game():
 						try:
 							self.game_grid[i][j] = "    "
 							if (self.game_grid[i-1][j] == "BOMB"):
-								#Set status to bomb detonation 
+								#Set status to bomb detonation
 								status = 1
 								done = True
 								break
@@ -128,7 +140,7 @@ class Angel_Demon_Game():
 							status = 2
 							done = True
 							break
-				
+
 			if (done == True):
 				break
 		return status
@@ -142,11 +154,11 @@ class Angel_Demon_Game():
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_height):
 			for j in range(0, self.game_width):
-			
+
 				#Bot found
 				if (self.game_grid[i][j] == "BOT"):
 					#j = (width - 1) corresponds to the right column, therefore cant move more right
-					if (j == (self.game_width - 1)): 
+					if (j == (self.game_width - 1)):
 						#Set status to out-of-bounds and break
 						status = 2
 						done = True
@@ -170,7 +182,7 @@ class Angel_Demon_Game():
 							status = 2
 							done = True
 							break
-				
+
 			if (done == True):
 				break
 		return status
@@ -184,12 +196,12 @@ class Angel_Demon_Game():
 		#Loop through the rows and columns to find the bot location
 		for i in range(0, self.game_height):
 			for j in range(0, self.game_width):
-				
+
 				#Bot found
 				if (self.game_grid[i][j] == "BOT"):
 					#Check if top row (i = 0) OR right column (j = width -1)
 					#Reject move as out of bounds if either occurs
-					if ((i == 0) or (j == (self.game_width - 1))): 
+					if ((i == 0) or (j == (self.game_width - 1))):
 						status = 2
 						done = True
 						break
@@ -212,7 +224,7 @@ class Angel_Demon_Game():
 							status = 2
 							done = True
 							break
-			
+
 			if (done == True):
 				break
 		return status
@@ -229,14 +241,14 @@ class Angel_Demon_Game():
 		print("THE ANGEL WINS!!!")
 		print()
 		hex_walker.bounce(.3, 4)
-	
+
 	#Function to execute the devil wins dance and console output
 	def devil_wins(self):
 		print()
 		print("THE DEVIL WINS!!! BOOM!")
 		print()
 		torso.king_kong(90, 4)
-	
+
 	#Function to prompt and obtain the angel desired move
 	def select_move_angel(self):
 		#Show possible moves
@@ -285,7 +297,7 @@ class Angel_Demon_Game():
 	def quantum_translate(self, state):
 		move_code = quantum_circuit.run_circuit(state[0], state[1], state[2])
 		return move_code
-	
+
 	#Function to determine the light state and return a vector.  Vector is one of the four possible light zones (00, 01, 10, 11)
 	def determine_state(self):
 		vector = []
@@ -306,7 +318,7 @@ class Angel_Demon_Game():
 					#Otherwise return standard status indicating game is still on
 					else:
 						return status
-	
+
 	#Function to execute physical movement of the bot based on move code
 	def move_hexapod(self, move_code):
 		if (move_code == "N"):
@@ -333,7 +345,7 @@ class Angel_Demon_Game():
 			hex_walker.walk(20, DIR_F)
 			time.sleep(0.1)
 			hex_walker.rotate(5,LEFT)
-	
+
 	#Primary function to run the angel demon game
 	def run_game(self):
 		#Welcome message
@@ -379,7 +391,7 @@ class Angel_Demon_Game():
 					print("Sending total state to quantum: ", self.state)
 					quantum = self.quantum_translate(self.state)
 
-					#Depending on the quantum outcome, the bot listens or disobeys 
+					#Depending on the quantum outcome, the bot listens or disobeys
 					if (quantum == 0):
 						print("Angel successfully tells bot to stay still")
 
@@ -474,7 +486,7 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 0
 				self.turn_num +=1
-				
+
 				if (self.rotation_correction == True):
 					rotation_check_code = rotation_corrector.process_image()
 					print("Rotation code needed: ", str(rotation_check_code))
@@ -482,15 +494,15 @@ class Angel_Demon_Game():
 						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
 					elif(rotation_check_code > 0):
 						hex_walker.rotate(rotation_check_code, LEFT)
-										
+
 				if (self.forward_back_correction == True):
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
 					if (forward_back_code < 0):
 						hex_walker.walk(1, DIR_B)
 					elif(forward_back_code > 0):
-						hex_walker.rotate(1, 0)		
-				
+						hex_walker.rotate(1, 0)
+
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")
 					self.angel_victory = True
@@ -522,7 +534,7 @@ class Angel_Demon_Game():
 					print("Sending total state to quantum: ", self.state)
 					quantum = self.quantum_translate(self.state)
 
-					#Depending on the quantum outcome, the bot listens or disobeys 
+					#Depending on the quantum outcome, the bot listens or disobeys
 					if (quantum == 0):
 						print("Devil successfully tells bot to move right!")
 						move_status = self.move_board_bot_right()
@@ -655,8 +667,8 @@ class Angel_Demon_Game():
 						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
 					elif(rotation_check_code > 0):
 						hex_walker.rotate(rotation_check_code, LEFT)
-					
-						
+
+
 				if (self.forward_back_correction == True):
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
@@ -664,7 +676,7 @@ class Angel_Demon_Game():
 						hex_walker.walk(1, DIR_B)
 					elif(forward_back_code > 0):
 						hex_walker.rotate(1, 0)
-					
+
 				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")

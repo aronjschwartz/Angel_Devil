@@ -10,10 +10,3 @@ class Voice:
     def say_something(self, message):
         self.tts.say(message)
         self.tts.runAndWait()
-
-
-def init_voice():
-    voice1 = Voice(12)
-
-def say(message):
-    voice1.say_something(message)

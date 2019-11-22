@@ -41,8 +41,8 @@ def main():
 
 	user_inputs = fetch_trackbar_pos(window_name, slider_names)
 
-	torso[1].set_leg_position(Leg_Position(user_inputs[1+TIP_SERVO], user_inputs[1+MID_SERVO], user_inputs[1+ROT_SERVO]))
-	torso[0].set_leg_position(Leg_Position(user_inputs[4+TIP_SERVO], user_inputs[4+MID_SERVO], user_inputs[4+ROT_SERVO]))
+	torso[1].set_leg_position(Leg_Position(user_inputs[1+ROT_SERVO], user_inputs[1+MID_SERVO], user_inputs[1+TIP_SERVO]))
+	torso[0].set_leg_position(Leg_Position(user_inputs[4+ROT_SERVO], user_inputs[4+MID_SERVO], user_inputs[4+TIP_SERVO]))
 	torso[2].set_servo_angle(user_inputs[0], WAIST_SERVO)
 	while True:
 		previous_user_inputs = user_inputs
@@ -53,8 +53,8 @@ def main():
 			break
 		if not compare_lists(user_inputs, previous_user_inputs):
 			print("Values changed")
-			torso[1].set_leg_position(Leg_Position(user_inputs[1 + TIP_SERVO], user_inputs[1 + MID_SERVO], user_inputs[1 + ROT_SERVO]))
-			torso[0].set_leg_position(Leg_Position(user_inputs[4 + TIP_SERVO], user_inputs[4 + MID_SERVO], user_inputs[4 + ROT_SERVO]))
+			torso[1].set_leg_position(Leg_Position(user_inputs[1 + ROT_SERVO], user_inputs[1 + MID_SERVO], user_inputs[1 + TIP_SERVO]))
+			torso[0].set_leg_position(Leg_Position(user_inputs[4 + ROT_SERVO], user_inputs[4 + MID_SERVO], user_inputs[4 + TIP_SERVO]))
 			torso[2].set_servo_angle(user_inputs[0], WAIST_SERVO)
 	cv.destroyAllWindows()
 

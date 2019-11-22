@@ -31,7 +31,7 @@ def test_leg_positions(leg):
     leg.set_leg_position(up)
     leg.print_self()
     print("***************************************testing out")
-    out = Leg_Position(120, 45, 90)
+    out = Leg_Position(90, 45, 120)
     leg.set_leg_position(out)
     leg.print_self()
 

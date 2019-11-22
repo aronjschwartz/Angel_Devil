@@ -4,8 +4,7 @@ from hex_walker_constants import TIP_SERVO, MID_SERVO, ROT_SERVO, WAIST_SERVO
 # NOTE: these values are ANGLES not raw pwms
 # thing.rot_servo and thing.list[ROT_SERVO] are synonymous/aliases that point to the same underlying data, for both read/write
 class Leg_Position(object):
-	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
-	def __init__(self, tip_servo: float, mid_servo: float, rot_servo: float):
+	def __init__(self, rot_servo: float, mid_servo: float, tip_servo: float):
 		self.list = [0.0, 0.0, 0.0]
 		self.list[ROT_SERVO] = rot_servo
 		self.list[MID_SERVO] = mid_servo

@@ -247,7 +247,7 @@ class Leg(object):
 		# modify one entry of the copy
 		v[servo] = angle
 		# init the Leg_Position from the list
-		L = Leg_Position(v[TIP_SERVO], v[MID_SERVO], v[ROT_SERVO])
+		L = Leg_Position(v[ROT_SERVO], v[MID_SERVO], v[TIP_SERVO])
 		
 		self.set_leg_position_thread(L, durr)
 

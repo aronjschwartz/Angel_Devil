@@ -2,26 +2,26 @@ from posedata_leg import *
 from hex_walker_constants import ARM_L, ARM_R
 
 ARMS_ARM_TABLE = {
-	"NEUTRAL":			Leg_Position(0, 45, 90),
+	"NEUTRAL":			Leg_Position(90, 45, 0),
 	"ON_HIP":			Leg_Position(0, 90, 0),
-	"UP":				Leg_Position(90, 0, 180),
-	"STRAIGHT_OUT":		Leg_Position(90,90,90),
-	"STRAIGHT_FWD":		Leg_Position(90,0,90),
+	"UP":				Leg_Position(180, 0, 90),
+	"STRAIGHT_OUT":		Leg_Position(90, 90, 90),
+	"STRAIGHT_FWD":		Leg_Position(90, 0, 90),
 	
-	"WAVE_UP":			Leg_Position(30, 40, 180),
-	"WAVE_DOWN":		Leg_Position(55,120,180),
+	"WAVE_UP":			Leg_Position(180, 40, 30),
+	"WAVE_DOWN":		Leg_Position(180, 120, 55),
 	
-	"HAND_SHAKE_UP":	Leg_Position(45,10,80),
-	"HAND_SHAKE_MID":	Leg_Position(45, 10, 70),
-	"HAND_SHAKE_DOWN":	Leg_Position(45,10,60),
+	"HAND_SHAKE_UP":	Leg_Position(80, 10, 45),
+	"HAND_SHAKE_MID":	Leg_Position(70, 10, 45),
+	"HAND_SHAKE_DOWN":	Leg_Position(60, 10, 45),
 	
-	"JOHNNY_BRAVO_MONKEY_DOWN":	Leg_Position(90,0,80),
-	"JOHNNY_BRAVO_MONKEY_UP":	Leg_Position(90,0,100),
+	"JOHNNY_BRAVO_MONKEY_DOWN":	Leg_Position(80, 0, 90),
+	"JOHNNY_BRAVO_MONKEY_UP":	Leg_Position(100, 0, 90),
 	
-	"BLOCKING_UP":		Leg_Position(30, 0, 180),
-	"BLOCKING_FRONT":	Leg_Position(30, 0, 90),
+	"BLOCKING_UP":		Leg_Position(180, 0, 30),
+	"BLOCKING_FRONT":	Leg_Position(90, 0, 30),
 	
-	"LOOKING":			Leg_Position(20, 5, 155)
+	"LOOKING":			Leg_Position(155, 5, 20)
 	
 }
 

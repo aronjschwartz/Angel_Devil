@@ -52,7 +52,7 @@ def main():
 
 	# initial read&set
 	user_inputs = fetch_trackbar_pos(window_name, slider_names)
-	all_legs[user_inputs[0]].set_leg_position(Leg_Position(user_inputs[2+TIP_SERVO], user_inputs[2+MID_SERVO], user_inputs[2+ROT_SERVO]))
+	all_legs[user_inputs[0]].set_leg_position(Leg_Position(user_inputs[2+ROT_SERVO], user_inputs[2+MID_SERVO], user_inputs[2+TIP_SERVO]))
 	while True:
 		previous_user_inputs = user_inputs
 		user_inputs = fetch_trackbar_pos(window_name, slider_names)
@@ -64,7 +64,7 @@ def main():
 			# if the enable bar is set:
 			if user_inputs[1] == 1:
 				print("Values changed")
-				newleg = Leg_Position(user_inputs[2+TIP_SERVO], user_inputs[2+MID_SERVO], user_inputs[2+ROT_SERVO])
+				newleg = Leg_Position(user_inputs[2+ROT_SERVO], user_inputs[2+MID_SERVO], user_inputs[2+TIP_SERVO])
 				if user_inputs[0] == 6:
 					# all legs at once
 					for n in GROUP_ALL_LEGS:

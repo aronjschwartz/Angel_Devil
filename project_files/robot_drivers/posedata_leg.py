@@ -4,8 +4,7 @@ from hex_walker_constants import TIP_SERVO, MID_SERVO, ROT_SERVO, WAIST_SERVO
 # NOTE: these values are ANGLES not raw pwms
 # thing.rot_servo and thing.list[ROT_SERVO] are synonymous/aliases that point to the same underlying data, for both read/write
 class Leg_Position(object):
-	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
-	def __init__(self, tip_servo: float, mid_servo: float, rot_servo: float):
+	def __init__(self, rot_servo: float, mid_servo: float, tip_servo: float):
 		self.list = [0.0, 0.0, 0.0]
 		self.list[ROT_SERVO] = rot_servo
 		self.list[MID_SERVO] = mid_servo
@@ -48,14 +47,14 @@ class Leg_Position(object):
 
 # table to be used when the robot is trying to rotate in place
 LEG_NORMAL_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(0, 90, 90),
-	"UP_NEUTRAL":		Leg_Position(0, 135, 90),
+	"NEUTRAL":			Leg_Position(90, 90, 0),
+	"UP_NEUTRAL":		Leg_Position(90, 135, 0),
 	
-	"RIGHT":			Leg_Position(5, 90, 120),
-	"UP_RIGHT":			Leg_Position(5, 135, 120),
+	"RIGHT":			Leg_Position(120, 90, 5),
+	"UP_RIGHT":			Leg_Position(120, 135, 5),
 	
-	"LEFT":				Leg_Position(5, 90, 60),
-	"UP_LEFT":			Leg_Position(5, 135, 60)
+	"LEFT":				Leg_Position(60, 90, 5),
+	"UP_LEFT":			Leg_Position(60, 135, 5)
 	
 }
 
@@ -63,27 +62,27 @@ LEG_NORMAL_ROTATION_TABLE = {
 # tip motor, mid motor, rot motor
 LEG_NORMAL_MOVEMENT_TABLE = {
 	#all the positions for the front and back legs
-	"NEUTRAL":			Leg_Position(30, 90, 90),
-	"UP_NEUTRAL":		Leg_Position(30, 135, 90),
+	"NEUTRAL":			Leg_Position(90, 90, 30),
+	"UP_NEUTRAL":		Leg_Position(90, 135, 30),
 	
-	"CORN_OUT":			Leg_Position(45, 105, 75),
-	"CORN_IN":			Leg_Position(0, 80, 125),
+	"CORN_OUT":			Leg_Position(75, 105, 45),
+	"CORN_IN":			Leg_Position(125, 80, 0),
 	
-	"CORN_UP_OUT":		Leg_Position(45, 150, 75),
-	"CORN_UP_IN":		Leg_Position(0, 125, 125),
+	"CORN_UP_OUT":		Leg_Position(75, 150, 45),
+	"CORN_UP_IN":		Leg_Position(125, 125, 0),
 	
 	#now all of the positions for the side legs
-	"SIDE_RIGHT":		Leg_Position(0, 90, 115),
-	"SIDE_LEFT":		Leg_Position(0, 90, 65),
+	"SIDE_RIGHT":		Leg_Position(115, 90, 0),
+	"SIDE_LEFT":		Leg_Position(65, 90, 0),
 	
-	"SIDE_UP_RIGHT":	Leg_Position(0, 135, 115),
-	"SIDE_UP_LEFT":		Leg_Position(0, 135, 65)
+	"SIDE_UP_RIGHT":	Leg_Position(115, 135, 0),
+	"SIDE_UP_LEFT":		Leg_Position(65, 135, 0)
 }
 
 # # table to be used when the robot is trying to move in a "sideways" way (moving with a single leg forward)
 # NORMAL_TRI_SIDE_MOVEMENT_TABLE = {
-# 	"NEUTRAL":			Leg_Position(0, 90, 90),
-# 	"UP_NEUTRAL":		Leg_Position(0, 135, 90),
+# 	"NEUTRAL":			Leg_Position(90, 90, 0),
+# 	"UP_NEUTRAL":		Leg_Position(90, 135, 0),
 # 	"CORN_LEFT":		Leg_Position(0, 0, 0),
 # 	"CORN_RIGHT":		Leg_Position(0, 0, 0),
 # 	"CENT_OUT":			Leg_Position(0, 0, 0),
@@ -95,32 +94,32 @@ LEG_NORMAL_MOVEMENT_TABLE = {
 # this is extra. don't do this until the above is working
 # table to be used when the robot is trying to rotate in place
 LEG_CROUCH_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(0, 135, 90),
-	"UP_NEUTRAL":		Leg_Position(0, 180, 90),
+	"NEUTRAL":			Leg_Position(90, 135, 0),
+	"UP_NEUTRAL":		Leg_Position(90, 180, 0),
 	
-	"RIGHT":			Leg_Position(0, 130, 120),
-	"UP_RIGHT":			Leg_Position(0, 180, 120),
+	"RIGHT":			Leg_Position(120, 130, 0),
+	"UP_RIGHT":			Leg_Position(120, 180, 0),
 	
-	"LEFT":				Leg_Position(0, 130, 60),
-	"UP_LEFT":			Leg_Position(0, 180, 60)
+	"LEFT":				Leg_Position(60, 130, 0),
+	"UP_LEFT":			Leg_Position(60, 180, 0)
 	
 }
 
 LEG_CROUCH_MOVEMENT_TABLE = {
-	"NEUTRAL":				Leg_Position(0, 135, 90),
-	"UP_NEUTRAL":			Leg_Position(0, 180, 90),
+	"NEUTRAL":				Leg_Position(90, 135, 0),
+	"UP_NEUTRAL":			Leg_Position(90, 180, 0),
 	
-	"CORN_LEFT":		Leg_Position(0, 125, 85),
-	"CORN_RIGHT":		Leg_Position(0, 125, 95),
+	"CORN_LEFT":		Leg_Position(85, 125, 0),
+	"CORN_RIGHT":		Leg_Position(95, 125, 0),
 	
-	"CORN_UP_LEFT":		Leg_Position(0, 175, 85),
-	"CORN_UP_RIGHT":	Leg_Position(0, 175, 95),
+	"CORN_UP_LEFT":		Leg_Position(85, 175, 0),
+	"CORN_UP_RIGHT":	Leg_Position(95, 175, 0),
 	
-	"SIDE_RIGHT":			Leg_Position(0, 125, 105),
-	"SIDE_LEFT":			Leg_Position(0, 125, 75),
+	"SIDE_RIGHT":			Leg_Position(105, 125, 0),
+	"SIDE_LEFT":			Leg_Position(75, 125, 0),
 	
-	"SIDE_UP_RIGHT":		Leg_Position(0, 170, 95),
-	"SIDE_UP_LEFT":			Leg_Position(0, 170, 85)
+	"SIDE_UP_RIGHT":		Leg_Position(95, 170, 0),
+	"SIDE_UP_LEFT":			Leg_Position(85, 170, 0)
 }
 
 # CROUCH_TRI_SIDE_MOVEMENT_TABLE = {
@@ -136,73 +135,73 @@ LEG_CROUCH_MOVEMENT_TABLE = {
 # }
 
 LEG_TALL_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(30, 45, 90),
-	"UP_NEUTRAL":		Leg_Position(0, 90, 90),
+	"NEUTRAL":			Leg_Position(90, 45, 30),
+	"UP_NEUTRAL":		Leg_Position(90, 90, 0),
 	
-	"RIGHT":			Leg_Position(30, 45, 120),
-	"UP_RIGHT":			Leg_Position(0, 90, 120),
+	"RIGHT":			Leg_Position(120, 45, 30),
+	"UP_RIGHT":			Leg_Position(120, 90, 0),
 	
-	"LEFT":				Leg_Position(30, 45, 60),
-	"UP_LEFT":			Leg_Position(0, 90, 60)
+	"LEFT":				Leg_Position(60, 45, 30),
+	"UP_LEFT":			Leg_Position(60, 90, 0)
 	
 }
 
 # TODO: fine rotation table is obsolete, remove this
 LEG_TALL_FINE_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(30, 45, 90),
-	"UP_NEUTRAL":		Leg_Position(0, 90, 90),
+	"NEUTRAL":			Leg_Position(90, 45, 30),
+	"UP_NEUTRAL":		Leg_Position(90, 90, 0),
 	
-	"RIGHT":			Leg_Position(30, 45, 92),
-	"UP_RIGHT":			Leg_Position(0, 90, 92),
+	"RIGHT":			Leg_Position(92, 45, 30),
+	"UP_RIGHT":			Leg_Position(92, 90, 0),
 	
-	"LEFT":				Leg_Position(30, 45, 88),
-	"UP_LEFT":			Leg_Position(0, 90, 89)
+	"LEFT":				Leg_Position(88, 45, 30),
+	"UP_LEFT":			Leg_Position(89, 90, 0)
 	
 }
 
 # TODO: duplicate neutral/up_neutral with corn_ and side_ names, for readability
 LEG_TALL_MOVEMENT_TABLE = {
-	"NEUTRAL":				Leg_Position(30, 45, 90),
-	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
+	"NEUTRAL":				Leg_Position(90, 45, 30),
+	"UP_NEUTRAL":			Leg_Position(90, 90, 0),
 	
-	"CORN_LEFT":		Leg_Position(35, 52, 80),
-	"CORN_RIGHT":		Leg_Position(35, 52, 100),
+	"CORN_LEFT":		Leg_Position(80, 52, 35),
+	"CORN_RIGHT":		Leg_Position(100, 52, 35),
 	
-	"CORN_UP_LEFT":		Leg_Position(0, 90, 80),
-	"CORN_UP_RIGHT":	Leg_Position(0, 90, 100),
+	"CORN_UP_LEFT":		Leg_Position(80, 90, 0),
+	"CORN_UP_RIGHT":	Leg_Position(100, 90, 0),
 	
-	"SIDE_RIGHT":			Leg_Position(25, 60, 130),
-	"SIDE_LEFT":			Leg_Position(25, 60, 50),
+	"SIDE_RIGHT":			Leg_Position(130, 60, 25),
+	"SIDE_LEFT":			Leg_Position(50, 60, 25),
 	
-	"SIDE_UP_RIGHT":		Leg_Position(0, 80, 130),
-	"SIDE_UP_LEFT":			Leg_Position(0, 80, 50)
+	"SIDE_UP_RIGHT":		Leg_Position(130, 80, 0),
+	"SIDE_UP_LEFT":			Leg_Position(50, 80, 0)
 }
 
 # There's no center in because the mid motor is limited to 45 degrees 
 LEG_TALL_SIDE_MOVEMENT_TABLE = {
-	"NEUTRAL":				Leg_Position(30, 45, 90),
-	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
+	"NEUTRAL":				Leg_Position(90, 45, 30),
+	"UP_NEUTRAL":			Leg_Position(90, 90, 0),
 	
-	"SIDE_OUT_LEFT":		Leg_Position(30, 50, 65),
-	"SIDE_OUT_RIGHT":		Leg_Position(30, 50, 115),
+	"SIDE_OUT_LEFT":		Leg_Position(65, 50, 30),
+	"SIDE_OUT_RIGHT":		Leg_Position(115, 50, 30),
 	
-	"SIDE_UP_OUT_LEFT":		Leg_Position(0, 70, 65),
-	"SIDE_UP_OUT_RIGHT":	Leg_Position(0, 70, 115),
+	"SIDE_UP_OUT_LEFT":		Leg_Position(65, 70, 0),
+	"SIDE_UP_OUT_RIGHT":	Leg_Position(115, 70, 0),
 	
-	"CENTER_OUT":			Leg_Position(30, 45, 90),
+	"CENTER_OUT":			Leg_Position(90, 45, 30),
 	
-	"CENTER_UP_OUT":		Leg_Position(10, 70, 90),
+	"CENTER_UP_OUT":		Leg_Position(90, 70, 10),
 }
 
 
 # misc table
 # TODO: make neutral/up_neutral in the other movement tables all reference it in this table... only change it in one place!
 LEG_MISC_TABLE = {
-	"INIT":				Leg_Position(0, 90, 90),
-	"NEUTRAL": 			Leg_Position(30, 45, 90),
-	"UP_NEUTRAL": 		Leg_Position(0, 90, 90),
-	"BOUNCE":			Leg_Position(0, 75, 90),
-	"PULL_UP":			Leg_Position(0, 75, 90),
+	"INIT":				Leg_Position(90, 90, 0),
+	"NEUTRAL": 			Leg_Position(90, 45, 30),
+	"UP_NEUTRAL": 		Leg_Position(90, 90, 0),
+	"BOUNCE":			Leg_Position(90, 75, 0),
+	"PULL_UP":			Leg_Position(90, 75, 0),
 	"STRAIGHT_OUT":		Leg_Position(90, 90, 90)
 	
 }

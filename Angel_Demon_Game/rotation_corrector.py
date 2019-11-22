@@ -6,7 +6,6 @@ import math
 import os
 import cv2
 from scipy import ndimage
-from skimage.transform import (hough_line, hough_line_peaks)
 
 #Display image with cv
 def display_image(image):

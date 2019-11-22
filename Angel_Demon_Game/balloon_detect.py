@@ -2,11 +2,18 @@
 # TODO: clean up code
 # TODO: make code more readable? add more debug/visual features?
 
+import sys
+sys.path.append("../project_files/robot_drivers/")
+
 import numpy as np
 import cv2
 import math
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+
+import pwm_wrapper as pw
+import hex_walker_driver_v2 as hwd
+from hex_walker_constants import *
 
 
 # in_to_pixels function
@@ -19,8 +26,8 @@ from picamera import PiCamera
 def in_to_pixels(inches):
     # convert from inches to centimeters to pixels in a 72 DPI image (pi camera DPI)
     pixels = (inches) * (2.54) * (28.346456693)
+    # return the number of pixels in given length
     return pixels
-
 
 class color_detector:
     # __init__ method
@@ -59,6 +66,14 @@ class color_detector:
         self.focal_length_pixels = 1126.85714  # for pi camera v2.1
         self.set_color_bounds()
         self.get_camera_properties()
+        pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+        larm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[ARM_L], ARM_L)  # 6
+        rot = hwd.Rotator(pwm_bot, PWM_CHANNEL_ARRAY[WAIST], WAIST)  # 8
+        pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+        rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R)  # 7
+
+        self.torso = hwd.Robot_Torso(rarm, larm, rot)
+
         if self.print_statements: print(TAG + "color_detector class successfully created")
 
     # set_color_bounds method
@@ -80,15 +95,22 @@ class color_detector:
 
         TAG = "SET_COLOR_BOUNDS: "
 
+        # set the color string to be all lowercase so the user can use uppercase or lowercase arguments
         lower_color = self.which_color.lower()
 
+        # if user wants to detect red
         if lower_color == 'r':
+            # set the color bounds to be red
             self.lower_bound = np.array([161, 155, 84])
             self.upper_bound = np.array([179, 255, 255])
+            # string used in print statement
             COLOR = "red"
+        # if user wants to detect blue
         elif lower_color == 'b':
+            # set the color bounds to be blue
             self.lower_bound = np.array([100, 50, 50])
             self.upper_bound = np.array([130, 255, 255])
+            # string used in print statement
             COLOR = "blue"
 
         if self.print_statements: print(TAG + "color bounds set to " + COLOR)
@@ -110,16 +132,22 @@ class color_detector:
 
         TAG = "GET_CAMERA_STATS: "
 
+        # if using a PI camera
         if self.pi_camera:
+            # set camera dimensions
             self.camera_height_pixels = 720
             self.camera_width_pixels = 1080
+            # set middle of camera
             self.camera_center_x = int((self.camera_width_pixels) / 2 - 1)
             self.camera_center_y = int((self.camera_height_pixels) / 2 - 1)
+        # if using a web camera
         else:
+            # set camera dimensions
             camera = cv2.VideoCapture(0)
             ret, frame = camera.read()
             self.camera_height_pixels = int(frame.shape[0])
             self.camera_width_pixels = int(frame.shape[1])
+            # set middle of camera
             self.camera_center_x = int((self.camera_width_pixels) / 2 - 1)
             self.camera_center_y = int((self.camera_height_pixels) / 2 - 1)
             camera.release()
@@ -163,6 +191,7 @@ class color_detector:
         x_correct = []
         y_correct = []
 
+        # if using a PI camera
         if self.pi_camera:
             camera = PiCamera()
             camera.resolution = (1080, 720)
@@ -198,6 +227,7 @@ class color_detector:
                         self.average_distance = sum(distances) / len(distances)
                         self.average_x_correct = sum(x_correct) / len(x_correct)
                         self.average_y_correct = sum(y_correct) / len(y_correct)
+                        self.convert_angle()
                         break
                     else:
                         distances.append(self.distance_to_object)
@@ -205,11 +235,13 @@ class color_detector:
                         y_correct.append(self.y_offset_angle)
                         count = count + 1
 
+                # if not in headless mode show the camera feed on screen
                 if not self.headless_mode:
                     cv2.imshow("Frame", frame)
 
                 rawCapture.truncate(0)
 
+        # if using a web camera
         else:
             cap = cv2.VideoCapture(0)
 
@@ -249,6 +281,7 @@ class color_detector:
                         y_correct.append(self.y_offset_angle)
                         count = count + 1
 
+                # if not in headless mode show the camera feed on screen
                 if not self.headless_mode:
                     cv2.imshow('frame', frame)
 
@@ -256,6 +289,25 @@ class color_detector:
             cv2.destroyAllWindows()
 
         # TODO: return angle here?
+
+        if self.horizontal_correction > 90:
+            #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
+            self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
+            self.torso.left_arm.set_servo_angle(45, MID_SERVO)
+            self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
+            self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
+            self.torso.right_arm.set_servo_angle(90, MID_SERVO)
+            self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
+            self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
+        elif self.horizontal_correction < 90:
+            #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
+            self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
+            self.torso.right_arm.set_servo_angle(45, MID_SERVO)
+            self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
+            self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
+            self.torso.left_arm.set_servo_angle(90, MID_SERVO)
+            self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
+            self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
 
         if self.print_statements: print(TAG + "detector has finished")
 
@@ -296,8 +348,9 @@ class color_detector:
     def distance_to_center(self):
 
         TAG = "DISTANCE_TO_CENTER: "
-
         center_rect = []
+
+        # TODO: is there a reason to return the values or can we just set them to the class?  could be easier?
 
         x_middle = int((self.rect_width) / 2 - 1 + self.rect_x_start)
         y_middle = int((self.rect_height) / 2 - 1 + self.rect_y_start)
@@ -377,9 +430,21 @@ class color_detector:
 
         if self.print_statements: print(TAG + "object has been identified as a balloon or not")
 
+    def convert_angle(self):
+        max_angle = math.atan2(self.camera_height_pixels,self.distance_to_object)*(180 / math.pi)
 
-my_tester = color_detector(False, True, 'b', 7, False)
+        # x angle: negative = right, positive = left
+        # y angle: positive = up, negative = down
+
+        # TODO: horizontal angle is from 30 to 150 not 0 to 180, possibly some calibration is in store?
+        self.horizontal_correction = 90 - self.average_x_correct
+        self.vertical_correction = 90 + (self.average_y_correct)*(90/max_angle)
+
+        if 30 >= self.horizontal_correction:
+            self.horizontal_correction = 30
+        elif self.horizontal_correction >= 150:
+            self.horizontal_correction = 150
+
+
+my_tester = color_detector(False, True, 'b', 7, True)
 my_tester.run_detector()
-print(my_tester.average_distance)
-print(my_tester.average_x_correct)
-print(my_tester.average_y_correct)

@@ -96,7 +96,7 @@ class Angel_Demon_Game():
 		self.rotation_correction = False
 		self.forward_back_correction = False
 		voice = Voice(12)
-		voice.say("Hello")
+
 
 	#Function to clear the board.  Writes all values in the grid to a 1-character empty string
 	def clear_board(self):
@@ -239,6 +239,7 @@ class Angel_Demon_Game():
 	def angel_wins(self):
 		print()
 		print("THE ANGEL WINS!!!")
+        voice.say("THE ANGEL WINS!!!")
 		print()
 		hex_walker.bounce(.3, 4)
 
@@ -246,6 +247,7 @@ class Angel_Demon_Game():
 	def devil_wins(self):
 		print()
 		print("THE DEVIL WINS!!! BOOM!")
+        voice.say("THE ANGEL WINS!!!")
 		print()
 		torso.king_kong(90, 4)
 
@@ -355,6 +357,7 @@ class Angel_Demon_Game():
 		print("*                                                            *")
 		print("**************************************************************")
 
+        voice.say("Welcome to the Angel Devil Quantom robot game!")
 		#Main game loop
 
 		while(1):
@@ -372,7 +375,8 @@ class Angel_Demon_Game():
 				if (win_status == 1):
 					self.angel_victory = True
 					break
-				print("***** Angels Turn *****")
+				print("***** Angel's Turn *****")
+                voice.say("Angel's turn")
 				self.show_game_board()
 
 				#Prompt user to select desired move
@@ -394,9 +398,11 @@ class Angel_Demon_Game():
 					#Depending on the quantum outcome, the bot listens or disobeys
 					if (quantum == 0):
 						print("Angel successfully tells bot to stay still")
+                        voice.say("It's bright outside today, I will listen to the angel and stay still")
 
 					elif (quantum == 1):
 						print("Angel disobeys neutrally and moves up!")
+                        voice.say("It's kind of dark out today, I can't listen to the angel but I will move up")
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
@@ -410,7 +416,7 @@ class Angel_Demon_Game():
 							self.move_hexapod("UP")
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Angel and moves right!")
-
+                        voice.say("It's very dark out today, I will listen to the devil and move right")
 						move_status = self.move_board_bot_right()
 
 						#Return code of '1' means we hit the bomb
@@ -439,6 +445,7 @@ class Angel_Demon_Game():
 					#Depending on the quantum outcome, the bot listens or disobeys (CHANCE TO BE ULTIMATELY INFLUENCED BY LIGHT LEVEL)
 					if (quantum == 0):
 						print("Angel successfully tells bot to move up!")
+                        voice.say("It's bright outside today, I will listen to the angel and move up")
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
@@ -452,9 +459,11 @@ class Angel_Demon_Game():
 							self.move_hexapod("UP")
 					elif (quantum == 1):
 						print("Angel disobeys neutrally and stays still!")
+                        voice.say("It's kind of dark out today, I can't listen to the angel but I will stay still")
 
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Angel and moves up-right!")
+                        voice.say("It's very dark out today, I will listen to the devil and move up to the right")
 
 						#move_status = self.move_board_bot_up_right()
 						move_status = self.move_board_bot_up()
@@ -516,7 +525,8 @@ class Angel_Demon_Game():
 				if (win_status == 1):
 					self.angel_victory = True
 					break
-				print("****** Devils Turn *****")
+				print("****** Devil's Turn *****")
+                voice.say("Devil's turn")
 				self.show_game_board()
 
 				#Prompt user to select desired move
@@ -537,6 +547,7 @@ class Angel_Demon_Game():
 					#Depending on the quantum outcome, the bot listens or disobeys
 					if (quantum == 0):
 						print("Devil successfully tells bot to move right!")
+                        voice.say("It's very dark out today, I will listen to the devil and move right")
 						move_status = self.move_board_bot_right()
 
 						#Return code of '1' means we hit the bomb
@@ -551,6 +562,7 @@ class Angel_Demon_Game():
 							self.move_hexapod("R")
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves up-right!")
+                        voice.say("It's kind of dark out today, I will not listen to the devil but I will move up to the right")
 
 						#move_status = self.move_board_bot_up_right()
 						move_status = self.move_board_bot_up()
@@ -582,6 +594,7 @@ class Angel_Demon_Game():
 
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Devil and moves up!")
+                        voice.say("It's very bright out today, I will listen to the angel and move up")
 
 						move_status = self.move_board_bot_up()
 
@@ -612,6 +625,7 @@ class Angel_Demon_Game():
 					#Depending on the quantum outcome, the bot listens or disobeys (CHANCE TO BE ULTIMATELY INFLUENCED BY LIGHT LEVEL)
 					if (quantum == 0):
 						print("Devil successfully tells bot to move up-right!")
+                        voice.say("It's very dark out today, I will listen to the devil and move up to the right")
 
 						#move_status = self.move_board_bot_up_right()
 						move_status = self.move_board_bot_up()
@@ -642,6 +656,7 @@ class Angel_Demon_Game():
 								self.move_hexapod("R")
 					elif (quantum == 1):
 						print("Devil disobeys neutrally and moves right!")
+                        voice.say("It's kind of dark out today, I will not listen to the devil but I will move to the right")
 						move_status = self.move_board_bot_right()
 
 						#Return code of '1' means we hit the bomb
@@ -656,6 +671,7 @@ class Angel_Demon_Game():
 							self.move_hexapod("R")
 					elif (quantum == 2): #Disobeys
 						print("Bot disoboeys the Devil and stays still!")
+                        voice.say("It's very bright out today, I will not listen to the devil and will stay still")
 
 
 				self.angel_turn = 1

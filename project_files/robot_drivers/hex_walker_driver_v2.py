@@ -582,18 +582,27 @@ class Hex_Walker(object):
 		# define positions to go through to get steps from a neutral legs up
 		# these all ultimately reference the LEG_TALL_MOVEMENT_TABLE in posedata_leg.py
 		# TODO: first, understand the current animation. then, improve it with full-range motion.
-		# start 		TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
-		left_step = [	TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
-						TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
-						TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
-						TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
-		right_step = [	TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
-						TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
-						TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
-						TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
+		# start 			TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+		temp_left_step = [	TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
+							TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
+							TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
+							TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+		temp_right_step = [	TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
+							TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
+							TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
+							TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
 		
-		# todo: scale
-		
+		# NEW: scale the "rot-servo" portion to produce fine-stepping behavior!
+		temp_both = []
+		for pose_idx in temp_left_step + temp_right_step:		# combine the lists for easier iteration
+			pose = HEX_WALKER_POSITIONS[pose_idx].copy()		# dereference and copy
+			for l in pose.list:		# modify: for each leg in the hex-pose, scale the rot-servo around 90*
+				l.list[ROT_SERVO] = ((l.list[ROT_SERVO] - 90.) * scale) + 90.	# subtract 90, scale, add 90
+			temp_both.append(pose)		# store
+		# re-split the merged list
+		left_step = temp_both[:4]  # first half
+		right_step = temp_both[4:] # second half
+
 		# begin walk sequence by lifting some of the legs: "half-raised neutral position"
 		# this is the pose at the end of a right-step or beginning of a left-step
 		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)

@@ -10,6 +10,8 @@
 
 import time
 import threading
+from typing import List
+
 from posedata_arms import *
 from posedata_walker import *
 from posedata_leg import *
@@ -17,8 +19,10 @@ from posedata_leg import *
 from hex_walker_constants import *
 from hex_util import *
 import frame_thread as ft
+from pwm_wrapper import Pwm_Wrapper
 
 #Extraneous
+
 HW_MOVE_DEBUG = 0 #toggle 0/1 to turn debug prints on/off
 
 LEG_THREAD_DEBUG = False
@@ -54,7 +58,7 @@ class Leg(object):
 	# set_leg_position_thread
 	# abort
 	# do_set_servo_angle
-	def __init__(self, pwm, channels, leg_num):
+	def __init__(self, pwm: Pwm_Wrapper, channels: List[int], leg_num: int):
 
 		# unique ID, not actually used for much, just stores the leg_num
 		self.uid = leg_num
@@ -129,7 +133,7 @@ class Leg(object):
 		
 
 		self.SERVO_ANGLE_LIMITS = [[0,1],[0,1],[0,1]]
-		if(leg_num == ARM_L or leg_num == ARM_R):
+		if leg_num == ARM_L or leg_num == ARM_R:
 			# arm: out in, out in, up down
 			self.SERVO_ANGLE_LIMITS[TIP_SERVO] = [ARM_TIP_SERVO_OUT_ANGLE, ARM_TIP_SERVO_IN_ANGLE]
 			self.SERVO_ANGLE_LIMITS[MID_SERVO] = [ARM_MID_SERVO_OUT_ANGLE, ARM_MID_SERVO_IN_ANGLE]
@@ -145,15 +149,15 @@ class Leg(object):
 			
 
 		# declare these member variables, immediately have value overwritten...
-		self.curr_servo_angle = [-1, -1, -1]
+		self.curr_servo_angle = [-1.0, -1.0, -1.0]
 		self.curr_servo_pwm =   [-1, -1, -1]
 		
 		# ...this code should overwrite the "-1"s with sensible values on bootup
 		# NEEDS to use the non-thread versions
-		if(leg_num == ARM_L or leg_num == ARM_R):
+		if leg_num == ARM_L or leg_num == ARM_R:
 			# default position is with arms fully extended
 			self.set_leg_position(ARMS_ARM_TABLE["STRAIGHT_OUT"])
-		elif(leg_num == WAIST):
+		elif leg_num == WAIST:
 			self.set_servo_angle(90, WAIST_SERVO)
 		else:
 			# default position is 90-degree crouch
@@ -173,16 +177,17 @@ class Leg(object):
 
 
 	# conversion functions: use linear mapping from input to output
-	def angle_to_pwm(self, angle, servo):
+	def angle_to_pwm(self, angle: float, servo: int) -> int:
 		if servo < 0 or servo > 2:
 			print("ERR#1: INVALID SERVO INDEX! valid values are 0 to 2")
 			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
 			return INV_PARAM
-		return linear_map(self.SERVO_ANGLE_LIMITS[servo][0], self.SERVO_PWM_LIMITS[servo][0], 
+		r = linear_map(self.SERVO_ANGLE_LIMITS[servo][0], self.SERVO_PWM_LIMITS[servo][0],
 						self.SERVO_ANGLE_LIMITS[servo][1], self.SERVO_PWM_LIMITS[servo][1], 
 						angle)
+		return round(r)
 		
-	def pwm_to_angle(self, pwm, servo):
+	def pwm_to_angle(self, pwm: int, servo: int) -> float:
 		if servo < 0 or servo > 2:
 			print("ERR#2: INVALID SERVO INDEX! valid values are 0 to 2")
 			print("leg="+str(self.uid)+", servo="+str(servo)+", pwm="+str(pwm))
@@ -191,7 +196,7 @@ class Leg(object):
 						self.SERVO_PWM_LIMITS[servo][1], self.SERVO_ANGLE_LIMITS[servo][1], 
 						pwm)
 
-	def percent_to_angle(self, percent, servo):
+	def percent_to_angle(self, percent: float, servo: int) -> float:
 		# maps 0-100 to each servo's min and max angle values
 		if servo < 0 or servo > 2:
 			print("ERR#3: INVALID SERVO INDEX! valid values are 0 to 2")
@@ -202,15 +207,15 @@ class Leg(object):
 						percent)
 
 	# convert-then-set functions:
-	def set_servo_percent(self, percent, servo):
+	def set_servo_percent(self, percent: float, servo: int):
 		# convert and pass off to set_servo_angle
 		self.set_servo_angle(self.percent_to_angle(percent, servo), servo)
-	def set_servo_pwm(self, pwm, servo):
+	def set_servo_pwm(self, pwm: int, servo: int):
 		# convert and pass off to set_servo_angle
 		self.set_servo_angle(self.angle_to_pwm(pwm, servo), servo)
 
 	# the old-fashioned "do the thing" command: clamps value to safety limits, ensures it won't collide with any thread operations, and calls do_set_servo_angle
-	def set_servo_angle(self, angle, servo):
+	def set_servo_angle(self, angle: float, servo: int):
 		if servo < 0 or servo > 2:
 			# ensure servo index is valid
 			print("ERR#4: INVALID SERVO INDEX! valid values are 0 to 2")
@@ -231,7 +236,7 @@ class Leg(object):
 	# creates a temporary "leg position" object to give to the leg_position_thread function
 	# changes the given servo to the given position over the given time
 	# OTHER MOTORS (on this leg) CANNOT CHANGE DURING THIS TIME, to change multiple motors at a time use set_leg_position_thread
-	def set_servo_angle_thread(self, angle, servo, durr):
+	def set_servo_angle_thread(self, angle: float, servo: int, durr: float):
 		if servo < 0 or servo > 2:
 			# ensure servo index is valid
 			print("ERR#5: INVALID SERVO INDEX! valid values are 0 to 2")
@@ -248,7 +253,7 @@ class Leg(object):
 
 
 	# uses the "leg_position" objects, immediate set (no threading)
-	def set_leg_position(self, leg_position):
+	def set_leg_position(self, leg_position: Leg_Position):
 		for s in GROUP_ALL_SERVOS:
 			self.set_servo_angle(leg_position.list[s], s)
 
@@ -258,9 +263,8 @@ class Leg(object):
 	# adds frames to the frame queue (with lock)
 	# sets the "running" flag unconditionally (note: no harm in setting an already set flag)
 	# * thread will jump in with "do_set_servo_angle" when it is the correct time
-	def set_leg_position_thread(self, leg_position, durr):
+	def set_leg_position_thread(self, leg_position: Leg_Position, durr: float):
 		# assemble dest from the leg position
-		# TODO: add a time component to the leg position object? or make a new object type? or just build the dest like this? not sure how to best integrate/use this system
 		dest = [0, 0, 0]
 		
 		# safety checking for each motor
@@ -306,14 +310,14 @@ class Leg(object):
 	# internal-use-only function
 	# set the actual PWM and the internally-tracked position
 	# guarantees that the determined PWM value isn't too crazy
-	def do_set_servo_angle(self, angle, servo):
+	def do_set_servo_angle(self, angle: float, servo: int):
 		if servo < 0 or servo > 2:
 			# ensure servo index is valid
 			print("ERR#6: INVALID SERVO INDEX! valid values are 0 to 2")
 			print("leg="+str(self.uid)+", servo="+str(servo)+", angle="+str(angle))
 			return INV_PARAM
 		# convert to pwm
-		pwm_val = int(self.angle_to_pwm(angle, servo))
+		pwm_val = self.angle_to_pwm(angle, servo)
 		
 		if pwm_val < c_PWM_ABSOLUTE_MINIMUM or pwm_val > c_PWM_ABSOLUTE_MAXIMUM:
 			# guarantee somewhat-sensible PWM value
@@ -322,7 +326,7 @@ class Leg(object):
 			# TODO: raise an exception of some kind??
 			return INV_PARAM
 		
-		# # do the write out, with lock just to be safe
+		# do the write out, with lock just to be safe
 		with self._curr_pos_lock:
 			self.curr_servo_angle[servo] = angle
 			self.curr_servo_pwm[servo] = pwm_val
@@ -340,7 +344,7 @@ class Leg(object):
 class Rotator(Leg):
 	# internal-use-only function
 	# if servo is not WAIST_SERVO, then return & do nothing... otherwise call normal do_set_servo_angle()
-	def do_set_servo_angle(self, angle, servo):
+	def do_set_servo_angle(self, angle: float, servo: int):
 		if servo != WAIST_SERVO:
 			# print("ERR#10: INVALID PARAM")
 			return INV_PARAM
@@ -374,7 +378,7 @@ class Hex_Walker(object):
 	# synchronize
 	# abort
 	# + assorted "motion" functions
-	def __init__(self, rf_leg, rm_leg, rb_leg, lb_leg, lm_leg, lf_leg):
+	def __init__(self, rf_leg: Leg, rm_leg: Leg, rb_leg: Leg, lb_leg: Leg, lm_leg: Leg, lf_leg: Leg):
 		# create backup members permanently and explicitly tied to each leg
 		# currently not used but it couldn't hurt, really
 		self.leg0 = rf_leg
@@ -852,7 +856,7 @@ class Robot_Torso(object):
 	# set_waist_position
 	# do_set_torso_position
 	# + assorted "motion" functions
-	def __init__(self, right_arm, left_arm, rotator):
+	def __init__(self, right_arm: Leg, left_arm: Leg, rotator: Rotator):
 		# individual member variables
 		self.left_arm = left_arm
 		self.right_arm = right_arm

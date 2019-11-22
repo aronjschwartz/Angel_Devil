@@ -465,7 +465,7 @@ class Hex_Walker(object):
 				# if next_pose is a Hex_Walker_Position object, convert it to its id
 				next_pose_idx = next_pose if isinstance(next_pose, int) else next_pose.id
 				if next_pose_idx in HEX_WALKER_POSITIONS[self.current_pose].safe_moves:
-					self.set_hexwalker_position(next_pose_idx, masklist=masklist, durr=durr)
+					self.set_hexwalker_position(next_pose, masklist=masklist, durr=durr)
 					self.synchronize()
 				else:
 					print("ERR: invalid move set")

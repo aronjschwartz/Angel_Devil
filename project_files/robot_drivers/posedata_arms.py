@@ -34,8 +34,8 @@ class Arms_Position(object):
 		self.description = description
 		# technically its a dict and not a list but whatever its gotta use the same name as the other classes
 		self.list = dict()
-		self.list[ARM_L] = left_arm
-		self.list[ARM_R] = right_arm
+		self.list[ARM_L] = copy.deepcopy(left_arm)
+		self.list[ARM_R] = copy.deepcopy(right_arm)
 	
 	def getarml(self) -> Leg_Position:
 		return self.list[ARM_L]

@@ -28,12 +28,12 @@ class Hex_Walker_Position(object):
 		self.description = description
 		self.id = m_id
 		self.list = [None, None, None, None, None, None]
-		self.list[LEG_RF] = rf_pos
-		self.list[LEG_RM] = rm_pos
-		self.list[LEG_RB] = rb_pos
-		self.list[LEG_LB] = lb_pos
-		self.list[LEG_LM] = lm_pos
-		self.list[LEG_LF] = lf_pos
+		self.list[LEG_RF] = copy.deepcopy(rf_pos)
+		self.list[LEG_RM] = copy.deepcopy(rm_pos)
+		self.list[LEG_RB] = copy.deepcopy(rb_pos)
+		self.list[LEG_LB] = copy.deepcopy(lb_pos)
+		self.list[LEG_LM] = copy.deepcopy(lm_pos)
+		self.list[LEG_LF] = copy.deepcopy(lf_pos)
 
 	def getrf(self) -> Leg_Position:
 		return self.list[LEG_RF]

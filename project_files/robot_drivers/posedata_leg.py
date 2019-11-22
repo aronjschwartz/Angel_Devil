@@ -4,6 +4,7 @@ import copy
 class Leg_Position(object):
 	# TODO: once tip/rot servo values are swapped, swap their position in this arg list too
 	def __init__(self, tip_servo, mid_servo, rot_servo):
+		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
 		self.rot_servo = rot_servo
 		self.mid_servo = mid_servo
 		self.tip_servo = tip_servo
@@ -85,11 +86,11 @@ LEG_CROUCH_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(0, 135, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 180, 90),
 	
-	"CORN_OUT_LEFT":		Leg_Position(0, 125, 85),
-	"CORN_OUT_RIGHT":		Leg_Position(0, 125, 95),
+	"CORN_LEFT":		Leg_Position(0, 125, 85),
+	"CORN_RIGHT":		Leg_Position(0, 125, 95),
 	
-	"CORN_UP_OUT_LEFT":		Leg_Position(0, 175, 85),
-	"CORN_UP_OUT_RIGHT":	Leg_Position(0, 175, 95),
+	"CORN_UP_LEFT":		Leg_Position(0, 175, 85),
+	"CORN_UP_RIGHT":	Leg_Position(0, 175, 95),
 	
 	"SIDE_RIGHT":			Leg_Position(0, 125, 105),
 	"SIDE_LEFT":			Leg_Position(0, 125, 75),
@@ -122,6 +123,7 @@ LEG_TALL_ROTATION_TABLE = {
 	
 }
 
+# TODO: fine rotation table is obsolete, remove this
 LEG_TALL_FINE_ROTATION_TABLE = {
 	"NEUTRAL":			Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":		Leg_Position(0, 90, 90),
@@ -134,15 +136,16 @@ LEG_TALL_FINE_ROTATION_TABLE = {
 	
 }
 
+# TODO: duplicate neutral/up_neutral with corn_ and side_ names, for readability
 LEG_TALL_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(30, 45, 90),
 	"UP_NEUTRAL":			Leg_Position(0, 90, 90),
 	
-	"CORN_OUT_LEFT":		Leg_Position(35, 52, 80),
-	"CORN_OUT_RIGHT":		Leg_Position(35, 52, 100),
+	"CORN_LEFT":		Leg_Position(35, 52, 80),
+	"CORN_RIGHT":		Leg_Position(35, 52, 100),
 	
-	"CORN_UP_OUT_LEFT":		Leg_Position(0, 90, 80),
-	"CORN_UP_OUT_RIGHT":	Leg_Position(0, 90, 100),
+	"CORN_UP_LEFT":		Leg_Position(0, 90, 80),
+	"CORN_UP_RIGHT":	Leg_Position(0, 90, 100),
 	
 	"SIDE_RIGHT":			Leg_Position(25, 60, 130),
 	"SIDE_LEFT":			Leg_Position(25, 60, 50),
@@ -169,10 +172,13 @@ LEG_TALL_SIDE_MOVEMENT_TABLE = {
 
 
 # misc table
+# TODO: make neutral/up_neutral in the other movement tables all reference it in this table... only change it in one place!
 LEG_MISC_TABLE = {
+	"INIT":				Leg_Position(0, 90, 90),
+	"NEUTRAL": 			Leg_Position(30, 45, 90),
+	"UP_NEUTRAL": 		Leg_Position(0, 90, 90),
 	"BOUNCE":			Leg_Position(0, 75, 90),
 	"PULL_UP":			Leg_Position(0, 75, 90),
-	"INIT":				Leg_Position(0, 90, 90),
 	"STRAIGHT_OUT":		Leg_Position(90, 90, 90)
 	
 }

@@ -22,22 +22,3 @@ def clamp(value, lower, upper):
 # clamp where you dont know the relative order of a and b
 def bidirectional_clamp(val, a, b):
 	return clamp(val, a, b) if a < b else clamp(val, b, a)
-
-
-# input is angle 0-359, but only multiples of 60 are valid
-def get_front_from_direction(direction):
-	if(direction == 0):
-		return "5-0"
-	elif(direction == 60):
-		return "0-1"
-	elif(direction == 120):
-		return "1-2"
-	elif(direction == 180):
-		return "2-3"
-	elif(direction == 240):
-		return "3-4"
-	elif(direction == 300):
-		return "4-5"
-	else:
-		return "5-0"
-

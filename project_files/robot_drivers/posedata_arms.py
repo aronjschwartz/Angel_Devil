@@ -29,6 +29,7 @@ ARMS_ARM_TABLE = {
 # DOES NOT INCLUDE WAIST INFORMATION
 class Arms_Position(object):
 	def __init__(self, left_arm, right_arm, description="-"):
+		# TODO: URGENT! ELIMINATE THESE NAMED FIELDS BECAUSE CHANGES IN THE LIST ARE NOT REFLECTED IN THEM!
 		self.left_arm = left_arm
 		self.right_arm = right_arm
 		# NOTE: this list is not actually indexed with ARM_L/ARM_R... might want to change this to a dict?

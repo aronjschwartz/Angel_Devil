@@ -88,12 +88,12 @@ for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port
     elif color == "pink":
         if size == "small":
             leg_cmd = "walk"
-            leg_args = [1, 0]
+            leg_args = [1, DIR_F]
             torso_cmd = "none"
             torso_args = []
         elif size == "large":
             leg_cmd = "walk"
-            leg_args = [1, 180]
+            leg_args = [1, DIR_B]
             torso_cmd = "none"
             torso_args = []
     else:

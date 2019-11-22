@@ -12,13 +12,12 @@ LEFT = 1
 RIGHT = 2
 
 # direction codes
-# TODO: change code to use these 
-DIR_F =    0
-DIR_FR =  60
-DIR_FL = 120
-DIR_B =  180
-DIR_BR = 240
-DIR_BL = 300
+DIR_F =    0		# "5-0"
+DIR_FR =  60		# "0-1"
+DIR_BR = 120		# "1-2"
+DIR_B =  180		# "2-3"
+DIR_BL = 240		# "3-4"
+DIR_FL = 300		# "4-5"
 
 # return codes
 SUCCESS = 0

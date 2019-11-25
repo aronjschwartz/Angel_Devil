@@ -68,6 +68,7 @@ def get_xy_values(rho, theta):
 def process_image():
 	
 	img = cv2.VideoCapture(0)
+	ret, img = img.read()
 	#Resize the image for consistency
 	img = cv2.resize(img, (1200, 960))
 	#Display original image

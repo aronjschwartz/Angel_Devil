@@ -496,6 +496,7 @@ class Angel_Demon_Game():
 				self.turn_num +=1
 
 				if (self.rotation_correction == True):
+					input("Press any key when ready to correct rotation")
 					rotation_check_code = rotation_corrector.process_image()
 					print("Rotation code needed: ", str(rotation_check_code))
 					if (rotation_check_code < 0):
@@ -504,6 +505,7 @@ class Angel_Demon_Game():
 						hex_walker.rotate(rotation_check_code, LEFT)
 
 				if (self.forward_back_correction == True):
+					input("Press any key when ready to correct forward/back")
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
 					if (forward_back_code < 0):
@@ -676,6 +678,7 @@ class Angel_Demon_Game():
 				self.angel_turn = 1
 				self.turn_num +=1
 				if (self.rotation_correction == True):
+					input("Press any key when ready to correct rotation")
 					rotation_check_code = rotation_corrector.process_image()
 					print("Rotation code needed: ", str(rotation_check_code))
 					if (rotation_check_code < 0):
@@ -685,6 +688,7 @@ class Angel_Demon_Game():
 
 
 				if (self.forward_back_correction == True):
+					input("Press any key when ready to correct forward/back")
 					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
 					if (forward_back_code < 0):

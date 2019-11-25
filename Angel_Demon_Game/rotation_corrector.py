@@ -77,6 +77,7 @@ def process_image():
 	
 	#Resize the image for consistency
 	img = cv2.VideoCapture(0)
+	ret, img = img.read()
 	img = cv2.resize(img, (1200, 960))
 	#Display original image
 	#Crop the portion of the photo we care about

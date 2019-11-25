@@ -51,8 +51,9 @@ while(cmd != 0):
 	print("19 - fine rotate right")
 	print("20 - change speed")
 	print("21 - point better")
+	print("22 - twist-dance")
 
-	while(True):
+	while True:
 		r = input("Choose an option:")
 		try:
 			cmd = int(r)
@@ -63,74 +64,75 @@ while(cmd != 0):
 		# if given valid numeric input, break
 		break
 
-	if(cmd == 0):
+	if cmd == 0:
 		sys.exit()
-	if(cmd == 1):
+	if cmd == 1:
 		print("doing the monkey 5 times")
 		torso.monkey(5)
-	elif(cmd == 2):
+	elif cmd == 2:
 		print("waving to the left 3 times")
 		torso.wave(45, 3)
-	elif(cmd == 3):
+	elif cmd == 3:
 		print("walking one step forward")
 		hex_walker.walk(1, DIR_F)
-	elif(cmd == 4):
+	elif cmd == 4:
 		print("walking 4 steps forward")
 		hex_walker.walk(4, DIR_F)
-	elif(cmd == 5):
+	elif cmd == 5:
 		print("walking 1 step backward")
 		hex_walker.walk(1, DIR_B)
-	elif(cmd == 6):
+	elif cmd == 6:
 		print("walking 4 steps backward")
 		hex_walker.walk(4, DIR_B)
-	elif(cmd == 7):
+	elif cmd == 7:
 		print("walking 1 step at 120 degrees")
 		hex_walker.walk(1, DIR_BR)
-	elif(cmd == 8):
+	elif cmd == 8:
 		print("walking 4 steps at 120 degrees")
 		hex_walker.walk(4, DIR_BR)
-	elif(cmd == 9):
+	elif cmd == 9:
 		print("rotate left l step")
 		hex_walker.rotate(1, LEFT)
-	elif(cmd ==10):
+	elif cmd ==10:
 		print("rotate left 4 steps")
 		hex_walker.rotate(4, LEFT)
-	elif(cmd == 11):
+	elif cmd == 11:
 		print("rotate right 1 step")
 		hex_walker.rotate(1, RIGHT)
-	elif(cmd == 12):
+	elif cmd == 12:
 		print("roate right 4 step")
 		hex_walker.rotate(4, RIGHT)
-	elif(cmd == 13):
+	elif cmd == 13:
 		print("hand shake")
 		torso.hand_shake(90, 4)
-	elif(cmd == 14):
+	elif cmd == 14:
 		print("king kong")
 		torso.king_kong(90, 4)
-	elif(cmd == 15):
+	elif cmd == 15:
 		print("leg wave left")
 		hex_walker.leg_wave(LEFT, .1, 4)
-	elif(cmd == 16):
+	elif cmd == 16:
 		print("leg wave right")
 		hex_walker.leg_wave(RIGHT, .1, 4)
-	elif(cmd == 17):
+	elif cmd == 17:
 		print("bounce down")
 		hex_walker.bounce(.3, 4)
-	elif(cmd == 18):
+	elif cmd == 18:
 		print("fine rotate left l step")
 		hex_walker.fine_rotate(1, LEFT)
-	elif(cmd == 19):
+	elif cmd == 19:
 		print("fine rotate right 1 step")
 		hex_walker.fine_rotate(1, RIGHT)
-	elif(cmd == 20):
+	elif cmd == 20:
 		print("change speed")
 		s = input("new speed (float): ")
 		try:
 			f = float(s)
 			hex_walker.set_speed(f)
+			torso.set_speed(f)
 		except ValueError:
 			print("failed")
-	elif (cmd == 21):
+	elif cmd == 21:
 		print("better point")
 		s = input("point angle: ")
 		try:
@@ -138,5 +140,10 @@ while(cmd != 0):
 			torso.point_better(f)
 		except ValueError:
 			print("failed")
+	elif cmd == 22:
+		print("twist-dance")
+		# note: MUST call torso function before calling hex function
+		torso.twist_dance(.4, 3)
+		hex_walker.twist_dance(.4, 3)
 	else:
 		print("cmd not recognized")

@@ -643,8 +643,83 @@ class Hex_Walker(object):
 		self.set_hexwalker_position(TALL_NEUTRAL, durr=durr)
 		self.set_new_front(DIR_F)
 		self.synchronize()
-
-
+	
+	# assumes beginning in true neutral position
+	### true neutral -> Bhalf-raised -> {Asequence -> Ahalf-raised -> Bsequence -> Bhalf-raised}, repeat -> true neutral
+	# always begins with a "left step"... just means which legs are being moved forward first
+	# can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
+	# variable speed, number of steps, and distance per step
+	def crab_walk(self, num_steps, front=DIR_F, scale=1.0, durr=None):
+		if front not in [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]:
+			print("ERR: crab_walk() accepts only front = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
+			return INV_PARAM
+		if num_steps < 1:
+			print("ERR: crab_walk() accepts only num_steps >= 1")
+			return INV_PARAM
+		if scale <= 0.0 or scale > 2.0:
+			# todo: depends on actual motions of the legs
+			# basic walk moves legs by ?????
+			# i'll limit the scale to 2.0 so max turn is 30 or 150
+			print("ERR: crab_walk() accepts only scale = (0.0 - 2.0]")
+			return INV_PARAM
+		
+		# apply a new front so we can use the same walk cycle unmodified to walk in 6 different directions by just
+		# redefining which leg is which.
+		self.set_new_front(front)
+		if HW_MOVE_DEBUG:
+			print("crab_walk dir: " + str(front))
+		
+		# define positions to go through to get steps from a neutral legs up
+		# these all ultimately reference the LEG_TALL_MOVEMENT_TABLE in posedata_leg.py
+		# TODO: first, understand the current animation. then, improve it with full-range motion.
+		# start 			TALL_TRI_FRONT_NEUTRAL_BACK_UP_NEUTRAL
+		temp_left_step = [TALL_TRI_FRONT_CENTER_UP_OUT_BACK_NEUTRAL,
+						  TALL_TRI_FRONT_CENTER_OUT_BACK_UP_NEUTRAL,
+						  TALL_TRI_FRONT_BACKWARDS_BACK_UP_NEUTRAL,
+						  TALL_TRI_FRONT_BACKWARDS_BACK_NEUTRAL]
+		temp_right_step = [TALL_TRI_FRONT_UP_NEUTRAL_BACK_NEUTRAL,
+						   TALL_TRI_FRONT_UP_NEUTRAL_BACK_BACKWARDS,
+						   TALL_TRI_FRONT_NEUTRAL_BACK_BACKWARDS,
+						   TALL_TRI_FRONT_NEUTRAL_BACK_UP_NEUTRAL]
+		
+		# NEW: scale the "rot-servo" portion to produce fine-stepping behavior!
+		# TODO: test that this actually does good fine-stepping with old walk-cycle, its not as obvious as with the rotate cycle
+		temp_both = []
+		for pose_idx in temp_left_step + temp_right_step:  # combine the lists for easier iteration
+			pose = HEX_WALKER_POSITIONS[pose_idx].copy()  # dereference and copy
+			for l in pose.list:  # modify: for each leg in the hex-pose, scale the rot-servo around 90*
+				l.list[ROT_SERVO] = ((l.list[ROT_SERVO] - 90.) * scale) + 90.  # subtract 90, scale, add 90
+			temp_both.append(pose)  # store
+		# re-split the merged list
+		left_step = temp_both[:4]  # first half
+		right_step = temp_both[4:]  # second half
+		
+		
+		# begin walk sequence by lifting some of the legs: "half-raised neutral position"
+		# this is the pose at the end of a right-step or beginning of a left-step
+		self.set_hexwalker_position(TALL_TRI_FRONT_NEUTRAL_BACK_UP_NEUTRAL, durr=durr)
+		self.synchronize()
+		
+		last_step_right = True
+		for i in range(num_steps):
+			if last_step_right:
+				# this branch always runs first!!
+				# if last step was right, do a left
+				self.run_pose_list(left_step, durr=durr)
+				last_step_right = False
+			else:
+				# if last step was left, do a right
+				self.run_pose_list(right_step, durr=durr)
+				last_step_right = True
+			self.synchronize()
+		# cleanup
+		self.set_hexwalker_position(TALL_NEUTRAL, durr=durr)
+		self.set_new_front(DIR_F)
+		self.synchronize()
+	
+	
+	
+	
 	# to apply "stance" changes: set_hexwalker_position(), probably?
 	# also, create run_pose_list() without the synchronize() calls
 

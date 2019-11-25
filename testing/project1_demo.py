@@ -52,6 +52,7 @@ while(cmd != 0):
 	print("20 - change speed")
 	print("21 - point better")
 	print("22 - twist-dance")
+	print("23 - crab-walk")
 
 	while True:
 		r = input("Choose an option:")
@@ -145,5 +146,8 @@ while(cmd != 0):
 		# note: MUST call torso function before calling hex function
 		torso.twist_dance(.4, 3)
 		hex_walker.twist_dance(.4, 3)
+	elif cmd == 23:
+		print("walking 4 steps sideways")
+		hex_walker.crab_walk(4, DIR_F)
 	else:
 		print("cmd not recognized")

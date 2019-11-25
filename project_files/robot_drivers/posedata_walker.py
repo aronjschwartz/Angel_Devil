@@ -193,6 +193,21 @@ TALL_TRI_FINE_RIGHT_LEFT_LEFT_UP_RIGHT = 60
 # testing positions
 FRONT_LEGS_UP = 1001
 
+
+# possible hex_walker positions during a tripod "walk" cycle
+# TALL_NEUTRAL = 31
+NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL = 132
+NEW_RIGHT_BACK_LEFT_UP_FORWARD = 133
+NEW_RIGHT_BACK_LEFT_FORWARD = 134
+NEW_RIGHT_UP_BACK_LEFT_FORWARD = 135
+NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL = 136
+NEW_RIGHT_UP_FORWARD_LEFT_BACK = 137
+NEW_RIGHT_FORWARD_LEFT_BACK = 138
+NEW_RIGHT_FORWARD_LEFT_UP_BACK = 139
+# NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+
+
+
 # these are all defines as hex_walker_position(rf, rm, rr, lr, lm, lf)
 HEX_WALKER_POSITIONS = {
 	# Normal (standard height) walking positions the order that they need to execute
@@ -690,6 +705,8 @@ HEX_WALKER_POSITIONS = {
 							"tall neutral position",
 							),
 	
+	#################################################################
+	# original code
 	# 32
 	TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL:
 		Hex_Walker_Position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL,
@@ -824,6 +841,8 @@ HEX_WALKER_POSITIONS = {
 							"right is forward, left is up",
 							),
 	
+	#################################################################
+
 	# crouch rotation movements
 	# 40
 	TALL_TRI_RIGHT_RIGHT_LEFT_UP_LEFT:
@@ -1145,7 +1164,156 @@ HEX_WALKER_POSITIONS = {
 							Leg_Position(90, 180, 90),
 							[],
 							"front two legs are raised",
-							)
+							),
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	#################################################################
+	# modified animations
+	# 132
+	NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL:
+		Hex_Walker_Position(NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL,
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_NEUTRAL_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_NEUTRAL"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL_UP"],
+							[NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL,
+							 NEW_RIGHT_BACK_LEFT_UP_FORWARD,
+							 NEW_RIGHT_FORWARD_LEFT_UP_BACK,
+							 TALL_NEUTRAL
+							 ],
+							"right is neutral, left is up",
+							),
+	# 133
+	NEW_RIGHT_BACK_LEFT_UP_FORWARD:
+		Hex_Walker_Position(NEW_RIGHT_BACK_LEFT_UP_FORWARD,
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT_UP"],
+							[NEW_RIGHT_BACK_LEFT_UP_FORWARD,
+							 NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL,
+							 NEW_RIGHT_FORWARD_LEFT_UP_BACK,
+							 NEW_RIGHT_BACK_LEFT_FORWARD
+							 ],
+							"right neutral, left up",
+							),
+	# 134
+	NEW_RIGHT_BACK_LEFT_FORWARD:
+		Hex_Walker_Position(NEW_RIGHT_BACK_LEFT_FORWARD,
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT"],
+							[NEW_RIGHT_BACK_LEFT_FORWARD,
+							 NEW_RIGHT_UP_BACK_LEFT_FORWARD,
+							 NEW_RIGHT_BACK_LEFT_UP_FORWARD
+							 ],
+							"right is neutral, left is forward",
+							),
+	# 135
+	NEW_RIGHT_UP_BACK_LEFT_FORWARD:
+		Hex_Walker_Position(NEW_RIGHT_UP_BACK_LEFT_FORWARD,
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTIN"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_LEFT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_RIGHTOUT"],
+							[NEW_RIGHT_UP_BACK_LEFT_FORWARD,
+							 NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL,
+							 NEW_RIGHT_BACK_LEFT_FORWARD,
+							 ],
+							"right is up, left is forward",
+							),
+	# 136
+	NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL:
+		Hex_Walker_Position(NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL,
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_NEUTRAL"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_NEUTRAL_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_NEUTRAL"],
+							[NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL,
+							 NEW_RIGHT_UP_FORWARD_LEFT_BACK,
+							 NEW_RIGHT_UP_BACK_LEFT_FORWARD,
+							 TALL_NEUTRAL
+							 ],
+							"right is up, left is neutral",
+							),
+	# 137
+	NEW_RIGHT_UP_FORWARD_LEFT_BACK:
+		Hex_Walker_Position(NEW_RIGHT_UP_FORWARD_LEFT_BACK,
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN"],
+							[NEW_RIGHT_UP_FORWARD_LEFT_BACK,
+							 NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL,
+							 NEW_RIGHT_FORWARD_LEFT_BACK
+							 ],
+							"right is up, left is neutral",
+							),
+	# 138
+	NEW_RIGHT_FORWARD_LEFT_BACK:
+		Hex_Walker_Position(NEW_RIGHT_FORWARD_LEFT_BACK,
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN"],
+							[NEW_RIGHT_FORWARD_LEFT_BACK,
+							 NEW_RIGHT_UP_FORWARD_LEFT_BACK,
+							 NEW_RIGHT_FORWARD_LEFT_UP_BACK
+							 ],
+							"right is forward, left is neutral",
+							),
+	# 139
+	NEW_RIGHT_FORWARD_LEFT_UP_BACK:
+		Hex_Walker_Position(NEW_RIGHT_FORWARD_LEFT_UP_BACK,
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTOUT_UP"],
+							LEG_NEW_MOVEMENT_TABLE["SIDE_RIGHT"],
+							LEG_NEW_MOVEMENT_TABLE["CORN_LEFTIN_UP"],
+							[NEW_RIGHT_FORWARD_LEFT_UP_BACK,
+							 NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL,
+							 NEW_RIGHT_FORWARD_LEFT_BACK
+							 ],
+							"right is forward, left is up",
+							),
+	
+	###############################################################################################
+	
 }
 
 

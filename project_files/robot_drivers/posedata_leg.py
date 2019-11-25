@@ -177,7 +177,33 @@ LEG_TALL_MOVEMENT_TABLE = {
 	"SIDE_UP_LEFT":			Leg_Position(50, 80, 0)
 }
 
-# There's no center in because the mid motor is limited to 45 degrees 
+# step 1: build a better logical motion sequence
+# step 2: define the poses to make that sequence work
+LEG_NEW_MOVEMENT_TABLE = {
+	"SIDE_NEUTRAL": 		Leg_Position(90, 60, 30),
+	"SIDE_NEUTRAL_UP":		Leg_Position(90, 90, 0),
+	
+	"SIDE_RIGHT": 			Leg_Position(116, 53, 48),
+	"SIDE_RIGHT_UP": 		Leg_Position(116, 83, 18),
+	"SIDE_LEFT": 			Leg_Position(64, 53, 48),
+	"SIDE_LEFT_UP": 		Leg_Position(64, 83, 18),
+	
+	"CORN_NEUTRAL":			Leg_Position(90, 60, 30),
+	"CORN_NEUTRAL_UP":		Leg_Position(90, 90, 0),
+	
+	"CORN_LEFTIN": 			Leg_Position(55, 55, 10),
+	"CORN_LEFTIN_UP": 		Leg_Position(55, 90, 10),
+	"CORN_RIGHTIN": 		Leg_Position(125, 55, 10),
+	"CORN_RIGHTIN_UP": 		Leg_Position(125, 90, 10),
+	
+	"CORN_LEFTOUT": 		Leg_Position(75, 45, 70),
+	"CORN_LEFTOUT_UP": 		Leg_Position(75, 75, 40),
+	"CORN_RIGHTOUT": 		Leg_Position(105, 45, 70),
+	"CORN_RIGHTOUT_UP": 	Leg_Position(105, 75, 40)
+	
+}
+
+# There's no center in because the mid motor is limited to 45 degrees
 LEG_TALL_SIDE_MOVEMENT_TABLE = {
 	"NEUTRAL":				Leg_Position(90, 45, 30),
 	"UP_NEUTRAL":			Leg_Position(90, 90, 0),

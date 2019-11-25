@@ -29,6 +29,9 @@ LEG_THREAD_DEBUG = False
 
 USE_THREADING = True
 
+# TODO: make the new walk cycle not shit, then actually use it
+USE_NEW_WALK_CYCLE = False
+
 
 
 # Leg_Position class defined in posedata_leg.py
@@ -582,15 +585,27 @@ class Hex_Walker(object):
 		# define positions to go through to get steps from a neutral legs up
 		# these all ultimately reference the LEG_TALL_MOVEMENT_TABLE in posedata_leg.py
 		# TODO: first, understand the current animation. then, improve it with full-range motion.
-		# start 			TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
-		temp_left_step = [	TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
-							TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
-							TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
-							TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
-		temp_right_step = [	TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
-							TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
-							TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
-							TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
+		if USE_NEW_WALK_CYCLE:
+			# TODO: make this walk cycle not be shit
+			# start 			NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+			temp_left_step = [	NEW_RIGHT_BACK_LEFT_UP_FORWARD,
+								NEW_RIGHT_BACK_LEFT_FORWARD,
+								NEW_RIGHT_UP_BACK_LEFT_FORWARD,
+								NEW_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+			temp_right_step = [	NEW_RIGHT_UP_FORWARD_LEFT_BACK,
+								NEW_RIGHT_FORWARD_LEFT_BACK,
+								NEW_RIGHT_FORWARD_LEFT_UP_BACK,
+								NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
+		else:
+			# start 			TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL
+			temp_left_step = [TALL_TRI_RIGHT_BACK_LEFT_UP_FORWARD,
+							  TALL_TRI_RIGHT_BACK_LEFT_FORWARD,
+							  TALL_TRI_RIGHT_UP_BACK_LEFT_FORWARD,
+							  TALL_TRI_RIGHT_UP_NEUTRAL_LEFT_NEUTRAL]
+			temp_right_step = [TALL_TRI_RIGHT_UP_FORWARD_LEFT_BACK,
+							   TALL_TRI_RIGHT_FORWARD_LEFT_BACK,
+							   TALL_TRI_RIGHT_FORWARD_LEFT_UP_BACK,
+							   TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
 		
 		# NEW: scale the "rot-servo" portion to produce fine-stepping behavior!
 		temp_both = []
@@ -605,7 +620,10 @@ class Hex_Walker(object):
 
 		# begin walk sequence by lifting some of the legs: "half-raised neutral position"
 		# this is the pose at the end of a right-step or beginning of a left-step
-		self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)
+		if USE_NEW_WALK_CYCLE:
+			self.set_hexwalker_position(NEW_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)
+		else:
+			self.set_hexwalker_position(TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL, durr=durr)
 		self.synchronize()
 
 		last_step_right = True

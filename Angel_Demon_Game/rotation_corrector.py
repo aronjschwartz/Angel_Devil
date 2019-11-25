@@ -149,5 +149,6 @@ def process_image():
 	
 	else:
 		rotation_correction_code = "NONE"
+	cv2.imwrite("Mask_pic_roto,jpg", result_upper)
 	return rotation_correction_code
 			

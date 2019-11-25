@@ -193,6 +193,14 @@ TALL_TRI_FINE_RIGHT_LEFT_LEFT_UP_RIGHT = 60
 # testing positions
 FRONT_LEGS_UP = 1001
 
+# twist-dance:
+# TALL_NEUTRAL = 31
+TWIST_DANCE_LEFT = 90
+# TALL_NEUTRAL = 31
+TWIST_DANCE_RIGHT = 91
+# TALL_NEUTRAL = 31
+
+
 
 # possible hex_walker positions during a tripod "walk" cycle
 # TALL_NEUTRAL = 31
@@ -1166,22 +1174,33 @@ HEX_WALKER_POSITIONS = {
 							"front two legs are raised",
 							),
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	# twist-dance positions
+	TWIST_DANCE_LEFT:
+		Hex_Walker_Position(TWIST_DANCE_LEFT,
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							LEG_MISC_TABLE["TWIST_RIGHT"],
+							[TALL_NEUTRAL,
+							 TWIST_DANCE_LEFT,
+							 TWIST_DANCE_RIGHT],
+							"each leg twists right so the bot seems to turn left",
+							),
+	TWIST_DANCE_RIGHT:
+		Hex_Walker_Position(TWIST_DANCE_RIGHT,
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							LEG_MISC_TABLE["TWIST_LEFT"],
+							[TALL_NEUTRAL,
+							 TWIST_DANCE_LEFT,
+							 TWIST_DANCE_RIGHT],
+							"each leg twists left so the bot seems to turn right",
+							),
 	
 	
 	

@@ -608,6 +608,7 @@ class Hex_Walker(object):
 							   TALL_TRI_RIGHT_NEUTRAL_LEFT_UP_NEUTRAL]
 		
 		# NEW: scale the "rot-servo" portion to produce fine-stepping behavior!
+		# TODO: test that this actually does good fine-stepping with old walk-cycle, its not as obvious as with the rotate cycle
 		temp_both = []
 		for pose_idx in temp_left_step + temp_right_step:		# combine the lists for easier iteration
 			pose = HEX_WALKER_POSITIONS[pose_idx].copy()		# dereference and copy
@@ -825,17 +826,17 @@ class Hex_Walker(object):
 					# pull_up = (60, 75, 90), tip above horizontal
 					# normal neutral = (120, 90, 90)
 					# crouch neutral = (45, 135, 90)
-					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, durr=speed)
 					self.synchronize()
 					# tall neutral = (120, 45, 90)
-					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, durr=speed)
 			if(direction == LEFT):
 				reverselist = list(GROUP_ALL_LEGS)
 				reverselist.reverse()
 				for n in reverselist:
-					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, speed)
+					self.do_set_hexwalker_position(LEG_MISC_TABLE["PULL_UP"], n, durr=speed)
 					self.synchronize()
-					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, speed)
+					self.do_set_hexwalker_position(LEG_TALL_MOVEMENT_TABLE["NEUTRAL"], n, durr=speed)
 		# one last synchronize() for the final movement to complete
 		self.synchronize()
 
@@ -843,10 +844,21 @@ class Hex_Walker(object):
 	# tea-bag
 	def bounce(self, wait, repetitions):
 		for i in range(0, repetitions):
-			self.set_hexwalker_position(TALL_TRI_BOUNCE_DOWN, wait)
+			self.set_hexwalker_position(TALL_TRI_BOUNCE_DOWN, durr=wait)
 			self.synchronize()
-			self.set_hexwalker_position(TALL_NEUTRAL, wait)
+			self.set_hexwalker_position(TALL_NEUTRAL, durr=wait)
 			self.synchronize()
+
+
+	# twist-dance
+	# NOTE: one does block, so this should be called AFTER the torso function is called
+	def twist_dance(self, speed, repetitions):
+		for i in range(repetitions):
+			self.set_hexwalker_position(TWIST_DANCE_LEFT, durr=speed)
+			self.set_hexwalker_position(TALL_NEUTRAL, durr=speed)
+			self.set_hexwalker_position(TWIST_DANCE_RIGHT, durr=speed)
+			self.set_hexwalker_position(TALL_NEUTRAL, durr=speed)
+		self.synchronize()
 
 
 	def do_nothing(self):
@@ -1048,7 +1060,15 @@ class Robot_Torso(object):
 	def look(self):
 		self.set_torso_position(ARMS_LOOKING, 90)
 		self.synchronize()
-
+	
+	# twist in the opposite direction of the base, so the torso remains mostly stationary
+	# NOTE: does not call synchronize(), just puts frames in the queue and returns!!! let synchronize() be called in the walker function!!
+	def twist_dance(self, speed, repetitions):
+		for i in range(repetitions):
+			self.set_waist_position(110, durr=speed)
+			self.set_waist_position(90, durr=speed)
+			self.set_waist_position(70, durr=speed)
+			self.set_waist_position(90, durr=speed)
 
 	# point with left arm or right arm in the specified direction, then hold
 	def point(self, hand, direction):

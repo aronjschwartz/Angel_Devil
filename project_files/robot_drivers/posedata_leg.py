@@ -134,9 +134,24 @@ LEG_CROUCH_MOVEMENT_TABLE = {
 # 	"TUCK_LEFT":		Leg_Position(0, 0, 0)
 # }
 
+# misc table
+# TODO: make neutral/up_neutral in the other movement tables all reference it in this table... only change it in one place!
+LEG_MISC_TABLE = {
+	"NEUTRAL": 			Leg_Position(90, 45, 30),
+	"UP_NEUTRAL": 		Leg_Position(90, 90, 0),
+	"BOUNCE": 			Leg_Position(90, 75, 0),
+	"PULL_UP": 			Leg_Position(90, 75, 0),
+	
+	"TWIST_LEFT": 		Leg_Position(70, 45, 50),
+	"TWIST_RIGHT": 		Leg_Position(110, 45, 50),
+	
+	"STRAIGHT_OUT": 	Leg_Position(90, 90, 90),
+	"INIT": 			Leg_Position(90, 90, 0)
+}
+
 LEG_TALL_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(90, 45, 30),
-	"UP_NEUTRAL":		Leg_Position(90, 90, 0),
+	"NEUTRAL":			LEG_MISC_TABLE["NEUTRAL"],
+	"UP_NEUTRAL":		LEG_MISC_TABLE["UP_NEUTRAL"],
 	
 	"RIGHT":			Leg_Position(120, 45, 30),
 	"UP_RIGHT":			Leg_Position(120, 90, 0),
@@ -145,6 +160,7 @@ LEG_TALL_ROTATION_TABLE = {
 	"UP_LEFT":			Leg_Position(60, 90, 0)
 	
 }
+
 
 # TODO: fine rotation table is obsolete, remove this
 LEG_TALL_FINE_ROTATION_TABLE = {
@@ -159,10 +175,11 @@ LEG_TALL_FINE_ROTATION_TABLE = {
 	
 }
 
+
 # TODO: duplicate neutral/up_neutral with corn_ and side_ names, for readability
 LEG_TALL_MOVEMENT_TABLE = {
-	"NEUTRAL":				Leg_Position(90, 45, 30),
-	"UP_NEUTRAL":			Leg_Position(90, 90, 0),
+	"NEUTRAL":			LEG_MISC_TABLE["NEUTRAL"],
+	"UP_NEUTRAL":		LEG_MISC_TABLE["UP_NEUTRAL"],
 	
 	"CORN_LEFT":		Leg_Position(80, 52, 35),
 	"CORN_RIGHT":		Leg_Position(100, 52, 35),
@@ -177,8 +194,9 @@ LEG_TALL_MOVEMENT_TABLE = {
 	"SIDE_UP_LEFT":			Leg_Position(50, 80, 0)
 }
 
-# step 1: build a better logical motion sequence
-# step 2: define the poses to make that sequence work
+# step 1: build a better logical motion sequence, done
+# step 2: define the poses to make that sequence work, WIP
+# this is assuming the default position is 90/60/30, which would require most of the other existing motions to be changed...
 LEG_NEW_MOVEMENT_TABLE = {
 	"SIDE_NEUTRAL": 		Leg_Position(90, 60, 30),
 	"SIDE_NEUTRAL_UP":		Leg_Position(90, 90, 0),
@@ -205,8 +223,8 @@ LEG_NEW_MOVEMENT_TABLE = {
 
 # There's no center in because the mid motor is limited to 45 degrees
 LEG_TALL_SIDE_MOVEMENT_TABLE = {
-	"NEUTRAL":				Leg_Position(90, 45, 30),
-	"UP_NEUTRAL":			Leg_Position(90, 90, 0),
+	"NEUTRAL":				LEG_MISC_TABLE["NEUTRAL"],
+	"UP_NEUTRAL":			LEG_MISC_TABLE["UP_NEUTRAL"],
 	
 	"SIDE_OUT_LEFT":		Leg_Position(65, 50, 30),
 	"SIDE_OUT_RIGHT":		Leg_Position(115, 50, 30),
@@ -217,19 +235,6 @@ LEG_TALL_SIDE_MOVEMENT_TABLE = {
 	"CENTER_OUT":			Leg_Position(90, 45, 30),
 	
 	"CENTER_UP_OUT":		Leg_Position(90, 70, 10),
-}
-
-
-# misc table
-# TODO: make neutral/up_neutral in the other movement tables all reference it in this table... only change it in one place!
-LEG_MISC_TABLE = {
-	"INIT":				Leg_Position(90, 90, 0),
-	"NEUTRAL": 			Leg_Position(90, 45, 30),
-	"UP_NEUTRAL": 		Leg_Position(90, 90, 0),
-	"BOUNCE":			Leg_Position(90, 75, 0),
-	"PULL_UP":			Leg_Position(90, 75, 0),
-	"STRAIGHT_OUT":		Leg_Position(90, 90, 90)
-	
 }
 
 

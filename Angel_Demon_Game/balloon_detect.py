@@ -1,7 +1,3 @@
-# TODO: add comments to document
-# TODO: clean up code
-# TODO: make code more readable? add more debug/visual features?
-
 import sys
 sys.path.append("../project_files/robot_drivers/")
 
@@ -10,11 +6,9 @@ import cv2
 import math
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
-
 
 # in_to_pixels function
 # DESCRIPTION:
@@ -45,6 +39,8 @@ class color_detector:
     #   (input) object_width: The width of the object you are searching for in inches
     #   (input) pi_camera:  boolean value that indicates whether a pi camera is being used or a webcam is being used.
     #                       (True = pi camera v2.1, False = webcam)
+    #   (input) testing: boolean to indicate if the code is for testing/calibration purposes, will only run torso
+    #                    and arms (True = only run torso and arms for testing, False = running with game or full robot)
     #   (method) TAG: string that associates print statements with the method
     #   (class) self.print_statements: saves the input print_statements value as a class variable
     #   (class) self.which_color: saves the input which_color value as a class variable
@@ -53,26 +49,31 @@ class color_detector:
     #   (class) self.object_width_in: saves the input object_width value as a class variable
     #   (class) self.object_width_pixels: indicates the focal length of the camera in pixels (hard-coded for pi camera)
     #   (class) self.focal_length_pixels: indicates the focal length of the camera in inches
-    def __init__(self, print_statements, headless, which_color, object_width, pi_camera):
+    def __init__(self, print_statements, headless, which_color, object_width, pi_camera, testing):
 
         TAG = "INIT: "
 
+        # setting class variables to the initialization input variables
         self.print_statements = print_statements
         self.which_color = which_color
         self.pi_camera = pi_camera
+        self.testing = testing
         self.headless_mode = headless
         self.object_width_in = object_width
         self.object_width_pixels = in_to_pixels(object_width)
-        self.focal_length_pixels = 1126.85714  # for pi camera v2.1
+        self.focal_length_pixels = 1126.85714  # currently setup for pi camera v2.1
         self.set_color_bounds()
         self.get_camera_properties()
-        pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-        larm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[ARM_L], ARM_L)  # 6
-        rot = hwd.Rotator(pwm_bot, PWM_CHANNEL_ARRAY[WAIST], WAIST)  # 8
-        pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-        rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R)  # 7
 
-        self.torso = hwd.Robot_Torso(rarm, larm, rot)
+        # if only using the torso and arms for testing reasons
+        if self.testing:
+            # initialize arms and torso
+            pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+            larm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[ARM_L], ARM_L)
+            rot = hwd.Rotator(pwm_bot, PWM_CHANNEL_ARRAY[WAIST], WAIST)
+            pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+            rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R)
+            self.torso = hwd.Robot_Torso(rarm, larm, rot)
 
         if self.print_statements: print(TAG + "color_detector class successfully created")
 
@@ -193,36 +194,52 @@ class color_detector:
 
         # if using a PI camera
         if self.pi_camera:
+            # start capturing image frames using the pi camera
             camera = PiCamera()
             camera.resolution = (1080, 720)
             camera.framerate = 60
             rawCapture = PiRGBArray(camera, size=(1080, 720))
 
+            # for each frame
             for frame_value in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+                # convert image to array
                 frame = frame_value.array
+                # convert from BGR to HSV format
                 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                # only keep the colors within the specified color range
                 mask = cv2.inRange(hsv, self.lower_bound, self.upper_bound)
+                # getting how many pixels are within color range
                 counts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+                # indicating the middle of the camera on the image
                 cv2.line(frame, (self.camera_center_x, self.camera_center_y - 10),
                          (self.camera_center_x, self.camera_center_y + 10), (0, 0, 255), 2)
                 cv2.line(frame, (self.camera_center_x - 10, self.camera_center_y),
                          (self.camera_center_x + 10, self.camera_center_y), (0, 0, 255), 2)
-
+                # if there is at least one colored pixel
                 if len(counts) > 0:
+                    # get the area of the rectangle using contours
                     total_area = max(counts, key=cv2.contourArea)
+                    # get the bounds of the rectangle
                     self.get_bounding_rect(total_area)
+                    # draw rectangle on frame
                     cv2.rectangle(frame, (self.rect_x_start, self.rect_y_start),
                                   (self.rect_x_start + self.rect_width, self.rect_y_start + self.rect_height),
                                   (0, 255, 0), 2)
+                    # calculate how far rectangle is from center
                     center_rect = self.distance_to_center()
+                    # draw line on frame between center of rectangle and center of frame
                     cv2.line(frame, (center_rect[0], center_rect[1]), (self.camera_center_x, self.camera_center_y),
                              (0, 0, 255), 2)
+                    # draw circle on frame which indicates center of rectangle
                     frame = cv2.circle(frame, (center_rect[0], center_rect[1]), 5, (255, 0, 0), -1)
+                    # calculate how far object is away
                     self.distance_camera_to_object()
+                    # put text on frame indicating distance and correction angles
                     cv2.putText(frame, "Distance: " + str(round(self.distance_to_object, 2)) + " in.", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
                     cv2.putText(frame, self.get_correction(), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                                 cv2.LINE_AA)
+                    # take average distance, x correction angles and y correction angles of 10 different frame
                     if 10 < count:
                         self.average_distance = sum(distances) / len(distances)
                         self.average_x_correct = sum(x_correct) / len(x_correct)
@@ -241,35 +258,49 @@ class color_detector:
 
                 rawCapture.truncate(0)
 
-        # if using a web camera
+        # if using a webcam
         else:
             cap = cv2.VideoCapture(0)
 
             while True:
+                # read a frame
                 _, frame = cap.read()
+                # convert frame from BRG to HSV
                 hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                # mask frame for color
                 mask = cv2.inRange(hsv, self.lower_bound, self.upper_bound)
+                # determine how many pixels are within color range
                 counts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+                # indicate where center of the image is
                 cv2.line(frame, (self.camera_center_x, self.camera_center_y - 10),
                          (self.camera_center_x, self.camera_center_y + 10), (0, 0, 255), 2)
                 cv2.line(frame, (self.camera_center_x - 10, self.camera_center_y),
                          (self.camera_center_x + 10, self.camera_center_y), (0, 0, 255), 2)
-
+                # if there is a colored object within bounds
                 if len(counts) > 0:
+                    # get area of object
                     total_area = max(counts, key=cv2.contourArea)
+                    # determine bounds of rectangle
                     self.get_bounding_rect(total_area)
+                    # draw rectangle on frame outlining object
                     cv2.rectangle(frame, (self.rect_x_start, self.rect_y_start),
                                   (self.rect_x_start + self.rect_width, self.rect_y_start + self.rect_height),
                                   (0, 255, 0), 2)
+                    # calculate the center of the object
                     center_rect = self.distance_to_center()
+                    # draw line on frame from center of image to center of rectangle
                     cv2.line(frame, (center_rect[0], center_rect[1]), (self.camera_center_x, self.camera_center_y),
                              (0, 0, 255), 2)
+                    # draw circle to indicate center of rectangle
                     frame = cv2.circle(frame, (center_rect[0], center_rect[1]), 5, (255, 0, 0), -1)
+                    # calculate distance to object
                     self.distance_camera_to_object()
+                    # put text on frame indicating distance and correction angles
                     cv2.putText(frame, "Distance: " + str(round(self.distance_to_object, 2)) + " in.", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
                     cv2.putText(frame, self.get_correction(), (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                                 cv2.LINE_AA)
+                    # take average distance, x correction angles and y correction angles of 10 different frame
                     if 10 < count:
                         self.average_distance = sum(distances) / len(distances)
                         self.average_x_correct = sum(x_correct) / len(x_correct)
@@ -285,29 +316,31 @@ class color_detector:
                 if not self.headless_mode:
                     cv2.imshow('frame', frame)
 
+            # release cammera
             cap.release()
             cv2.destroyAllWindows()
 
-        # TODO: return angle here?
-
-        if self.horizontal_correction > 90:
-            #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
-            self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
-            self.torso.left_arm.set_servo_angle(45, MID_SERVO)
-            self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
-            self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
-            self.torso.right_arm.set_servo_angle(90, MID_SERVO)
-            self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
-            self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
-        elif self.horizontal_correction < 90:
-            #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
-            self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
-            self.torso.right_arm.set_servo_angle(45, MID_SERVO)
-            self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
-            self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
-            self.torso.left_arm.set_servo_angle(90, MID_SERVO)
-            self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
-            self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
+        # if testing, send commands to torso
+        if self.testing:
+            # use arm depending on horizontal correctino angle
+            if self.horizontal_correction > 90:
+                #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
+                self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
+                self.torso.left_arm.set_servo_angle(45, MID_SERVO)
+                self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
+                self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
+                self.torso.right_arm.set_servo_angle(90, MID_SERVO)
+                self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
+                self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
+            elif self.horizontal_correction < 90:
+                #self.torso.right_arm.set_servo_angle(self.vertical_correction, ROT_SERVO)
+                self.torso.right_arm.set_servo_angle(90, ROT_SERVO)
+                self.torso.right_arm.set_servo_angle(45, MID_SERVO)
+                self.torso.right_arm.set_servo_angle(90, TIP_SERVO)
+                self.torso.left_arm.set_servo_angle(90, ROT_SERVO)
+                self.torso.left_arm.set_servo_angle(90, MID_SERVO)
+                self.torso.left_arm.set_servo_angle(90, TIP_SERVO)
+                self.torso.rotator.set_servo_angle(self.horizontal_correction, WAIST_SERVO)
 
         if self.print_statements: print(TAG + "detector has finished")
 
@@ -327,6 +360,7 @@ class color_detector:
 
         TAG = "GET_BOUNDING_REC: "
 
+        # get bounding rectangle parameters and save within instance of class
         (self.rect_x_start, self.rect_y_start, self.rect_width, self.rect_height) = cv2.boundingRect(area)
 
         if self.print_statements: print(TAG + "obtained bounding rectangle")
@@ -350,12 +384,15 @@ class color_detector:
         TAG = "DISTANCE_TO_CENTER: "
         center_rect = []
 
-        # TODO: is there a reason to return the values or can we just set them to the class?  could be easier?
-
+        # get the x coordinate of the middle of middle of the rectangle
         x_middle = int((self.rect_width) / 2 - 1 + self.rect_x_start)
+        # get the y coordinate of the middle of middle of the rectangle
         y_middle = int((self.rect_height) / 2 - 1 + self.rect_y_start)
+        # get the vertical offset between center of image and center of rectangle
         self.y_offset = self.camera_center_y - y_middle
+        # get the horizontal offset between center of image and center of rectangle
         self.x_offset = self.camera_center_x - x_middle
+        # package middle values into list for easy use later
         center_rect.append(x_middle)
         center_rect.append(y_middle)
 
@@ -376,6 +413,7 @@ class color_detector:
 
         TAG = "DISTANCE_CAMERA_TO_OBJECT: "
 
+        # distance to object in inches
         self.distance_to_object = ((self.object_width_in) * (self.focal_length_pixels)) / (self.rect_width)
 
         if self.print_statements: print(TAG + "distance from camera to object has been determined")
@@ -394,12 +432,11 @@ class color_detector:
     #   (return) offset_string: formatted string that includes the offset angles
     def get_correction(self):
 
-        # TODO: check to see if angles are correct
-        # TODO: convert angle to be between 0 and 180 degrees
-
         TAG = "GET_CORRECTION: "
 
+        # calculate how the angle from the the center of the image to the center of the rectangle in the x direction
         self.x_offset_angle = round(math.atan2(self.x_offset, self.distance_to_object) * (180 / math.pi), 2)
+        # calculate how the angle from the the center of the image to the center of the rectangle in the y direction
         self.y_offset_angle = round(math.atan2(self.y_offset, self.distance_to_object) * (180 / math.pi), 2)
         offset_string = "X: {} | Y: {}".format(self.x_offset_angle, self.y_offset_angle)
 
@@ -407,44 +444,36 @@ class color_detector:
 
         return offset_string
 
-    # check_balloon method
+    # convert_angle method
     #
     # DESCRIPTION:
-    #   Determines if the identified object has the characteristics of a balloon.
+    #   Converts the correction angle determined in the get_correction method to an angle value that corresponds with
+    #   the hexapod drivers.
     #
     # ATTRIBUTES:
     #   (method) TAG: string that associates print statements with the method
-    #   (method) percent_difference: the difference in size between the height and width of the object
-    def check_balloon(self):
-
-        # TODO: do we need this? should we add more checking parameters?
-
-        TAG = "CHECK_BALLOON: "
-
-        percent_difference = abs(self.rect_width - self.rect_height) / 100
-
-        if percent_difference > 0.6:
-            print("not balloon")
-        else:
-            print("balloon")
-
-        if self.print_statements: print(TAG + "object has been identified as a balloon or not")
-
+    #   (function) max_angle: the vertical angle from the center of the image to the top of the image
+    #   (class) self.horizontal_correction: converted horizontal angle that works with robot movement drivers
+    #   (class) self.vertical_correction: converted vertical angle that works with robot movement drivers
     def convert_angle(self):
+
+        TAG = "CONVERT_ANGLE: "
+
+        # calculate angle from middle of image to top of image
         max_angle = math.atan2(self.camera_height_pixels,self.distance_to_object)*(180 / math.pi)
-
-        # x angle: negative = right, positive = left
-        # y angle: positive = up, negative = down
-
-        # TODO: horizontal angle is from 30 to 150 not 0 to 180, possibly some calibration is in store?
+        # correct vertical angle
         self.horizontal_correction = 90 - self.average_x_correct
+        # correct horizontal angle
         self.vertical_correction = 90 + (self.average_y_correct)*(90/max_angle)
 
+        # horizontal angle is limited by torso rotation which is between 30 and 150
         if 30 >= self.horizontal_correction:
             self.horizontal_correction = 30
         elif self.horizontal_correction >= 150:
             self.horizontal_correction = 150
 
+        if self.print_statements: print(TAG + "converted correction angle to angle recognized by hexapod drivers")
 
-my_tester = color_detector(False, True, 'b', 7, True)
+
+my_tester = color_detector(False, True, 'b', 7, True, True)
 my_tester.run_detector()

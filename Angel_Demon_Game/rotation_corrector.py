@@ -142,8 +142,8 @@ def process_image():
 		true_angle = (radians*180)/(math.pi)
 		rotation_correction_code = interpret_angle_for_rotation_code(true_angle)
 		
-		#cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)
-		#cv2.imwrite('upper_' + str(file_count) + '.jpg',result_upper)
+		cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)
+		cv2.imwrite('upper_result' + '.jpg',result_upper)
 			
 	#print("File: ", str(file), " analysis: Rotation correction: ", str(rotation_correction_code), " Forward/Back code: ", forward_back_code) 
 	

@@ -120,13 +120,15 @@ def process_image():
 			
 		avg_rho = float(rho_sum/len(lower_rhos))
 		avg_line_parameters = get_xy_values(avg_rho, avg_theta)
-		y1 = avg_line_parameters[1]		
+		x1 = avg_line_parameters[0]
+		y1 = avg_line_parameters[1]
+		x2 = avg_line_parameters[2]
 		y2 = avg_line_parameters[3]
 		avg_y = float((y1 + y2)/2)
 		forward_back_code = interpret_y_for_forward_back_code(avg_y)
 	
-		#cv2.line(result_lower,(x1, y1),(x2, y2),(0,0,255),2)
-		#cv2.imwrite('lower_' + str(file_count) + '.jpg',result_lower)
+		cv2.line(result_lower,(x1, y1),(x2, y2),(0,0,255),2)
+		cv2.imwrite('lower_result' + '.jpg',result_lower)
 		
 	else:
 		forward_back_code = -1

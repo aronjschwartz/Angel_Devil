@@ -93,8 +93,8 @@ class Angel_Demon_Game():
 		self.game_grid[self.game_height - 1][0] = "BOT"
 
 		#Booleans for correction modes
-		self.rotation_correction = False
-		self.forward_back_correction = False
+		self.rotation_correction = True
+		self.forward_back_correction = True
 		self.voice = Voice(12)
 
 
@@ -499,19 +499,23 @@ class Angel_Demon_Game():
 					input("Press any key when ready to correct rotation")
 					rotation_check_code = rotation_corrector.process_image()
 					print("Rotation code needed: ", str(rotation_check_code))
-					if (rotation_check_code < 0):
-						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-					elif(rotation_check_code > 0):
-						hex_walker.rotate(rotation_check_code, LEFT)
+					if (rotation_check_code != "NONE"):
+					
+						if (rotation_check_code < 0):
+							hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+						elif(rotation_check_code > 0):
+							hex_walker.rotate(rotation_check_code, LEFT)
+
 
 				if (self.forward_back_correction == True):
 					input("Press any key when ready to correct forward/back")
-					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
-					if (forward_back_code < 0):
-						hex_walker.walk(1, DIR_B)
-					elif(forward_back_code > 0):
-						hex_walker.rotate(1, 0)
+					forward_back_code = forward_back_corrector.process_image()
+					if (forward_back_code != "NONE"):
+						if (forward_back_code < 0):
+							hex_walker.walk(1, DIR_B)
+						elif(forward_back_code > 0):
+							hex_walker.rotate(1, 0)
 
 				if (self.turn_num == self.max_turns):
 					print("MAX TURNS REACHED, Angel wins!!")
@@ -681,20 +685,23 @@ class Angel_Demon_Game():
 					input("Press any key when ready to correct rotation")
 					rotation_check_code = rotation_corrector.process_image()
 					print("Rotation code needed: ", str(rotation_check_code))
-					if (rotation_check_code < 0):
-						hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-					elif(rotation_check_code > 0):
-						hex_walker.rotate(rotation_check_code, LEFT)
+					if (rotation_check_code != "NONE"):
+					
+						if (rotation_check_code < 0):
+							hex_walker.rotate(-1*(rotation_check_code), RIGHT)
+						elif(rotation_check_code > 0):
+							hex_walker.rotate(rotation_check_code, LEFT)
 
 
 				if (self.forward_back_correction == True):
 					input("Press any key when ready to correct forward/back")
-					forward_back_code = forward_back_corrector.process_image()
 					print("Forward/back code needed: ", str(forward_back_code))
-					if (forward_back_code < 0):
-						hex_walker.walk(1, DIR_B)
-					elif(forward_back_code > 0):
-						hex_walker.rotate(1, 0)
+					forward_back_code = forward_back_corrector.process_image()
+					if (forward_back_code != "NONE"):
+						if (forward_back_code < 0):
+							hex_walker.walk(1, DIR_B)
+						elif(forward_back_code > 0):
+							hex_walker.rotate(1, 0)
 
 				#Running out of turns is automatic win for the angel
 				if (self.turn_num == self.max_turns):

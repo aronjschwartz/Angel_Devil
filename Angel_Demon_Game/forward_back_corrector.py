@@ -79,7 +79,7 @@ def process_image():
 	
 	#y range, x range for cropping
 
-	lower_cropped = img[height-600:height, width_fourth:width - width_fourth]
+	lower_cropped = img[0:height, width_fourth:width - width_fourth]
 	
 	#Set filter bounds to all blue colors
 	lower_bound = np.array([100,0,0])
@@ -131,7 +131,7 @@ def process_image():
 		cv2.imwrite('lower_result' + '.jpg',result_lower)
 		
 	else:
-		forward_back_code = -1
+		forward_back_code = "NONE"
 		
 
 	return forward_back_code

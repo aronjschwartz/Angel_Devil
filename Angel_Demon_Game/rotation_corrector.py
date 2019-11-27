@@ -87,7 +87,7 @@ def process_image():
 	
 	#y range, x range for cropping
 	#Top portion used for rotation adjustment
-	upper_cropped = img[0:height-400, width_fourth:width - width_fourth]
+	upper_cropped = img[0:height, width_fourth:width - width_fourth]
 	
 	
 	#Set filter bounds to all blue colors
@@ -107,7 +107,7 @@ def process_image():
 	maxLineGap = 30
 
 	#Apply the hough lines transform to the canny results
-	lines_upper = cv2.HoughLines(edges_upper,1,np.pi/180,40,minLineLength,maxLineGap)
+	lines_upper = cv2.HoughLines(edges_upper,1,np.pi/180,20,minLineLength,maxLineGap)
 	
 	#Upper crop line parameter lists
 	horizontals_upper = []
@@ -149,6 +149,6 @@ def process_image():
 	
 	else:
 		rotation_correction_code = "NONE"
-	cv2.imwrite("Mask_pic_roto,jpg", result_upper)
+	
 	return rotation_correction_code
 			

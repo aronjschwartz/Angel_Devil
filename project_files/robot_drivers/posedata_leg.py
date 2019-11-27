@@ -162,20 +162,6 @@ LEG_TALL_ROTATION_TABLE = {
 }
 
 
-# TODO: fine rotation table is obsolete, remove this
-LEG_TALL_FINE_ROTATION_TABLE = {
-	"NEUTRAL":			Leg_Position(90, 45, 30),
-	"UP_NEUTRAL":		Leg_Position(90, 90, 0),
-	
-	"RIGHT":			Leg_Position(92, 45, 30),
-	"UP_RIGHT":			Leg_Position(92, 90, 0),
-	
-	"LEFT":				Leg_Position(88, 45, 30),
-	"UP_LEFT":			Leg_Position(89, 90, 0)
-	
-}
-
-
 # TODO: duplicate neutral/up_neutral with corn_ and side_ names, for readability
 LEG_TALL_MOVEMENT_TABLE = {
 	"NEUTRAL":			LEG_MISC_TABLE["NEUTRAL"],

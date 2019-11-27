@@ -649,7 +649,10 @@ class Hex_Walker(object):
 	# always begins with a "left step"... just means which legs are being moved forward first
 	# can end after left-step (if num_steps=odd) or right-step (if num_steps=even)
 	# variable speed, number of steps, and distance per step
-	def crab_walk(self, num_steps, front=DIR_F, scale=1.0, durr=None):
+	def crab_walk(self, num_steps, direction, front=DIR_F, scale=1.0, durr=None):
+		if not (direction == LEFT or direction == RIGHT):
+			print("ERR: crab_walk() accepts only direction = (LEFT or RIGHT)")
+			return INV_PARAM
 		if front not in [DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR]:
 			print("ERR: crab_walk() accepts only front = (DIR_F, DIR_FL, DIR_FR, DIR_B, DIR_BL, DIR_BR)")
 			return INV_PARAM
@@ -663,6 +666,10 @@ class Hex_Walker(object):
 			print("ERR: crab_walk() accepts only scale = (0.0 - 2.0]")
 			return INV_PARAM
 		
+		# implement direction-changing by reversing the direction of the robot
+		if direction == RIGHT:
+			front = (front + 180) % 360
+			
 		# apply a new front so we can use the same walk cycle unmodified to walk in 6 different directions by just
 		# redefining which leg is which.
 		self.set_new_front(front)

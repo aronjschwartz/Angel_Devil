@@ -1032,7 +1032,8 @@ class Robot_Torso(object):
 	## takes a list of indices within ARMS_POSITIONS array, along with the waist-rotations to use for each.
 	# sets arms and waist at same time, waits until each change is done with synchronize()
 	# previously do_moveset(self, positions, rotations, sleeps, repetitions):
-	def do_moveset(self, position_indices, rotations, repeat=1, masklist=GROUP_ALL_LEGS, durr=None):
+	# TODO: convert this to accept indices or objects to allow for dynamic modificaiton of poses
+	def do_moveset(self, position_indices, rotations, repeat=1, masklist=GROUP_ALL_ARMS, durr=None):
 		if len(position_indices) != len(rotations):
 			print("ERR: len(position_indices) != len(rotations)")
 			return INV_PARAM

@@ -1172,13 +1172,13 @@ class Robot_Torso(object):
 			# use left arm to point: dynamically create the leg-pose to have the angle i want
 			armspos = ARMS_POSITIONS[ARMS_POINTING_FWD_LEFT].copy()
 			# translate direction=[180=back, 270=left, 360=fwd] to [180=back, 90=out, 0=fwd]
-			armspos.left_arm.list[MID_SERVO] = (-(direction-180))+180
+			armspos.arm_l.list[MID_SERVO] = (-(direction-180))+180
 			self.set_arms_position(armspos)
 		else:
 			# use right arm to point
 			armspos = ARMS_POSITIONS[ARMS_POINTING_FWD_RIGHT].copy()
 			# translate direction=[0=fwd, 90=right, 180=back] to [0=fwd, 90=out, 180=back], no translation
-			armspos.right_arm.list[MID_SERVO] = direction
+			armspos.arm_r.list[MID_SERVO] = direction
 			self.set_arms_position(armspos)
 		self.synchronize()
 

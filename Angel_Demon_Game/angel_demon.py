@@ -45,6 +45,20 @@ torso = hwd.Robot_Torso(rarm, larm, rot)
 
 stab_angle = 150
 
+
+# calibration stuff: assuming speed = 0.1
+# fine-steps per 90:
+ROTATE_FINESTEPS_PER_90 = 22
+ROTATE_STEPS_PER_90 = 5
+WALK_STEPS_PER_SQUARE = 13
+
+
+
+
+
+
+
+
 class Voice:
     def __init__(self, voice_num):
         self.tts = pyttsx3.init()
@@ -495,23 +509,25 @@ class Angel_Demon_Game():
 				self.angel_turn = 0
 				self.turn_num +=1
 
-				if (self.rotation_correction == True):
+				if self.rotation_correction == True:
 					input("Press any key when ready to correct rotation")
-					rotation_check_code = rotation_corrector.process_image()
-					print("Rotation code needed: ", str(rotation_check_code))
-					if (rotation_check_code != "NONE"):
-					
-						if (rotation_check_code < 0):
-							hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-						elif(rotation_check_code > 0):
-							hex_walker.rotate(rotation_check_code, LEFT)
+					rotation_correction_angle = rotation_corrector.process_image()
+					print("Rotation needed: ", str(rotation_correction_angle))
+					if rotation_correction_angle is not None:
+						if rotation_correction_angle < 0:
+							direction = RIGHT
+						else:
+							direction = LEFT
+						# ratio: 22 fine-steps = 90%
+						num_correction_steps = (ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90
+						hex_walker.fine_rotate(num_correction_steps, direction)
 
 
 				if (self.forward_back_correction == True):
 					input("Press any key when ready to correct forward/back")
 					print("Forward/back code needed: ", str(forward_back_code))
 					forward_back_code = forward_back_corrector.process_image()
-					if (forward_back_code != "NONE"):
+					if (forward_back_code != None):
 						if (forward_back_code < 0):
 							hex_walker.walk(1, DIR_B)
 						elif(forward_back_code > 0):
@@ -681,23 +697,24 @@ class Angel_Demon_Game():
 
 				self.angel_turn = 1
 				self.turn_num +=1
-				if (self.rotation_correction == True):
+				if self.rotation_correction:
 					input("Press any key when ready to correct rotation")
-					rotation_check_code = rotation_corrector.process_image()
-					print("Rotation code needed: ", str(rotation_check_code))
-					if (rotation_check_code != "NONE"):
-					
-						if (rotation_check_code < 0):
-							hex_walker.rotate(-1*(rotation_check_code), RIGHT)
-						elif(rotation_check_code > 0):
-							hex_walker.rotate(rotation_check_code, LEFT)
-
-
+					rotation_correction_angle = rotation_corrector.process_image()
+					print("Rotation angle needed: ", str(rotation_correction_angle))
+					if rotation_correction_angle is not None:
+						if rotation_correction_angle < 0:
+							direction = RIGHT
+						else:
+							direction = LEFT
+						# ratio: 22 fine-steps = 90%
+						num_correction_steps = (ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90
+						hex_walker.fine_rotate(num_correction_steps, direction)
+				
 				if (self.forward_back_correction == True):
 					input("Press any key when ready to correct forward/back")
 					print("Forward/back code needed: ", str(forward_back_code))
 					forward_back_code = forward_back_corrector.process_image()
-					if (forward_back_code != "NONE"):
+					if (forward_back_code != None):
 						if (forward_back_code < 0):
 							hex_walker.walk(1, DIR_B)
 						elif(forward_back_code > 0):

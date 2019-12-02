@@ -25,21 +25,22 @@ def findIntersection(x1,y1,x2,y2,x3,y3,x4,y4):
 
 #This function takes an angle and outputs a recommend correction code
 def interpret_angle_for_rotation_code(angle):
-
-	correction_code = 0
-	if ((angle >= 5) and (angle < 15.0)):
-		correction_code = 1 # move left
-	elif ((angle >= 15.0) and (angle < 30.0)):
-		correction_code = 2
-	elif ((angle >= 30.0) and (angle < 45.0)):
-		correction_code = 3
-	elif ((angle < -5) and (angle > -15.0)):
-		correction_code = -1 #move right
-	elif ((angle <= -15.0) and (angle > -30.0)):
-		correction_code = -2
-	elif ((angle <= -30.0) and (angle > -45.0)):
-		correction_code = -3
-	return correction_code
+	
+	return angle
+	# correction_code = 0
+	# if ((angle >= 5) and (angle < 15.0)):
+	# 	correction_code = 1 # move left
+	# elif ((angle >= 15.0) and (angle < 30.0)):
+	# 	correction_code = 2
+	# elif ((angle >= 30.0) and (angle < 45.0)):
+	# 	correction_code = 3
+	# elif ((angle < -5) and (angle > -15.0)):
+	# 	correction_code = -1 #move right
+	# elif ((angle <= -15.0) and (angle > -30.0)):
+	# 	correction_code = -2
+	# elif ((angle <= -30.0) and (angle > -45.0)):
+	# 	correction_code = -3
+	# return correction_code
 
 def get_rho_theta_horizontals(hough_lines_list):
 	horizontals = []
@@ -116,7 +117,9 @@ def process_image():
 	rho_list_upper = []
 	
 	#Only analyze images with valid lines found, should be always
-	if len(lines_upper) > 1:
+	if len(lines_upper) <= 1:
+		return None
+	else:
 		upper_horizontals, upper_thetas, upper_rhos = get_rho_theta_horizontals(lines_upper)
 
 		angle_sum = 0.0
@@ -140,15 +143,11 @@ def process_image():
 		#Calculate the angle with respect to horizontal for the average line
 		radians = math.atan2(y1-y2, x2-x1)
 		true_angle = (radians*180)/(math.pi)
-		rotation_correction_code = interpret_angle_for_rotation_code(true_angle)
+		# rotation_correction_code = interpret_angle_for_rotation_code(true_angle)
 		
 		cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)
 		cv2.imwrite('upper_result' + '.jpg',result_upper)
+		return true_angle
 			
 	#print("File: ", str(file), " analysis: Rotation correction: ", str(rotation_correction_code), " Forward/Back code: ", forward_back_code) 
 	
-	else:
-		rotation_correction_code = "NONE"
-	
-	return rotation_correction_code
-			

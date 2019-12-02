@@ -148,6 +148,6 @@ while(cmd != 0):
 		hex_walker.twist_dance(.4, 3)
 	elif cmd == 23:
 		print("walking 4 steps sideways")
-		hex_walker.crab_walk(4, DIR_F)
+		hex_walker.crab_walk(4, RIGHT, DIR_F)
 	else:
 		print("cmd not recognized")

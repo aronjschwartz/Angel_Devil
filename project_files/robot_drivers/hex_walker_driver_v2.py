@@ -666,8 +666,10 @@ class Hex_Walker(object):
 			print("ERR: crab_walk() accepts only scale = (0.0 - 2.0]")
 			return INV_PARAM
 		
+		# current bad walk-cycle is walking in direction of front-right leg, rotate this to be the right leg
+		front = (front + 60) % 360
 		# implement direction-changing by reversing the direction of the robot
-		if direction == RIGHT:
+		if direction == LEFT:
 			front = (front + 180) % 360
 			
 		# apply a new front so we can use the same walk cycle unmodified to walk in 6 different directions by just

@@ -1,8 +1,8 @@
 
 #**********************************************************************************************
-#*														                                      *
-#*	   Program: Implements the Angel/Demon game with a quantum-based decision making          *
-#*														                                      *
+#*																							  *
+#*	   Program: Implements the Angel/Demon game with a quantum-based decision making		  *
+#*																							  *
 #**********************************************************************************************
 
 import sys
@@ -37,6 +37,7 @@ rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R) #7
 
 #create the hex walker
 hex_walker = hwd.Hex_Walker(rf, rm, rb, lb, lm, lf)
+hex_walker.set_speed(0.1)
 # create the torso
 torso = hwd.Robot_Torso(rarm, larm, rot)
 
@@ -60,14 +61,14 @@ WALK_STEPS_PER_SQUARE = 13
 
 
 class Voice:
-    def __init__(self, voice_num):
-        self.tts = pyttsx3.init()
-        voices = self.tts.getProperty('voices')
-        self.tts.setProperty('voice', voices[voice_num].id)
+	def __init__(self, voice_num):
+		self.tts = pyttsx3.init()
+		voices = self.tts.getProperty('voices')
+		self.tts.setProperty('voice', voices[voice_num].id)
 
-    def say(self, message):
-        self.tts.say(message)
-        self.tts.runAndWait()
+	def say(self, message):
+		self.tts.say(message)
+		self.tts.runAndWait()
 
 class Angel_Demon_Game():
 
@@ -99,7 +100,7 @@ class Angel_Demon_Game():
 
 		#Initialize the bomb starting position
 		self.bomb_y_pos = 2
-		self.bomb_x_pos = 0
+		self.bomb_x_pos = 2
 		self.game_grid[self.bomb_y_pos][self.bomb_x_pos] = "BOMB"
 
 
@@ -108,7 +109,7 @@ class Angel_Demon_Game():
 
 		#Booleans for correction modes
 		self.rotation_correction = True
-		self.forward_back_correction = True
+		self.forward_back_correction = False
 		self.voice = Voice(12)
 
 
@@ -146,7 +147,7 @@ class Angel_Demon_Game():
 								break
 							else:
 								#Otherwise just move the bot and status remains at "0"
-								self.game_grid[i-1][j] = "BOT"
+								self.game_grid[i-1][j] = "BOT "
 								done = True
 								break
 						#Capture index errors for code safety
@@ -342,25 +343,25 @@ class Angel_Demon_Game():
 
 		elif (move_code == "UP"):
 			print("Move up")
-			hex_walker.walk(20, DIR_F)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
 
 		elif (move_code == "UR"):
 			print("Move up right")
-			hex_walker.walk(20, DIR_F)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
 			time.sleep(0.1)
-			hex_walker.rotate(5, RIGHT)
+			hex_walker.rotate(ROTATE_STEPS_PER_90, RIGHT)
 			time.sleep(0.1)
-			hex_walker.walk(20, DIR_F)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
 			time.sleep(0.1)
-			hex_walker.rotate(5, LEFT)
+			hex_walker.rotate(ROTATE_STEPS_PER_90, LEFT)
 
 		elif (move_code == "R"):
 			print("Move right")
-			hex_walker.rotate(5, RIGHT)
+			hex_walker.rotate(ROTATE_STEPS_PER_90, RIGHT)
 			time.sleep(0.1)
-			hex_walker.walk(20, DIR_F)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
 			time.sleep(0.1)
-			hex_walker.rotate(5,LEFT)
+			hex_walker.rotate(ROTATE_STEPS_PER_90,LEFT)
 
 	#Primary function to run the angel demon game
 	def run_game(self):
@@ -519,8 +520,9 @@ class Angel_Demon_Game():
 						else:
 							direction = LEFT
 						# ratio: 22 fine-steps = 90%
-						num_correction_steps = (ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90
-						hex_walker.fine_rotate(num_correction_steps, direction)
+						num_correction_steps = abs(round((ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90))
+						if num_correction_steps != 0:
+							hex_walker.fine_rotate(num_correction_steps, direction)
 
 
 				if (self.forward_back_correction == True):
@@ -707,8 +709,9 @@ class Angel_Demon_Game():
 						else:
 							direction = LEFT
 						# ratio: 22 fine-steps = 90%
-						num_correction_steps = (ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90
-						hex_walker.fine_rotate(num_correction_steps, direction)
+						num_correction_steps = abs(round((ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90))
+						if num_correction_steps != 0:
+							hex_walker.fine_rotate(num_correction_steps, direction)
 				
 				if (self.forward_back_correction == True):
 					input("Press any key when ready to correct forward/back")

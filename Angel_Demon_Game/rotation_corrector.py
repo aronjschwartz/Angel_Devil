@@ -142,7 +142,7 @@ def process_image():
 		
 		#Calculate the angle with respect to horizontal for the average line
 		radians = math.atan2(y1-y2, x2-x1)
-		true_angle = (radians*180)/(math.pi)
+		true_angle = math.degrees(radians)
 		# rotation_correction_code = interpret_angle_for_rotation_code(true_angle)
 		
 		cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)

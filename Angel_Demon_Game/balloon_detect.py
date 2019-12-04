@@ -49,7 +49,7 @@ class color_detector:
     #   (class) self.object_width_in: saves the input object_width value as a class variable
     #   (class) self.object_width_pixels: indicates the focal length of the camera in pixels (hard-coded for pi camera)
     #   (class) self.focal_length_pixels: indicates the focal length of the camera in inches
-    def __init__(self, print_statements, headless, which_color, object_width, pi_camera, testing):
+    def __init__(self, print_statements, headless, which_color, object_width, pi_camera, testing, hex_walker_object):
 
         TAG = "INIT: "
 
@@ -64,16 +64,17 @@ class color_detector:
         self.focal_length_pixels = 1126.85714  # currently setup for pi camera v2.1
         self.set_color_bounds()
         self.get_camera_properties()
+        self.torso = hex_walker_object
 
         # if only using the torso and arms for testing reasons
-        if self.testing:
-            # initialize arms and torso
-            pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
-            larm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[ARM_L], ARM_L)
-            rot = hwd.Rotator(pwm_bot, PWM_CHANNEL_ARRAY[WAIST], WAIST)
-            pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
-            rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R)
-            self.torso = hwd.Robot_Torso(rarm, larm, rot)
+        # if self.testing:
+        #     # initialize arms and torso
+        #     pwm_bot = pw.Pwm_Wrapper(PWM_ADDR_BOTTOM, PWM_FREQ)
+        #     larm = hwd.Leg(pwm_bot, PWM_CHANNEL_ARRAY[ARM_L], ARM_L)
+        #     rot = hwd.Rotator(pwm_bot, PWM_CHANNEL_ARRAY[WAIST], WAIST)
+        #     pwm_top = pw.Pwm_Wrapper(PWM_ADDR_TOP, PWM_FREQ)
+        #     rarm = hwd.Leg(pwm_top, PWM_CHANNEL_ARRAY[ARM_R], ARM_R)
+        #     self.torso = hwd.Robot_Torso(rarm, larm, rot)
 
         if self.print_statements: print(TAG + "color_detector class successfully created")
 
@@ -475,5 +476,5 @@ class color_detector:
         if self.print_statements: print(TAG + "converted correction angle to angle recognized by hexapod drivers")
 
 
-my_tester = color_detector(False, True, 'b', 7, True, True)
-my_tester.run_detector()
+# my_tester = color_detector(False, True, 'b', 7, True, True)
+# my_tester.run_detector()

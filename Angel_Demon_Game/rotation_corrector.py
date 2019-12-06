@@ -12,6 +12,8 @@ from scipy import ndimage
 # TODO: seriously clean up and optimize and comment the code
 # TODO: add debug switches
 # TODO: consider how to transform from 2d angle with in the image to 3d spacial rotation of robot
+# TODO: implement some way of sorting the slopes of the detected lines and searching for groupings, to determine outliers
+# TODO: implement some way of sorting the lines by their vertical height and building groups, to hopefully find two clusters and discard the top cluster
 
 
 #Display image with cv

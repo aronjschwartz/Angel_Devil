@@ -54,15 +54,15 @@ def main():
 		input("Press any key when ready to correct rotation")
 		rotation_correction_angle = rotation_corrector.process_image()
 		print("Rotation needed: ", str(rotation_correction_angle))
-		if rotation_correction_angle is not None:
-			if rotation_correction_angle < 0:
-				direction = RIGHT
-			else:
-				direction = LEFT
-			# ratio: 22 fine-steps = 90%
-			num_correction_steps = abs(round((ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90))
-			if num_correction_steps != 0:
-				hex_walker.fine_rotate(num_correction_steps, direction)
+		# if rotation_correction_angle is not None:
+		# 	if rotation_correction_angle < 0:
+		# 		direction = RIGHT
+		# 	else:
+		# 		direction = LEFT
+		# 	# ratio: 22 fine-steps = 90%
+		# 	num_correction_steps = abs(round((ROTATE_FINESTEPS_PER_90 * rotation_correction_angle) / 90))
+		# 	if num_correction_steps != 0:
+		# 		hex_walker.fine_rotate(num_correction_steps, direction)
 
 
 

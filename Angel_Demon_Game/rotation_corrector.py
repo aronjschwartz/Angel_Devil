@@ -7,6 +7,13 @@ import os
 import cv2
 from scipy import ndimage
 
+
+
+# TODO: seriously clean up and optimize and comment the code
+# TODO: add debug switches
+# TODO: consider how to transform from 2d angle with in the image to 3d spacial rotation of robot
+
+
 #Display image with cv
 def display_image(image):
 	cv2.imshow("TEST", image)
@@ -179,7 +186,7 @@ def process_image():
 		
 		#Calculate the angle with respect to horizontal for the average line
 		radians = math.atan2(y1-y2, x2-x1)
-		true_angle = (radians*180)/(math.pi)
+		true_angle = math.degrees(radians)
 		# rotation_correction_code = interpret_angle_for_rotation_code(true_angle)
 		
 		cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)

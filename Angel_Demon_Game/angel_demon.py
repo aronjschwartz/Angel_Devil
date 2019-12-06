@@ -18,6 +18,8 @@ import rotation_corrector
 import forward_back_corrector
 import pyttsx3
 
+import balloon_detect
+
 import pwm_wrapper as pw
 import hex_walker_driver_v2 as hwd
 from hex_walker_constants import *
@@ -54,10 +56,8 @@ ROTATE_STEPS_PER_90 = 5
 WALK_STEPS_PER_SQUARE = 13
 
 
-
-
-
-
+balloon_det_obj = balloon_detect.color_detect()
+    
 
 
 class Voice:
@@ -362,6 +362,17 @@ class Angel_Demon_Game():
 			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
 			time.sleep(0.1)
 			hex_walker.rotate(ROTATE_STEPS_PER_90,LEFT)
+            
+    def balloon_detect_movement(self, correction_boolean):
+        if(correction_boolean):
+            hex_walker.rotate(ROTATE_STEPS_PER_90, RIGHT)
+            balloon_det_obj.run_detect()
+            time.sleep(0.1)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)
+        else:
+            balloon_det_obj.run_detect()
+            time.sleep(0.1)
+			hex_walker.walk(WALK_STEPS_PER_SQUARE, DIR_F)         
 
 	#Primary function to run the angel demon game
 	def run_game(self):
@@ -420,8 +431,8 @@ class Angel_Demon_Game():
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle, 1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle, 1)
+							self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -435,8 +446,8 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("R")
+							#torso.stab(stab_angle ,1)
+							self.balloon_detect_movement(True)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -463,8 +474,8 @@ class Angel_Demon_Game():
 						move_status = self.move_board_bot_up()
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle ,1)
+							self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -484,8 +495,8 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle ,1)
+							self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -498,8 +509,8 @@ class Angel_Demon_Game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
-								torso.stab(stab_angle ,1)
-								self.move_hexapod("R")
+								#torso.stab(stab_angle ,1)
+								self.balloon_detect_movement(True)
 								self.devil_victory = True
 								break
 							elif(move_status == 2):
@@ -575,8 +586,9 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("R")
+							#torso.stab(stab_angle ,1)
+							#self.move_hexapod("R")
+                            self.balloon_detect_movement(True)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -592,8 +604,9 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle,1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle,1)
+							#self.move_hexapod("UP")
+                            self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -606,8 +619,9 @@ class Angel_Demon_Game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
-								torso.stab(stab_angle ,1)
-								self.move_hexapod("R")
+								#torso.stab(stab_angle ,1)
+								#self.move_hexapod("R")
+                                self.balloon_detect_movement(True)
 								self.devil_victory = True
 								break
 							elif(move_status == 2):
@@ -623,8 +637,9 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle ,1)
+							#self.move_hexapod("UP")
+                            self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -655,8 +670,9 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("UP")
+							#torso.stab(stab_angle ,1)
+							#self.move_hexapod("UP")
+                            self.balloon_detect_movement(False)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):
@@ -669,8 +685,9 @@ class Angel_Demon_Game():
 
 							#Return code of '1' means we hit the bomb
 							if (move_status == 1):
-								torso.stab(stab_angle ,1)
-								self.move_hexapod("R")
+								#torso.stab(stab_angle ,1)
+								#self.move_hexapod("R")
+                                self.balloon_detect_movement(True)
 								self.devil_victory = True
 								break
 							elif(move_status == 2):
@@ -684,8 +701,9 @@ class Angel_Demon_Game():
 
 						#Return code of '1' means we hit the bomb
 						if (move_status == 1):
-							torso.stab(stab_angle ,1)
-							self.move_hexapod("R")
+							#torso.stab(stab_angle ,1)
+							#self.move_hexapod("R")
+                            self.balloon_detect_movement(True)
 							self.devil_victory = True
 							break
 						elif(move_status == 2):

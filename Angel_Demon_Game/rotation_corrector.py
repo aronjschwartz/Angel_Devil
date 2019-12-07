@@ -15,6 +15,8 @@ from scipy import ndimage
 # TODO: implement some way of sorting the slopes of the detected lines and searching for groupings, to determine outliers
 # TODO: implement some way of sorting the lines by their vertical height and building groups, to hopefully find two clusters and discard the top cluster
 
+# TODO: investigate how using a black-and-white image is handled differently by Canny than a blue-and-black image
+
 
 #Display image with cv
 def display_image(image):
@@ -105,14 +107,16 @@ def process_image():
 	
 	
 	#Set filter bounds to all blue colors
-	lower_bound = np.array([100,0,0])
+	lower_bound = np.array([30,0,0])
 	upper_bound = np.array([225,80,80])
 	
 	#Apply the blue mask to the cropped image
 	blue_mask_upper = cv2.inRange(upper_cropped, lower_bound, upper_bound)
 	
-	#Display the mask combined with the cropped image
-	result_upper =  cv2.bitwise_and(upper_cropped, upper_cropped, mask=blue_mask_upper)
+	#reduce non-blue stuff to be black, keep blue as blue
+	# result_upper =  cv2.bitwise_and(upper_cropped, upper_cropped, mask=blue_mask_upper)
+	# reduce the image to black and white
+	result_upper = np.stack((blue_mask_upper,blue_mask_upper,blue_mask_upper), axis=2)
 	
 	cv2.imwrite('masked_image' + '.jpg',result_upper)
 	

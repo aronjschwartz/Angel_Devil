@@ -476,5 +476,5 @@ class color_detector:
         if self.print_statements: print(TAG + "converted correction angle to angle recognized by hexapod drivers")
 
 
-# my_tester = color_detector(False, True, 'b', 7, True, True)
+# my_tester = color_detector(False, True, 'b', 7, True, True, walker_object)
 # my_tester.run_detector()

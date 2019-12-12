@@ -145,7 +145,7 @@ def process_image():
 		return None
 	elif len(lines_upper) <= 1:
 		return None
-	elif:
+	elif len(lines_upper) > 1:
 		#Translate lines
 		upper_horizontals, upper_thetas, upper_rhos = get_rho_theta_horizontals(lines_upper, cdstP)
 		

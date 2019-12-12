@@ -65,7 +65,8 @@ class color_detector:
         self.set_color_bounds()
         self.get_camera_properties()
         self.torso = hex_walker_object
-
+        self.torso.left_arm.set_servo_angle(0, TIP_SERVO)
+        self.torso.right_arm.set_servo_angle(0, TIP_SERVO)
         # if only using the torso and arms for testing reasons
         # if self.testing:
         #     # initialize arms and torso

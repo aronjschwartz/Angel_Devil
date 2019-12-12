@@ -62,9 +62,9 @@ stab_angle = 150
 
 # calibration stuff: assuming speed = 0.1
 # fine-steps per 90:
-ROTATE_FINESTEPS_PER_90 = 22
-ROTATE_STEPS_PER_90 = 5
-WALK_STEPS_PER_SQUARE = 13
+ROTATE_FINESTEPS_PER_90 = 27
+ROTATE_STEPS_PER_90 = 4
+WALK_STEPS_PER_SQUARE = 12
 
 
 balloon_det_obj = balloon_detect.color_detector(False,True, 'b', 7, True, True, torso)
@@ -76,7 +76,7 @@ class Voice:
 		self.tts = pyttsx3.init()
 		voices = self.tts.getProperty('voices')
 		self.tts.setProperty('voice', voices[voice_num].id)
-		self.tts.setProperty('rate', 100)
+		self.tts.setProperty('rate', 125)
 	
 	def say(self, message):
 		self.tts.say(message)
@@ -776,7 +776,7 @@ class Angel_Demon_Game():
 
 #Main function to execute the game
 def main():
-	game = Angel_Demon_Game(30, "test")
+	game = Angel_Demon_Game(10, "test")
 	game.run_game()
 
 #Call the main function

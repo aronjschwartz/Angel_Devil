@@ -107,14 +107,20 @@ def process_image():
 	width_fourth = int(width/4)
 	
 	#y range, x range for cropping
-	upper_cropped = img[0:height, width_fourth:width - width_fourth]
-	
+	upper_cropped = img[0:height, 0:width]
+	new_image = np.zeros(upper_cropped.shape, upper_cropped.dtype)
+	for y in range(height):
+            for x in range(width):
+                for c in range(upper_cropped.shape[2]):
+                    new_image[y,x,c]=np.clip((1.3)*upper_cropped[y,x,c] + 40,0, 255)
+	cv2.imwrite('cropped' + '.jpg',upper_cropped)
+	cv2.imwrite('INCREASED_SAT' + '.jpg',new_image)
 	#Set filter bounds to all blue colors
-	lower_bound = np.array([30,0,0])
-	upper_bound = np.array([225,80,80])
-	
+	lower_bound = np.array([100,50,50])
+	upper_bound = np.array([130,255,255])
+	hsv = cv2.cvtColor(new_image, cv2.COLOR_BGR2HSV)
 	#Apply the blue mask to the cropped image
-	blue_mask_upper = cv2.inRange(upper_cropped, lower_bound, upper_bound)
+	blue_mask_upper = cv2.inRange(hsv, lower_bound, upper_bound)
 	
 	#Reduce non-blue pixels to be black, keep blue as blue
 	#Reduce the image to black and white

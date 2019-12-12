@@ -76,6 +76,7 @@ class Voice:
 		self.tts = pyttsx3.init()
 		voices = self.tts.getProperty('voices')
 		self.tts.setProperty('voice', voices[voice_num].id)
+		self.tts.setProperty('rate', 100)
 	
 	def say(self, message):
 		self.tts.say(message)
@@ -121,7 +122,7 @@ class Angel_Demon_Game():
 		#Booleans for correction modes
 		self.rotation_correction = True
 		self.forward_back_correction = False
-		self.voice = Voice(12)
+		self.voice = Voice(10)
 	
 	
 	#Function to clear the board.  Writes all values in the grid to a 1-character empty string

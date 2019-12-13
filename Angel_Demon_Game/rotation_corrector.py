@@ -8,15 +8,6 @@ import cv2
 from scipy import ndimage
 
 
-
-# TODO: seriously clean up and optimize and comment the code
-# TODO: add debug switches
-# TODO: consider how to transform from 2d angle with in the image to 3d spacial rotation of robot
-# TODO: implement some way of sorting the slopes of the detected lines and searching for groupings, to determine outliers
-# TODO: implement some way of sorting the lines by their vertical height and building groups, to hopefully find two clusters and discard the top cluster
-# TODO: investigate how using a black-and-white image is handled differently by Canny than a blue-and-black image
-
-
 #Display image with cv2 library
 def display_image(image):
 	cv2.imshow("TEST", image)
@@ -56,6 +47,7 @@ def interpret_angle_for_rotation_code(angle):
 
 #Function to obtain all lines within a slope threshold from a hough lines list
 def get_rho_theta_horizontals(hough_lines_list, img):
+	#List to hold return values
 	horizontals = []
 	thetas = []
 	rhos = []
@@ -109,16 +101,18 @@ def process_image():
 	#y range, x range for cropping
 	upper_cropped = img[0:height, 0:width]
 	new_image = np.zeros(upper_cropped.shape, upper_cropped.dtype)
+	#Process the image to double the saturation of each pixel 
 	for y in range(height):
             for x in range(width):
                 for c in range(upper_cropped.shape[2]):
                     new_image[y,x,c]=np.clip((1.3)*upper_cropped[y,x,c] + 40,0, 255)
 	cv2.imwrite('cropped' + '.jpg',upper_cropped)
 	cv2.imwrite('INCREASED_SAT' + '.jpg',new_image)
-	#Set filter bounds to all blue colors
+	#Set filter bounds to all blue colors in the HSV space
 	lower_bound = np.array([100,50,50])
 	upper_bound = np.array([130,255,255])
 	hsv = cv2.cvtColor(new_image, cv2.COLOR_BGR2HSV)
+	
 	#Apply the blue mask to the cropped image
 	blue_mask_upper = cv2.inRange(hsv, lower_bound, upper_bound)
 	
@@ -149,7 +143,7 @@ def process_image():
 								 minLineLength,
 								 maxLineGap)
 	
-	#Extract information from lines list
+	#Extract polar coordinates information from lines list
 	if lines_upper is not None:
 		for i in range(0, len(lines_upper)):
 			rho = lines_upper[i][0][0]
@@ -204,7 +198,7 @@ def process_image():
 		#Draw the average line and write to image
 		cv2.line(result_upper,(x1, y1),(x2, y2),(0,0,255),2)
 		cv2.imwrite('upper_result_final' + '.jpg',result_upper)
-		#Return the calculated angle of offset
+		#Return the calculated angle of average line
 		return true_angle
 	
 	

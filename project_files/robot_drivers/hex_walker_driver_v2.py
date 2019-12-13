@@ -728,7 +728,9 @@ class Hex_Walker(object):
 		if not (direction == LEFT or direction == RIGHT):
 			print("ERR: rotate() accepts only direction = (LEFT or RIGHT)")
 			return INV_PARAM
-		if num_steps < 1:
+		if num_steps == 0:
+			return SUCCESS
+		if num_steps < 0:
 			print("ERR: rotate() accepts only num_steps >= 1")
 			return INV_PARAM
 		if scale <= 0.0 or scale > 2.0:
